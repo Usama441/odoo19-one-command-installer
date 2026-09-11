@@ -209,8 +209,19 @@ repeat_character() {
 }
 
 print_padded_text() {
-  local content="$1" width="$2" content_width padding
-  content_width="${#content}"
+  local LC_ALL=C
+  local content="$1" width="$2" content_width=0 padding index byte byte_value
+
+  # Bash printf measures %-Ns fields in bytes under some Ubuntu locales.
+  # Count UTF-8 leading bytes instead so terminal borders remain aligned.
+  for (( index = 0; index < ${#content}; index++ )); do
+    byte="${content:index:1}"
+    printf -v byte_value '%d' "'$byte"
+    if (( (byte_value & 0xC0) != 0x80 )); then
+      content_width=$((content_width + 1))
+    fi
+  done
+
   printf '%s' "$content"
   if (( content_width < width )); then
     padding=$((width - content_width))
