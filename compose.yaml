@@ -1,0 +1,114 @@
+name: odoo19-dual
+
+x-odoo-common: &odoo-common
+  image: ${ODOO_IMAGE:-odoo:19.0-20260908}
+  restart: unless-stopped
+  healthcheck:
+    test: ["CMD-SHELL", "curl -fsS 'http://localhost:8069/web/health?db_server_status=true' >/dev/null"]
+    interval: 10s
+    timeout: 10s
+    retries: 30
+    start_period: 30s
+  stop_grace_period: 90s
+
+services:
+  db-community:
+    image: ${POSTGRES_IMAGE:-postgres:15.19}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: ${COMMUNITY_DB_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - community-db:/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odoo -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  community:
+    <<: *odoo-common
+    depends_on:
+      db-community:
+        condition: service_healthy
+    ports:
+      - "${COMMUNITY_PORT}:8069"
+    environment:
+      HOST: db-community
+      PORT: 5432
+      USER: odoo
+      PASSWORD: ${COMMUNITY_DB_PASSWORD}
+    volumes:
+      - community-data:/var/lib/odoo
+      - ./config/community:/etc/odoo:ro
+      - ./addons/community:/mnt/extra-addons
+
+  db-enterprise:
+    image: ${POSTGRES_IMAGE:-postgres:15.19}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: ${ENTERPRISE_DB_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - enterprise-db:/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odoo -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  enterprise:
+    <<: *odoo-common
+    depends_on:
+      db-enterprise:
+        condition: service_healthy
+    ports:
+      - "${ENTERPRISE_PORT}:8069"
+    environment:
+      HOST: db-enterprise
+      PORT: 5432
+      USER: odoo
+      PASSWORD: ${ENTERPRISE_DB_PASSWORD}
+    volumes:
+      - enterprise-data:/var/lib/odoo
+      - ./config/enterprise:/etc/odoo:ro
+      - ./addons/enterprise:/mnt/enterprise-addons:ro
+      - ./addons/enterprise-custom:/mnt/extra-addons
+
+  pgadmin:
+    image: ${PGADMIN_IMAGE:-dpage/pgadmin4:9.17}
+    profiles: ["pgadmin"]
+    restart: unless-stopped
+    depends_on:
+      db-community:
+        condition: service_healthy
+    ports:
+      - "${PGADMIN_PORT}:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+      PGADMIN_DISABLE_POSTFIX: "True"
+      PGADMIN_REPLACE_SERVERS_ON_STARTUP: "True"
+      PGPASS_FILE: /pgadmin4/pgpass
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+      - ./config/pgadmin/servers.json:/pgadmin4/servers.json:ro
+      - ./config/pgadmin/pgpass:/pgadmin4/pgpass:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost/misc/ping >/dev/null"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+    stop_grace_period: 30s
+
+volumes:
+  community-db:
+  community-data:
+  enterprise-db:
+  enterprise-data:
+  pgadmin-data:

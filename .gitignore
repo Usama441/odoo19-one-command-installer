@@ -1,0 +1,12 @@
+.env
+installation-info.txt
+/.agents/
+/.codex/
+/enterprise-19.0/
+__pycache__/
+*.py[cod]
+config/*/odoo.conf
+config/pgadmin/servers.json
+config/pgadmin/pgpass
+addons/enterprise/*
+!addons/enterprise/.gitkeep
