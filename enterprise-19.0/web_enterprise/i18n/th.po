@@ -1,0 +1,407 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# * web_enterprise
+#
+# Translators:
+# Khwunchai Jaengsawang <khwunchai.j@ku.th>, 2022
+# Martin Trigaux, 2022
+# Wichanon Jamwutthipreecha, 2022
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-05-16 16:03+0000\n"
+"PO-Revision-Date: 2025-09-16 22:57+0000\n"
+"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"Language-Team: Thai <https://translate.odoo.com/projects/odoo-19/"
+"web_enterprise/th/>\n"
+"Language: th\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 5.12.2\n"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.js:0
+msgid "%s days"
+msgstr "%s วัน"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/settings_form_view/res_config_edition.xml:0
+msgid "(Enterprise Edition)"
+msgstr "(สำหรับองค์กร)"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid ") with the instructions to follow"
+msgstr ") โดยมีคำแนะนำให้ปฏิบัติตาม"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.js:0
+msgid "1 month"
+msgstr "1 เดือน"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/legacy/xml/promote_studio.xml:0
+#: code:addons/web_enterprise/static/src/views/list/list_renderer_desktop.xml:0
+msgid "Add Custom Field"
+msgstr "เพิ่มฟิลด์กำหนดเอง"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/legacy/xml/promote_studio.xml:0
+#: code:addons/web_enterprise/static/src/webclient/promote_studio_dialog/promote_studio_dialog.xml:0
+msgid "Add new fields and much more with"
+msgstr "เพิ่มฟิลด์ใหม่และอีกมากมายด้วย"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/legacy/xml/control_panel.xml:0
+msgid "CLEAR"
+msgstr "ล้าง"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "Click here to send an email"
+msgstr "คลิกที่นี่เพื่อส่งอีเมล"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/legacy/xml/promote_studio.xml:0
+#: code:addons/web_enterprise/static/src/webclient/promote_studio_dialog/promote_studio_dialog.xml:0
+msgid "Close"
+msgstr "ปิด"
+
+#. module: web_enterprise
+#: model:ir.model,name:web_enterprise.model_res_config_settings
+msgid "Config Settings"
+msgstr ""
+
+#. module: web_enterprise
+#: model:ir.model,name:web_enterprise.model_res_partner
+msgid "Contact"
+msgstr "ติดต่อ"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "Contact your sales representative to help you to unlink your previous database"
+msgstr ""
+"ติดต่อตัวแทนฝ่ายขายของคุณ เพื่อช่วยคุณยกเลิกการเชื่อมโยงฐานข้อมูลก่อนหน้าของคุณ"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/legacy/xml/control_panel.xml:0
+msgid "Control panel toolbar"
+msgstr "แถบเครื่องมือแผงควบคุม"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/color_scheme/color_scheme_menu_items.js:0
+msgid "Dark Mode"
+msgstr "โหมดมืด"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/settings_form_view/res_config_edition.xml:0
+msgid "Database expiration:"
+msgstr "วันหมดอายุฐานข้อมูล:"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "Dismiss"
+msgstr "ยกเลิก"
+
+#. module: web_enterprise
+#: model:ir.actions.server,name:web_enterprise.download_contact
+msgid "Download (vCard)"
+msgstr "ดาวน์โหลด (vCard)"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "Error reason:"
+msgstr "สาเหตุของข้อผิดพลาด:"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/legacy/xml/control_panel.xml:0
+msgid "FILTER"
+msgstr "ตัวกรอง"
+
+#. module: web_enterprise
+#: model:ir.model,name:web_enterprise.model_ir_http
+msgid "HTTP Routing"
+msgstr "การกำหนด HTTP"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/navbar/navbar.js:0
+msgid "Home menu"
+msgstr "เมนูหลัก"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/legacy/xml/promote_studio.xml:0
+#: code:addons/web_enterprise/static/src/webclient/promote_studio_dialog/promote_studio_dialog.xml:0
+msgid "Install Odoo Studio"
+msgstr "ติดตั้ง Odoo Studio"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "Log in as an administrator to correct the issue."
+msgstr "เข้าสู่ระบบแบบผู้ดูแลระบบเพื่อแก้ปัญหา"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "Login to your Odoo.com dashboard then unlink your previous database:"
+msgstr ""
+
+#. module: web_enterprise
+#: model:ir.model,name:web_enterprise.model_ir_ui_menu
+msgid "Menu"
+msgstr "เมนู"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/home_menu.xml:0
+msgid "No result"
+msgstr "ไม่มีผลลัพธ์"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/settings_form_view/res_config_edition.xml:0
+#: model_terms:ir.ui.view,arch_db:web_enterprise.res_config_settings_view_form
+msgid "Odoo"
+msgstr "Odoo"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/settings_form_view/res_config_edition.xml:0
+msgid "Odoo Enterprise Edition License V1.0"
+msgstr "สิทธิ์การใช้งาน Odoo Enterprise Edition V1.0"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/legacy/xml/promote_studio.xml:0
+#: code:addons/web_enterprise/static/src/webclient/promote_studio_dialog/promote_studio_dialog.xml:0
+msgid "Odoo Studio"
+msgstr "Odoo Studio"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "Odoo Support"
+msgstr "การสนับสนุน Odoo"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "Paste code here"
+msgstr "วางโค้ดที่นี่"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/navbar/navbar.js:0
+msgid "Previous view"
+msgstr "มุมมองก่อนหน้า"
+
+#. module: web_enterprise
+#: model_terms:ir.ui.view,arch_db:web_enterprise.res_config_settings_view_form
+msgid "Progressive Web App"
+msgstr ""
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "Refresh subscription status"
+msgstr "รีเฟรชสถานะการสมัครสมาชิก"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "Register your subscription"
+msgstr "ลงทะเบียนสมัครสมาชิก"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "Renew your subscription"
+msgstr "ต่ออายุสมาชิก"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/legacy/xml/control_panel.xml:0
+msgid "SEE RESULT"
+msgstr "ดูผลลัพธ์"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/legacy/xml/barcode_fields.xml:0
+msgid "Scan barcode"
+msgstr "สแกนบาร์โค้ด"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "Sending the instructions by email ..."
+msgstr "กำลังส่งคำแนะนำทางอีเมล ..."
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "Something went wrong while registering your database. You can try again or contact"
+msgstr "เกิดข้อผิดพลาดขณะลงทะเบียนฐานข้อมูลของคุณ ลองใหม่อีกครั้งหรือติดต่อ"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "Subscription Code:"
+msgstr "โค้ดสมาชิก:"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/home_menu.xml:0
+msgid "TIP"
+msgstr "เคล็ดลับ"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "Thank you, your registration was successful! Your database is valid until"
+msgstr "ขอบคุณ การลงทะเบียนของคุณสำเร็จ! ฐานข้อมูลของคุณใช้ได้จนถึง"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/enterprise_subscription_service.js:0
+msgid "Thank you, your registration was successful! Your database is valid until %s."
+msgstr "ขอขอบคุณ การลงทะเบียนของคุณสำเร็จแล้ว! ฐานข้อมูลของคุณใช้ได้จนถึง %s"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "The instructions to unlink your subscription from the previous database(s) have been sent"
+msgstr "ได้ส่งคำแนะนำในการยกเลิกการสมัครรับข้อมูลจากฐานข้อมูลก่อนหน้าแล้ว"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.js:0
+msgid "This database has expired. "
+msgstr "ฐานข้อมูลนี้หมดอายุแล้ว "
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.js:0
+msgid "This database will expire in %s. "
+msgstr "ฐานข้อมูลนี้จะหมดอายุใน %s "
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.js:0
+msgid "This demo database will expire in %s. "
+msgstr "ฐานข้อมูลสาธิตนี้จะหมดอายุใน %s "
+
+#. module: web_enterprise
+#: model_terms:ir.ui.view,arch_db:web_enterprise.res_config_settings_view_form
+msgid "This name will be used for the application when Odoo is installed through the browser."
+msgstr ""
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "To unlink it you can either:"
+msgstr "หากต้องการยกเลิกการเชื่อมโยง คุณสามารถ:"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/legacy/xml/control_panel.xml:0
+msgid "Today"
+msgstr "วันนี้"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "Unable to send the instructions by email, please contact the"
+msgstr "ไม่สามารถส่งคำแนะนำทางอีเมลได้ โปรดติดต่อ"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "Upgrade your subscription"
+msgstr "อัปเกรดการสมัครของคุณ"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/legacy/xml/control_panel.xml:0
+msgid "View switcher"
+msgstr "ตัวสลับมุมมอง"
+
+#. module: web_enterprise
+#: model:ir.model.fields,field_description:web_enterprise.field_res_config_settings__web_app_name
+msgid "Web App Name"
+msgstr ""
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "You have more users or more apps installed than your subscription allows."
+msgstr "คุณมีผู้ใช้หรือแอปติดตั้งมากกว่าที่การสมัครของคุณอนุญาต"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "You will be able to register your database once you have installed your first app."
+msgstr "คุณสามารถสมัครสมาชิกฐานข้อมูลหลังจากที่คุณติดตั้งแอปแรกของคุณ"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "Your subscription code"
+msgstr "โค้ดสมาชิกของคุณ"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "Your subscription is already linked to a database."
+msgstr "การสมัครของคุณเชื่อมโยงกับฐานข้อมูลแล้ว"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "Your subscription was updated and is valid until"
+msgstr "การสมัครของคุณได้รับการอัปเดตและมีผลจนถึง"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "buy a subscription"
+msgstr "ชื้อการสมาชิก"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "or"
+msgstr "หรือ"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/expiration_panel.xml:0
+msgid "to the subscription owner (email:"
+msgstr "ถึงเจ้าของการสมัครสมาชิก (อีเมล:"
+
+#. module: web_enterprise
+#. odoo-javascript
+#: code:addons/web_enterprise/static/src/webclient/home_menu/home_menu.xml:0
+msgid "— open me anywhere with"
+msgstr "— เปิดฉันที่ไหนก็ได้ ด้วย"

@@ -1,0 +1,49 @@
+<odoo>
+    <data>
+        <record id="hr_expense_view_form_inherits_stripe" model="ir.ui.view">
+            <field name="inherit_id" ref="hr_expense.hr_expense_view_form"/>
+            <field name="name">hr.expense.form.inherit.stripe</field>
+            <field name="model">hr.expense</field>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='button_box']" position="inside">
+                    <button name="action_open_stripe_card" type="object" class="oe_stat_button" icon="fa-credit-card-alt"
+                            invisible="not is_card_expense">
+                        <span class="ps-2">Cards</span>
+                    </button>
+                </xpath>
+                <xpath expr="//field[@name='payment_mode']" position="attributes">
+                    <attribute name="readonly">state != 'draft' or is_card_expense</attribute>
+                </xpath>
+                <xpath expr="//field[@name='company_id']" position="attributes">
+                    <attribute name="readonly">state != 'draft' or is_card_expense</attribute>
+                </xpath>
+
+                <xpath expr="//field[@name='employee_id' and @groups='hr.group_hr_user']" position="attributes">
+                    <attribute name="readonly">not is_editable or is_card_expense</attribute>
+                </xpath>
+                <xpath expr="//field[@name='employee_id' and @groups='!hr.group_hr_user']" position="attributes">
+                    <attribute name="readonly">not is_editable or is_card_expense</attribute>
+                </xpath>
+
+                <xpath expr="//field[@name='total_amount']" position="attributes">
+                    <attribute name="readonly">not is_editable or product_has_cost or is_card_expense</attribute>
+                </xpath>
+                <xpath expr="//field[@name='total_amount']" position="attributes">
+                    <attribute name="readonly">not is_editable or product_has_cost or is_card_expense</attribute>
+                </xpath>
+                <xpath expr="//field[@name='total_amount_currency']" position="attributes">
+                    <attribute name="readonly">not is_editable or product_has_cost or is_card_expense</attribute>
+                </xpath>
+                <xpath expr="//field[@name='currency_id']" position="attributes">
+                    <attribute name="readonly">not is_editable or product_has_cost or is_card_expense</attribute>
+                </xpath>
+                <xpath expr="//field[@name='date']" position="attributes">
+                    <attribute name="readonly">not is_editable or is_card_expense</attribute>
+                </xpath>
+                <xpath expr="//field[@name='payment_method_line_id']" position="attributes">
+                    <attribute name="readonly">not is_editable or is_card_expense</attribute>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="account_accountant.BatchPaymentPopoverLine">
+        <tr t-on-click.stop="onClick" class="cursor-pointer">
+            <td>
+                <t t-esc="formattedDate"/>
+            </td>
+            <td>
+                <t t-esc="props.batchPayment.name"/>
+            </td>
+            <td>
+                <t t-esc="formattedAmount"/>
+            </td>
+            <td class="text-success">
+                <a href="#" t-on-click.stop="onOpenBatchPayment" class="oe_link">View</a>
+            </td>
+        </tr>
+    </t>
+</templates>

@@ -1,0 +1,267 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* pos_appointment
+# 
+# Translators:
+# Martin Trigaux, 2025
+# Wil Odoo, 2025
+# Tony Ng, 2025
+# 
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server saas~18.3+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-05-06 09:45+0000\n"
+"PO-Revision-Date: 2025-05-06 11:00+0000\n"
+"Last-Translator: Tony Ng, 2025\n"
+"Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/zh_TW/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Language: zh_TW\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#. module: pos_appointment
+#: model_terms:ir.ui.view,arch_db:pos_appointment.calendar_event_view_kanban_pos_restaurant_appointment
+msgid "<span>p</span>"
+msgstr "<span>人</span>"
+
+#. module: pos_appointment
+#: model_terms:ir.ui.view,arch_db:pos_appointment.calendar_event_view_form_gantt_booking_inherited_pos_appointment
+msgid "<span>people</span>"
+msgstr "<span>人</span>"
+
+#. module: pos_appointment
+#: model_terms:ir.ui.view,arch_db:pos_appointment.calendar_event_view_gantt_booking_resource_inherited_pos_appointment
+msgid "<strong>Contact Information</strong>"
+msgstr "<strong>聯絡資料</strong>"
+
+#. module: pos_appointment
+#: model_terms:ir.ui.view,arch_db:pos_appointment.calendar_event_view_gantt_booking_resource_inherited_pos_appointment
+msgid "<strong>Duration: </strong>"
+msgstr "<strong>時長：</strong>"
+
+#. module: pos_appointment
+#: model_terms:ir.ui.view,arch_db:pos_appointment.calendar_event_view_gantt_booking_resource_inherited_pos_appointment
+msgid "<strong>Email: </strong>"
+msgstr "<strong>電郵：</strong>"
+
+#. module: pos_appointment
+#: model_terms:ir.ui.view,arch_db:pos_appointment.calendar_event_view_gantt_booking_resource_inherited_pos_appointment
+msgid "<strong>Name: </strong>"
+msgstr "<strong>名稱：</strong>"
+
+#. module: pos_appointment
+#: model_terms:ir.ui.view,arch_db:pos_appointment.calendar_event_view_gantt_booking_resource_inherited_pos_appointment
+msgid "<strong>Phone: </strong>"
+msgstr "<strong>電話：</strong>"
+
+#. module: pos_appointment
+#: model_terms:ir.ui.view,arch_db:pos_appointment.calendar_event_view_gantt_booking_resource_inherited_pos_appointment
+msgid "<strong>Start Date: </strong>"
+msgstr "<strong>開始日期: </strong>"
+
+#. module: pos_appointment
+#: model:ir.model.fields,field_description:pos_appointment.field_calendar_event__appointment_status
+msgid "Appointment Status"
+msgstr "預約狀態"
+
+#. module: pos_appointment
+#: model:ir.model.fields,field_description:pos_appointment.field_pos_config__appointment_type_id
+#: model:ir.model.fields,field_description:pos_appointment.field_res_config_settings__pos_appointment_type_id
+msgid "Appointment Type"
+msgstr "預約類型"
+
+#. module: pos_appointment
+#: model_terms:ir.ui.view,arch_db:pos_appointment.res_config_settings_view_form
+msgid "Appointment type"
+msgstr "預約類型"
+
+#. module: pos_appointment
+#. odoo-javascript
+#: code:addons/pos_appointment/static/src/app/gantt_overrides/gantt_renderer.js:0
+#: code:addons/pos_appointment/static/src/app/kanban_extend/kanban_record.js:0
+msgid "Booked"
+msgstr "已預約"
+
+#. module: pos_appointment
+#. odoo-javascript
+#: code:addons/pos_appointment/static/src/app/components/navbar/navbar.xml:0
+msgid "Booking"
+msgstr "預訂"
+
+#. module: pos_appointment
+#: model_terms:ir.ui.view,arch_db:pos_appointment.calendar_event_view_gantt_booking_resource_inherited_pos_appointment
+msgid "Booking Details"
+msgstr "預約詳情"
+
+#. module: pos_appointment
+#: model:ir.model,name:pos_appointment.model_calendar_event
+msgid "Calendar Event"
+msgstr "日曆活動"
+
+#. module: pos_appointment
+#: model_terms:ir.ui.view,arch_db:pos_appointment.calendar_event_view_form_gantt_booking_inherited_pos_appointment
+msgid "Cancel"
+msgstr "取消"
+
+#. module: pos_appointment
+#. odoo-javascript
+#: code:addons/pos_appointment/static/src/app/gantt_overrides/gantt_renderer.js:0
+#: code:addons/pos_appointment/static/src/app/kanban_extend/kanban_record.js:0
+#: model_terms:ir.ui.view,arch_db:pos_appointment.calendar_event_view_form_gantt_booking_inherited_pos_appointment
+#: model_terms:ir.ui.view,arch_db:pos_appointment.calendar_event_view_kanban_pos_restaurant_appointment
+msgid "Check In"
+msgstr "出席"
+
+#. module: pos_appointment
+#: model:ir.model,name:pos_appointment.model_res_config_settings
+msgid "Config Settings"
+msgstr "配置設定"
+
+#. module: pos_appointment
+#. odoo-python
+#: code:addons/pos_appointment/models/calendar_event.py:0
+msgid "Create Booking"
+msgstr "建立預約"
+
+#. module: pos_appointment
+#. odoo-javascript
+#: code:addons/pos_appointment/static/src/app/gantt_overrides/gantt_renderer.js:0
+#: code:addons/pos_appointment/static/src/app/kanban_extend/kanban_record.js:0
+msgid "Delete"
+msgstr "刪除"
+
+#. module: pos_appointment
+#: model:ir.model.fields,field_description:pos_appointment.field_calendar_event__display_name
+#: model:ir.model.fields,field_description:pos_appointment.field_pos_config__display_name
+#: model:ir.model.fields,field_description:pos_appointment.field_pos_session__display_name
+#: model:ir.model.fields,field_description:pos_appointment.field_res_config_settings__display_name
+msgid "Display Name"
+msgstr "顯示名稱"
+
+#. module: pos_appointment
+#. odoo-javascript
+#: code:addons/pos_appointment/static/src/app/kanban_extend/kanban_record.xml:0
+msgid "Duration:"
+msgstr "時長："
+
+#. module: pos_appointment
+#. odoo-javascript
+#: code:addons/pos_appointment/static/src/app/gantt_overrides/gantt_renderer.js:0
+#: code:addons/pos_appointment/static/src/app/kanban_extend/kanban_record.xml:0
+msgid "Edit"
+msgstr "編輯"
+
+#. module: pos_appointment
+#. odoo-python
+#: code:addons/pos_appointment/models/calendar_event.py:0
+msgid "Edit Booking"
+msgstr "編輯預訂"
+
+#. module: pos_appointment
+#: model_terms:ir.ui.view,arch_db:pos_appointment.calendar_event_view_gantt_booking_resource_inherited_pos_appointment
+msgid "Event Details"
+msgstr "活動詳情"
+
+#. module: pos_appointment
+#: model:ir.model.fields,field_description:pos_appointment.field_calendar_event__id
+#: model:ir.model.fields,field_description:pos_appointment.field_pos_config__id
+#: model:ir.model.fields,field_description:pos_appointment.field_pos_session__id
+#: model:ir.model.fields,field_description:pos_appointment.field_res_config_settings__id
+msgid "ID"
+msgstr "識別碼"
+
+#. module: pos_appointment
+#. odoo-python
+#: code:addons/pos_appointment/models/calendar_event.py:0
+msgid "Manage Bookings"
+msgstr "管理預訂"
+
+#. module: pos_appointment
+#. odoo-javascript
+#: code:addons/pos_appointment/static/src/app/gantt_overrides/gantt_renderer.js:0
+#: code:addons/pos_appointment/static/src/app/kanban_extend/kanban_record.js:0
+msgid "No Show"
+msgstr "缺席"
+
+#. module: pos_appointment
+#: model_terms:ir.ui.view,arch_db:pos_appointment.calendar_event_view_kanban_pos_restaurant_appointment
+msgid "No show"
+msgstr "缺席"
+
+#. module: pos_appointment
+#: model:ir.model.fields,field_description:pos_appointment.field_calendar_event__phone_number
+msgid "Phone number"
+msgstr "電話號碼"
+
+#. module: pos_appointment
+#: model:ir.model,name:pos_appointment.model_pos_config
+msgid "Point of Sale Configuration"
+msgstr "POS 銷售點設定"
+
+#. module: pos_appointment
+#: model:ir.model,name:pos_appointment.model_pos_session
+msgid "Point of Sale Session"
+msgstr "POS 操作時段"
+
+#. module: pos_appointment
+#: model:ir.model.fields,field_description:pos_appointment.field_calendar_event__answers
+msgid "Q&A answers"
+msgstr "問答答案"
+
+#. module: pos_appointment
+#: model_terms:ir.ui.view,arch_db:pos_appointment.calendar_event_view_form_gantt_booking_inherited_pos_appointment
+msgid "Reservation for"
+msgstr "預訂人："
+
+#. module: pos_appointment
+#. odoo-javascript
+#: code:addons/pos_appointment/static/src/app/kanban_extend/kanban_controller.xml:0
+msgid "Select Date"
+msgstr "選擇日期"
+
+#. module: pos_appointment
+#. odoo-javascript
+#: code:addons/pos_appointment/static/src/app/kanban_extend/kanban_record.xml:0
+msgid "Start Date:"
+msgstr "開始日期："
+
+#. module: pos_appointment
+#. odoo-javascript
+#: code:addons/pos_appointment/static/src/app/gantt_overrides/gantt_renderer.js:0
+msgid "View"
+msgstr "檢視"
+
+#. module: pos_appointment
+#: model_terms:ir.ui.view,arch_db:pos_appointment.calendar_event_view_kanban_pos_restaurant_appointment
+msgid "Waiting"
+msgstr "等候中"
+
+#. module: pos_appointment
+#. odoo-javascript
+#: code:addons/pos_appointment/static/src/app/gantt_overrides/gantt_renderer.xml:0
+msgid "Waiting List"
+msgstr "等待清單"
+
+#. module: pos_appointment
+#: model:ir.model.fields,field_description:pos_appointment.field_calendar_event__waiting_list_capacity
+msgid "Waiting List Capacity"
+msgstr "候補名單容量"
+
+#. module: pos_appointment
+#: model_terms:ir.ui.view,arch_db:pos_appointment.calendar_event_view_form_gantt_booking_inherited_pos_appointment
+msgid "e.g. \"John Doe\""
+msgstr "例：陳大文"
+
+#. module: pos_appointment
+#: model_terms:ir.ui.view,arch_db:pos_appointment.calendar_event_view_gantt_booking_resource_inherited_pos_appointment
+msgid "for:"
+msgstr "為："
+
+#. module: pos_appointment
+#. odoo-javascript
+#: code:addons/pos_appointment/static/src/app/kanban_extend/kanban_record.xml:0
+#: model_terms:ir.ui.view,arch_db:pos_appointment.calendar_event_view_gantt_booking_resource_inherited_pos_appointment
+msgid "hours"
+msgstr "小時"

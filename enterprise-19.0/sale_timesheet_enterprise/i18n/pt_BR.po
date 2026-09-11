@@ -1,0 +1,213 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# * sale_timesheet_enterprise
+#
+# Translators:
+# Martin Trigaux, 2022
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
+# "Maitê Dietze (madi)" <madi@odoo.com>, 2025.
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-05-16 16:03+0000\n"
+"PO-Revision-Date: 2025-09-19 12:11+0000\n"
+"Last-Translator: \"Maitê Dietze (madi)\" <madi@odoo.com>\n"
+"Language-Team: Portuguese (Brazil) <https://translate.odoo.com/projects/"
+"odoo-19/sale_timesheet_enterprise/pt_BR/>\n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
+"1000000 == 0) ? 1 : 2);\n"
+"X-Generator: Weblate 5.12.2\n"
+
+#. module: sale_timesheet_enterprise
+#: model:ir.model.fields.selection,name:sale_timesheet_enterprise.selection__res_config_settings__invoiced_timesheet__all
+msgid "All recorded timesheets"
+msgstr "Todas as planilhas de horas registradas"
+
+#. module: sale_timesheet_enterprise
+#: model:ir.model,name:sale_timesheet_enterprise.model_account_analytic_line
+msgid "Analytic Account"
+msgstr "Conta Analítica"
+
+#. module: sale_timesheet_enterprise
+#: model:ir.model,name:sale_timesheet_enterprise.model_res_config_settings
+msgid "Config Settings"
+msgstr "Configurações"
+
+#. module: sale_timesheet_enterprise
+#: model_terms:ir.ui.view,arch_db:sale_timesheet_enterprise.timesheet_view_grid_by_invoice_type
+msgid "Day"
+msgstr "Dia"
+
+#. module: sale_timesheet_enterprise
+#. odoo-javascript
+#: code:addons/sale_timesheet_enterprise/static/src/components/timesheet_overtime_indication/timesheet_overtime_indication.js:0
+msgid "Difference between the number of %s ordered on the sales order item and the number of %s delivered"
+msgstr ""
+"Diferença entre o número de %s pedidos no item do pedido de venda e o número "
+"de %s entregues"
+
+#. module: sale_timesheet_enterprise
+#: model:ir.model.fields,help:sale_timesheet_enterprise.field_project_task__portal_progress
+msgid "Display progress of current task."
+msgstr "Mostrar progresso da tarefa atual."
+
+#. module: sale_timesheet_enterprise
+#: model_terms:ir.ui.view,arch_db:sale_timesheet_enterprise.project_sharing_inherit_project_task_view_form
+#: model_terms:ir.ui.view,arch_db:sale_timesheet_enterprise.project_sharing_inherit_project_task_view_tree
+msgid "Hours Spent"
+msgstr "Horas Gastas"
+
+#. module: sale_timesheet_enterprise
+#: model_terms:ir.ui.view,arch_db:sale_timesheet_enterprise.project_sharing_inherit_project_task_view_tree
+msgid "Hours Spent on Sub-Tasks"
+msgstr ""
+
+#. module: sale_timesheet_enterprise
+#: model_terms:ir.ui.view,arch_db:sale_timesheet_enterprise.res_config_settings_view_form
+msgid "Invoice"
+msgstr "Fatura"
+
+#. module: sale_timesheet_enterprise
+#: model_terms:ir.ui.view,arch_db:sale_timesheet_enterprise.res_config_settings_view_form
+msgid "Invoicing Policy"
+msgstr "Política de faturamento"
+
+#. module: sale_timesheet_enterprise
+#: model:ir.model,name:sale_timesheet_enterprise.model_account_move_line
+msgid "Journal Item"
+msgstr "Item do diário"
+
+#. module: sale_timesheet_enterprise
+#: model_terms:ir.ui.view,arch_db:sale_timesheet_enterprise.timesheet_view_grid_by_invoice_type
+msgid "Month"
+msgstr "Mês"
+
+#. module: sale_timesheet_enterprise
+#: model:ir.model.fields,field_description:sale_timesheet_enterprise.field_project_task__portal_effective_hours
+msgid "Portal Effective Hours"
+msgstr ""
+
+#. module: sale_timesheet_enterprise
+#: model:ir.model.fields,field_description:sale_timesheet_enterprise.field_project_task__portal_progress
+msgid "Portal Progress"
+msgstr ""
+
+#. module: sale_timesheet_enterprise
+#: model:ir.model.fields,field_description:sale_timesheet_enterprise.field_project_task__portal_remaining_hours
+msgid "Portal Remaining Hours"
+msgstr ""
+
+#. module: sale_timesheet_enterprise
+#: model:ir.model.fields,field_description:sale_timesheet_enterprise.field_project_task__portal_subtask_effective_hours
+msgid "Portal Subtask Effective Hours"
+msgstr ""
+
+#. module: sale_timesheet_enterprise
+#: model:ir.model.fields,field_description:sale_timesheet_enterprise.field_project_task__portal_total_hours_spent
+msgid "Portal Total Hours Spent"
+msgstr ""
+
+#. module: sale_timesheet_enterprise
+#: model_terms:ir.ui.view,arch_db:sale_timesheet_enterprise.project_sharing_inherit_project_task_view_form
+#: model_terms:ir.ui.view,arch_db:sale_timesheet_enterprise.project_sharing_inherit_project_task_view_tree
+msgid "Progress"
+msgstr "Progresso"
+
+#. module: sale_timesheet_enterprise
+#: model:ir.model,name:sale_timesheet_enterprise.model_project_project
+msgid "Project"
+msgstr "Projeto"
+
+#. module: sale_timesheet_enterprise
+#: model_terms:ir.ui.view,arch_db:sale_timesheet_enterprise.project_sharing_inherit_project_task_view_form
+#: model_terms:ir.ui.view,arch_db:sale_timesheet_enterprise.project_sharing_inherit_project_task_view_tree
+msgid "Remaining Hours"
+msgstr "Horas Restantes"
+
+#. module: sale_timesheet_enterprise
+#: model:ir.model,name:sale_timesheet_enterprise.model_sale_order_line
+msgid "Sales Order Line"
+msgstr "Linha do pedido de venda"
+
+#. module: sale_timesheet_enterprise
+#: model:ir.model,name:sale_timesheet_enterprise.model_project_task
+msgid "Task"
+msgstr "Tarefa"
+
+#. module: sale_timesheet_enterprise
+#. odoo-python
+#: code:addons/sale_timesheet_enterprise/models/project_task.py:0
+msgid "This Sale Order Item doesn't have a target value of planned hours. Planned hours :"
+msgstr ""
+
+#. module: sale_timesheet_enterprise
+#: model:ir.model.fields,help:sale_timesheet_enterprise.field_project_task__portal_subtask_effective_hours
+msgid "Time spent on the sub-tasks (and their own sub-tasks) of this task."
+msgstr "Tempo gasto em subtarefas (e suas próprias subtarefas) desta tarefa."
+
+#. module: sale_timesheet_enterprise
+#: model:ir.model.fields,help:sale_timesheet_enterprise.field_project_task__portal_effective_hours
+msgid "Time spent on this task, excluding its sub-tasks."
+msgstr "Tempo gasto nesta tarefa, excluindo suas subtarefas."
+
+#. module: sale_timesheet_enterprise
+#: model:ir.model.fields,help:sale_timesheet_enterprise.field_project_task__portal_total_hours_spent
+msgid "Time spent on this task, including its sub-tasks."
+msgstr "Tempo gasto nesta tarefa, incluindo suas subtarefas."
+
+#. module: sale_timesheet_enterprise
+#: model_terms:ir.ui.view,arch_db:sale_timesheet_enterprise.timesheet_view_grid_by_invoice_type
+msgid "Timesheets"
+msgstr "Planilhas de horas"
+
+#. module: sale_timesheet_enterprise
+#: model:ir.model.fields,field_description:sale_timesheet_enterprise.field_res_config_settings__invoiced_timesheet
+msgid "Timesheets Invoicing"
+msgstr "Faturamento de planilhas de horas"
+
+#. module: sale_timesheet_enterprise
+#: model_terms:ir.ui.view,arch_db:sale_timesheet_enterprise.res_config_settings_view_form
+msgid "Timesheets taken into account when invoicing your time"
+msgstr "Planilhas de horas levadas em consideração ao faturar seu tempo"
+
+#. module: sale_timesheet_enterprise
+#: model_terms:ir.ui.view,arch_db:sale_timesheet_enterprise.project_sharing_inherit_project_task_view_tree
+msgid "Total Hours"
+msgstr "Horas Totais"
+
+#. module: sale_timesheet_enterprise
+#: model:ir.model.fields,help:sale_timesheet_enterprise.field_project_task__portal_remaining_hours
+msgid "Total remaining time, can be re-estimated periodically by the assignee of the task."
+msgstr ""
+"Tempo total restante, pode ser reestimado periodicamente pelo responsável da "
+"tarefa."
+
+#. module: sale_timesheet_enterprise
+#: model:ir.model.fields.selection,name:sale_timesheet_enterprise.selection__res_config_settings__invoiced_timesheet__approved
+msgid "Validated timesheets only"
+msgstr "Somente planilhas de horas validadas"
+
+#. module: sale_timesheet_enterprise
+#: model_terms:ir.ui.view,arch_db:sale_timesheet_enterprise.timesheet_view_grid_by_invoice_type
+msgid "Week"
+msgstr "Semana"
+
+#. module: sale_timesheet_enterprise
+#: model:ir.model.fields,help:sale_timesheet_enterprise.field_res_config_settings__invoiced_timesheet
+msgid ""
+"With the 'all recorded timesheets' option, all timesheets will be invoiced without distinction, even if they haven't been validated. Additionally, all timesheets will be accessible in your customers' portal. \n"
+"When you choose the 'validated timesheets only' option, only the validated timesheets will be invoiced and appear in your customers' portal."
+msgstr ""
+"Com a opção \"todas as planilhas de horas registradas\", todas as planilhas "
+"de horas serão faturadas sem distinção, mesmo que não tenham sido validadas. "
+"Além disso, todas as planilhas de horas estarão acessíveis no portal de seus "
+"clientes. \n"
+"Quando você escolhe a opção \"somente planilhas de horas validadas\", "
+"somente as planilhas de horas validadas serão faturadas e aparecerão no "
+"portal de seus clientes."

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="ir_config_parameter_l10n_au_payroll_server_url" model="ir.config_parameter">
+        <field name="key">l10n_au_payroll_iap.endpoint</field>
+        <field name="value">http://iap.odoo.com</field>
+    </record>
+    <record id="ir_config_parameter_l10n_au_payroll_test_server_url" model="ir.config_parameter">
+        <field name="key">l10n_au_payroll_iap.test_endpoint</field>
+        <field name="value">http://iap.odoo.com</field>
+    </record>
+
+</odoo>

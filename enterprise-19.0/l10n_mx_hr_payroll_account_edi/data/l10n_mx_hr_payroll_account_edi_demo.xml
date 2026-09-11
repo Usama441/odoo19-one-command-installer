@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="base.demo_company_mx" model="res.company">
+        <field name="l10n_mx_imss_id">Y5847150105</field>
+    </record>
+
+    <record id="base.hr_employee_cesar" model="hr.employee">
+        <field name="l10n_mx_rfc">CUSC850516316</field>
+        <field name="l10n_mx_curp">CUSC850516XNERLS05</field>
+        <field name="contract_type_id" ref="l10n_mx_contract_type_01"/>
+    </record>
+
+    <record id="base.hr_employee_cecilia" model="hr.employee">
+        <field name="l10n_mx_rfc">MISC491214B86</field>
+        <field name="l10n_mx_curp">MISC491214MDFRNC06</field>
+        <field name="contract_type_id" ref="l10n_mx_contract_type_01"/>
+    </record>
+
+    <record id="base.hr_employee_xochilt" model="hr.employee">
+        <field name="l10n_mx_rfc">CACX7605011P8</field>
+        <field name="l10n_mx_curp">CACX760431HNESHC03</field>
+        <field name="contract_type_id" ref="l10n_mx_contract_type_01"/>
+    </record>
+
+    <record id="base.hr_employee_karla" model="hr.employee">
+        <field name="l10n_mx_rfc">FUNK671228PH6</field>
+        <field name="l10n_mx_curp">FUNK671228MYNNLR02</field>
+        <field name="contract_type_id" ref="l10n_mx_contract_type_01"/>
+    </record>
+</odoo>

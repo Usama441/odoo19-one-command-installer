@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<templates>
+    <t t-name="account_accountant_batch_payment.BankRecButtonList" t-inherit="account_accountant.BankRecButtonList" t-inherit-mode="extension">
+        <xpath expr="//t[@t-if='!props.isTopLine']" position="before">
+            <BankRecBatchPaymentButton
+                t-if="!props.isTopLine and !ui.isSmall and isBatchPaymentsButtonShown"
+                onSelected.bind="onSelectBatchPayment"
+            />
+        </xpath>
+    </t>
+</templates>

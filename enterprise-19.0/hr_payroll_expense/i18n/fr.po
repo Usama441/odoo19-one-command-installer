@@ -1,0 +1,81 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# * hr_payroll_expense
+#
+# Translators:
+# Cécile Collart <cco@odoo.com>, 2022
+# Martin Trigaux, 2022
+# Jolien De Paepe, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0beta+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-04 09:41+0000\n"
+"PO-Revision-Date: 2025-09-15 11:59+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: French <https://translate.odoo.com/projects/odoo-19/"
+"hr_payroll_expense/fr/>\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
+"1000000 == 0) ? 1 : 2);\n"
+"X-Generator: Weblate 5.12.2\n"
+
+#. module: hr_payroll_expense
+#: model:ir.model,name:hr_payroll_expense.model_hr_expense_sheet
+msgid "Expense Report"
+msgstr "Rapport de notes de frais"
+
+#. module: hr_payroll_expense
+#: model:ir.model.fields,field_description:hr_payroll_expense.field_hr_payslip__expense_sheet_ids
+#: model_terms:ir.ui.view,arch_db:hr_payroll_expense.hr_payslip_view_form_inherit_expense
+msgid "Expenses"
+msgstr "Dépenses"
+
+#. module: hr_payroll_expense
+#: model:ir.model.fields,field_description:hr_payroll_expense.field_hr_payslip__expenses_count
+msgid "Expenses Count"
+msgstr "Nombre de dépenses"
+
+#. module: hr_payroll_expense
+#: model:hr.salary.rule,name:hr_payroll_expense.hr_salary_rule_expense_refund
+msgid "Expenses Reimbursement"
+msgstr "Remboursement des dépenses"
+
+#. module: hr_payroll_expense
+#: model:ir.model.fields,help:hr_payroll_expense.field_hr_payslip__expense_sheet_ids
+msgid "Expenses to reimburse to employee."
+msgstr "Dépenses à rembouser à l'employé."
+
+#. module: hr_payroll_expense
+#: model:ir.model,name:hr_payroll_expense.model_hr_payslip
+msgid "Pay Slip"
+msgstr "Fiche de paie"
+
+#. module: hr_payroll_expense
+#: model:ir.model.fields,field_description:hr_payroll_expense.field_hr_expense_sheet__payslip_id
+msgid "Payslip"
+msgstr "Fiche de paie"
+
+#. module: hr_payroll_expense
+#: model:ir.model.fields,field_description:hr_payroll_expense.field_hr_expense_sheet__refund_in_payslip
+msgid "Reimburse In Next Payslip"
+msgstr "Rembourser dans la prochaine fiche de paie"
+
+#. module: hr_payroll_expense
+#: code:addons/hr_payroll_expense/models/hr_payslip.py:0
+msgid "Reimbursed Expenses"
+msgstr "Dépenses remboursées"
+
+#. module: hr_payroll_expense
+#: model_terms:ir.ui.view,arch_db:hr_payroll_expense.hr_expense_sheet_view_form_inherit_payroll
+msgid "Report in Next Payslip"
+msgstr "Rapporter dans la prochaine fiche de paie"
+
+#. module: hr_payroll_expense
+#: code:addons/hr_payroll_expense/models/hr_expense_sheet.py:0
+msgid "Your expense (%s) will be added to your next payslip."
+msgstr "Votre note de frais (%s) sera ajoutée à votre prochaine fiche de paie."

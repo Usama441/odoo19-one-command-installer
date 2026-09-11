@@ -1,0 +1,22 @@
+#equity_transaction_tbody {
+    .text-muted {
+          color: rgba(33, 37, 41, 0.4) !important;
+    }
+}
+
+.o_ubo_form {
+    --table-striped-bg: #f8f9fa;
+    --table-striped-color: #{color-contrast(#f8f9fa)};
+}
+
+.o_holder_end_dialog {
+    .w-25 {
+        width: 25% !important;
+    }
+}
+
+.o_holder_edit_dialog {
+    .w-15 {
+        width: 15% !important;
+    }
+}

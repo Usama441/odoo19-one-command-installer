@@ -1,0 +1,11 @@
+.o_dashboard_edit_action {
+    position: relative;
+    display: flex;
+    flex-flow: column;
+    height: 100dvh !important;
+    width: 100dvw !important;
+
+    ol.breadcrumb {
+        margin-top: 2px;
+    }
+}

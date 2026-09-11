@@ -1,0 +1,10 @@
+.appointment-card, .o_kanban_record {
+    @include o-kanban-record-color;
+
+    @for $size from 2 through length($o-colors) {
+        .o_kanban_color_#{$size - 1} {
+            background-color: nth($o-colors, $size);
+        }
+    }
+
+}

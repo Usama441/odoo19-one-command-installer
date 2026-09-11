@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="account_fiscal_categories.warning_multi_rate">
+        There are multiple fiscal rates in this period
+    </t>
+</templates>

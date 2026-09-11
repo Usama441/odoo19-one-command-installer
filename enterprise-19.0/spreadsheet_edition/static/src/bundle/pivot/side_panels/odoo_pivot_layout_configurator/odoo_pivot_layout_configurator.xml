@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+    <t
+        t-name="spreadsheet_edition.OdooPivotLayoutConfigurator"
+        t-inherit="o-spreadsheet-PivotLayoutConfigurator">
+        <xpath expr="//AddDimensionButton" position="replace">
+            <PivotModelFieldSelector
+                resModel="props.definition.model"
+                readonly="false"
+                filter.bind="filterGroupableFields"
+                update.bind="addColumnDimension"/>
+        </xpath>
+        <xpath expr="//AddDimensionButton" position="replace">
+            <PivotModelFieldSelector
+                resModel="props.definition.model"
+                readonly="false"
+                filter.bind="filterGroupableFields"
+                update.bind="addRowDimension"
+            />
+        </xpath>
+    </t>
+    <t
+        t-name="spreadsheet_edition.PivotModelFieldSelector"
+        t-inherit="web._ModelFieldSelector">
+        <xpath expr="//div[hasclass('o_model_field_selector')]" position="replace">
+            <button class="add-dimension o-button" t-on-click="(ev) => this.openPopover(ev.currentTarget)">Add</button>
+        </xpath>
+    </t>
+</templates>

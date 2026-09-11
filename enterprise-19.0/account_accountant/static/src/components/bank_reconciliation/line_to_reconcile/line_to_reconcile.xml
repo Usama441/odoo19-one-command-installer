@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+    <t t-name="account_accountant.BankRecLineToReconcile">
+        <div class="o_row" t-on-click.stop="onClickLine">
+            <div class="o_line_name d-flex align-items-center">
+                <span t-esc="lineData.account_id.display_name" class="text-truncate"/>
+            </div>
+            <div class="d-flex gap-2 align-items-center overflow-hidden">
+                <a href="#" class="text-truncate" t-esc="lineData.partner_id.display_name" t-on-click.stop="openPartner" role="button" t-att-title="lineData.partner_id.display_name"/>
+            </div>
+            <span t-if="!!moveData.display_name and moveData.id !== statementLineData.move_id.id" class="d-none d-md-inline">
+                <a t-on-click.stop="openMove" href="#">
+                    <t t-esc="moveData.display_name"/>
+                </a>
+            </span>
+            <div class="o_line_amount d-flex align-items-center justify-content-between">
+                <span class="text-muted w-50 text-end" t-if="hasDifferentCurrencies">
+                    <span t-att-class="{'btn btn-link p-0' : showLineInfo}" t-ref="line-info-ref" t-on-click.stop="openLineInfoPopOver">
+                        <i t-if="showLineInfo" class="fa fa-info-circle me-2"/>
+                        <t t-out="formattedAmountCurrencyOfLine"/>
+                    </span>
+                </span>
+                <span class="text-end w-100" t-if="!hasDifferentCurrencies">
+                    <span t-att-class="{'btn btn-link p-0' : showLineInfo}" t-ref="line-info-ref" t-on-click.stop="openLineInfoPopOver">
+                        <i t-if="showLineInfo" class="fa fa-info-circle me-2"/>
+                        <t t-out="formattedAmountCurrencyOfStatementLine"/>
+                    </span>
+                </span>
+            </div>
+            <div class="o_line_to_reconcile_button d-none d-md-flex justify-content-end gap-2">
+                <button class="btn btn-link p-0 text-600" t-on-click.stop="toggleEditLine">
+                    <i class="fa fa-pencil"/>
+                </button>
+                <button class="btn btn-link p-0 text-600" t-on-click.stop="deleteLine">
+                    <i class="fa fa-trash"/>
+                </button>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="hr_holidays.l10n_ch_swissdec_unpaid_lt" model="hr.leave.type">
+            <field name="l10n_ch_swissdec_payroll_impact" eval="True"/>
+        </record>
+
+        <record id="hr_holidays.l10n_ch_swissdec_illness_lt" model="hr.leave.type">
+            <field name="l10n_ch_swissdec_payroll_impact" eval="True"/>
+        </record>
+
+        <record id="hr_holidays.l10n_ch_swissdec_accident_lt" model="hr.leave.type">
+            <field name="l10n_ch_swissdec_payroll_impact" eval="True"/>
+        </record>
+
+        <record id="hr_holidays.l10n_ch_swissdec_maternity_lt" model="hr.leave.type">
+            <field name="l10n_ch_swissdec_payroll_impact" eval="True"/>
+        </record>
+
+        <record id="hr_holidays.l10n_ch_swissdec_military_lt" model="hr.leave.type">
+            <field name="l10n_ch_swissdec_payroll_impact" eval="True"/>
+        </record>
+
+        <record id="hr_holidays.l10n_ch_swissdec_interruption_of_work_lt" model="hr.leave.type">
+            <field name="l10n_ch_swissdec_payroll_impact" eval="True"/>
+            <field name="l10n_ch_swissdec_work_interruption" eval="True"/>
+        </record>
+    </data>
+</odoo>

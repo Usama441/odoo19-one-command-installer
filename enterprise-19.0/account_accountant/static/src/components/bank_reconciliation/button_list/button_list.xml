@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+    <t t-name="account_accountant.BankRecButtonList">
+        <div class="d-flex gap-1">
+            <t t-if="props.isTopLine and props.preSelectedReconciliationModel and !props.statementLine.data.is_reconciled">
+                <BankRecButton
+                    label="props.preSelectedReconciliationModel.display_name"
+                    primary="true"
+                    action.bind="() => this.triggerReconciliationModel(props.preSelectedReconciliationModel.id)"
+                />
+            </t>
+            <t t-else="">
+                <t t-foreach="buttonsToDisplay" t-as="button" t-key="button_index">
+                    <BankRecButton t-props="button"/>
+                </t>
+            </t>
+
+            <t t-if="!props.isTopLine">
+                <Dropdown>
+                    <button class="btn btn-secondary" t-att-class="{'btn-sm': !ui.isSmall}">
+                        <i class="oi oi-ellipsis-v"/>
+                    </button>
+
+                    <t t-set-slot="content">
+                        <t t-if="ui.isSmall">
+                            <t t-foreach="mobileButtonsToDisplay" t-as="button" t-key="button_index">
+                                <DropdownItem class="'btn btn-link'" onSelected.bind="button.action">
+                                    <t t-esc="button.label"/>
+                                </DropdownItem>
+                            </t>
+                        </t>
+                        <!-- Small hack to display the inverse button in the dropdown to let the choice to the user -->
+                        <t t-if="buttons?.receivable">
+                            <DropdownItem class="'btn btn-link'" onSelected.bind="setAccountPayableOnReconcileLine">
+                                Payable
+                            </DropdownItem>
+                        </t>
+                        <t t-elif="buttons?.payable">
+                            <DropdownItem class="'btn btn-link'" onSelected.bind="setAccountReceivableOnReconcileLine">
+                                Receivable
+                            </DropdownItem>
+                        </t>
+                        <BankRecFileUploader record="bankRecFileUploaderRecord">
+                            <t t-set-slot="toggler">
+                                <span class="dropdown-item dropdown-item o-navigable btn btn-link">
+                                    Upload Bills
+                                </span>
+                            </t>
+                        </BankRecFileUploader>
+                        <div class="dropdown-divider"/>
+                        <t t-foreach="extraReconcileModelsToShow" t-as="model" t-key="model.id">
+                            <DropdownItem class="'btn btn-link'" onSelected.bind="() => this.triggerReconciliationModel(model.id)">
+                                <t t-esc="model.display_name"/>
+                            </DropdownItem>
+                        </t>
+                        <div t-if="extraReconcileModelsToShow.length" class="dropdown-divider"/>
+                        <DropdownItem class="'btn btn-link'" onSelected.bind="actionViewRecoModels">
+                            Manage Models
+                        </DropdownItem>
+                        <DropdownItem class="'btn btn-link'" onSelected.bind="deleteTransaction">
+                            Delete Transaction
+                        </DropdownItem>
+                    </t>
+                </Dropdown>
+            </t>
+        </div>
+    </t>
+</templates>

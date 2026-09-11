@@ -2,7 +2,6 @@
 installation-info.txt
 /.agents/
 /.codex/
-/enterprise-19.0/
 __pycache__/
 *.py[cod]
 config/*/odoo.conf

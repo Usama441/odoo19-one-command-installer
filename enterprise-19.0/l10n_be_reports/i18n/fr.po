@@ -1,0 +1,2693 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* l10n_be_reports
+#
+# Translators:
+# Martin Trigaux, 2023
+# Cécile Collart <cco@odoo.com>, 2023
+# Jolien De Paepe, 2023
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.5a1+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-08-27 07:46+0000\n"
+"PO-Revision-Date: 2025-08-27 07:46+0000\n"
+"Last-Translator: Dylan Kiss <dyki@odoo.com>\n"
+"Language-Team: \n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Poedit 3.4.1\n"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_281_50_pdf
+msgid "(including amounts that are related to other taxable periods):"
+msgstr ""
+"(y compris, les sommes qui ont un rapport avec d'autres périodes "
+"imposables):"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_281_50_pdf
+msgid ""
+",\n"
+"                                                enter the amount actually paid in"
+msgstr ""
+",\n"
+"                                                inscrivez ici le montant réellement payé en"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_281_50_pdf
+msgid "0.00"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "1. NN ou NE:"
+msgstr "1. NN ou NE:"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_281_50_pdf
+msgid "1. N°"
+msgstr "1. N°"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_payroll_13_month
+msgid "13th Month"
+msgstr "13e mois"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_281_50_pdf
+msgid "2. Name (or denomination) and address of the debtor of the income:"
+msgstr "2. Nom (ou dénomination) et adresse du débiteur des revenus :"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "2. Phone number:"
+msgstr "2. Numéro de téléphone :"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_rc_270mh_form
+msgid "270MH Form"
+msgstr "Formulaire 270MH"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "281.10"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "281.11"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "281.12"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "281.13"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "281.14"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "281.15"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "281.16"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "281.17"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "281.18"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_payroll_28120
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "281.20"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "281.30"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.form_281_50_view_form
+msgid "281.50 Form"
+msgstr "Fiche 281.50"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.form_325_view_form
+msgid "281.50 Forms"
+msgstr "Fiches 281.50"
+
+#. module: l10n_be_reports
+#: model:ir.actions.report,name:l10n_be_reports.action_report_partner_281_50_pdf
+msgid "281.50 PDF"
+msgstr "281.50 PDF"
+
+#. module: l10n_be_reports
+#: model:ir.actions.report,name:l10n_be_reports.action_report_partner_281_50_xml
+msgid "281.50 XML"
+msgstr "281.50 XML"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_res_partner__forms_281_50
+#: model:ir.model.fields,field_description:l10n_be_reports.field_res_users__forms_281_50
+msgid "281.50 forms"
+msgstr "Fiches 281.50"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "3. Identity of the debtor of the income"
+msgstr "3. Identité du débiteur des revenus"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_281_50_pdf
+msgid "3. Nature"
+msgstr "3. Nature"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.form_325_view_form
+msgid "325 Form"
+msgstr "Relevé 325"
+
+#. module: l10n_be_reports
+#: model:ir.model,name:l10n_be_reports.model_l10n_be_form_325_wizard
+msgid "325 Form Wizard"
+msgstr "Wizard Relevé 325"
+
+#. module: l10n_be_reports
+#: model:ir.actions.report,name:l10n_be_reports.action_report_325_form_pdf
+msgid "325 PDF"
+msgstr "325 PDF"
+
+#. module: l10n_be_reports
+#: model:ir.actions.act_window,name:l10n_be_reports.action_open_325_tree_view
+msgid "325 forms"
+msgstr "Relevés 325"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_281_50_pdf
+msgid "4. Comments:"
+msgstr "4. Commentaire :"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid ""
+"4. Domicile (natural persons), registered office or main administrative\n"
+"                                                office (companies and other institutions)"
+msgstr ""
+"4. Domicile (personnes physiques), siège social ou établissement principal "
+"administratif (sociétés et autres institutions) :"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid ""
+"5. Administrative or operating headquarters (companies and other\n"
+"                                                institutions)\n"
+"                                                or operating headquarters (natural persons who have more than one such\n"
+"                                                headquarters) when it is a statement specific to that administrative or\n"
+"                                                operating headquarters:"
+msgstr ""
+"5. Siège administratif ou d'exploitation (sociétés et autres institutions) "
+"ou siège d'exploitation (personnes physiques qui disposent de plusieurs de "
+"ces sièges) lorsqu'il s'agit d'un relevé propre à ce siège administratif ou "
+"d'exploitation :"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "AMOUNT TOTAL"
+msgstr "MONTANT TOTAL"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.view_account_financial_report_export
+msgid "Choose option(s) before exporting XML:"
+msgstr "Choisissez une ou plusieurs options avant d'exporter le XML:"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_state_adv_tax_payment_rollover
+msgid "Advance Tax Payment Rollover"
+msgstr "Report de l’acompte d’impôt"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__atn
+msgid "ATN"
+msgstr "ATN"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_state_adv_tax_payments_matching_with_certificate
+msgid "Advance Tax Payments Matching With Certificate"
+msgstr "Correspondance des acomptes d’impôt avec le certificat"
+
+#. module: l10n_be_reports
+#: model:ir.model,name:l10n_be_reports.model_account_chart_template
+msgid "Account Chart Template"
+msgstr "Plan comptable"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_equity_capital_notary_fees_allocation_to_legal_reserve
+msgid "Allocation To Legal Reserve"
+msgstr "Affectation à la réserve légale"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__message_needaction
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__message_needaction
+msgid "Action Needed"
+msgstr "Action nécessaire"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_rc_investment_deduction
+msgid ""
+"Are certain assets not eligible for the investment deduction?\n"
+"The investment deduction allows for a tax reduction for new purchases. It is "
+"necessary to verify that only eligible assets are included in this "
+"calculation."
+msgstr ""
+"Certains actifs ne sont-ils pas éligibles à la déduction pour investissement ?\n"
+"La déduction pour investissement permet une réduction d’impôt pour les nouveaux achats. "
+"Il est nécessaire de vérifier que seuls les actifs éligibles sont inclus dans ce calcul."
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_submission_wizard__prorata_at_0
+msgid "Actual Use at 0%"
+msgstr "Utilisation réelle à 0%"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_fixed_assets_depreciation_rate
+msgid ""
+"Are the depreciation rates and rules in conformity with tax requirements?\n"
+"Depreciation is the allocation of the cost of an asset over several years. "
+"It is important that the depreciation period used is compliant with Belgian "
+"tax rules to avoid it being rejected in the event of an audit."
+msgstr ""
+"Les taux et règles d’amortissement sont-ils conformes aux exigences fiscales ?\n"
+"L’amortissement est l’imputation du coût d’un actif sur plusieurs années. "
+"Il est important que la période d’amortissement utilisée soit conforme aux règles fiscales belges "
+"afin d’éviter un rejet en cas de contrôle."
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_submission_wizard__prorata_at_100
+msgid "Actual Use at 100%"
+msgstr "Utilisation réelle à 100%"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_sales_bad_debts
+msgid ""
+"Are there any doubtful clients to be recorded and provisioned for?\n"
+"A client is \"doubtful\" if there are reasons to believe they will not pay. "
+"This situation must be recorded in the accounts to reflect the company's "
+"financial reality."
+msgstr ""
+"Y a-t-il des clients douteux à enregistrer et à provisionner ?\n"
+"Un client est « douteux » s’il existe des raisons de croire qu’il ne paiera pas. "
+"Cette situation doit être enregistrée dans les comptes afin de refléter la réalité financière de l’entreprise."
+
+#. module: l10n_be_reports
+#: model:ir.model.fields.selection,name:l10n_be_reports.selection__l10n_be_form_325__treatment_type__2
+#: model:ir.model.fields.selection,name:l10n_be_reports.selection__l10n_be_form_325_wizard__treatment_type__2
+msgid "Add"
+msgstr "Ajouter"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_oe_year_end_expense_accruals
+msgid ""
+"Are there any expenses to be included in the financial year (expenses paid "
+"in the next financial year)?\n"
+"You need to check if the company has paid for expenses (for example, an "
+"annual insurance policy) that concern the next financial year. These "
+"expenses must be allocated correctly."
+msgstr ""
+"Y a-t-il des charges à inclure dans l’exercice (charges payées au cours de l’exercice suivant) ?\n"
+"Il faut vérifier si l’entreprise a payé des charges (par exemple, une police d’assurance annuelle) "
+"concernant l’exercice suivant. Ces charges doivent être imputées correctement."
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__partner_address
+msgid "Address"
+msgstr "Adresse"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_rc_financial_prod_with_sp_tax_regime
+msgid ""
+"Are there any financial products benefiting from a specific tax regime?\n"
+"This could include capital gains on shares or dividends. Some benefit from a "
+"specific tax treatment that must be verified to optimize the declaration."
+msgstr ""
+"Existe-t-il des produits financiers bénéficiant d’un régime fiscal spécifique ?\n"
+"Cela peut inclure des plus-values sur actions ou des dividendes. Certains bénéficient d’un traitement fiscal particulier "
+"qui doit être vérifié pour optimiser la déclaration."
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_281_50__partner_address
+msgid "Address of the partner when the form was created"
+msgstr "Adresse du partenaire lors de la création de la fiche"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_tf_foreign_curr_acc_revaluation
+msgid ""
+"Are there any foreign currency accounts that should be revalued at closing?\n"
+"If the company has foreign currency accounts, the amounts must be adjusted "
+"to reflect the exchange rate at the balance sheet closing."
+msgstr ""
+"Y a-t-il des comptes en devises étrangères qui doivent être réévalués à la "
+"clôture ?\n"
+"Si l'entreprise détient des comptes en devises étrangères, les montants "
+"doivent être ajustés pour refléter le taux de change à la clôture du bilan."
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_281_50_pdf
+msgid "Amount"
+msgstr "Montant"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_fixed_assets_asset_disposal
+msgid ""
+"Are there any investments to be disposed of because they no longer exist or "
+"are obsolete?\n"
+"If an asset is no longer in use or is obsolete, it must be removed from the "
+"company's assets. This check is used to identify these assets and record "
+"them correctly."
+msgstr ""
+"Y a-t-il des immobilisations à céder parce qu'elles n'existent plus ou sont "
+"obsolètes ?\n"
+"Si un actif n'est plus utilisé ou est obsolète, il doit être retiré des "
+"immobilisations de l'entreprise. Ce contrôle permet d'identifier ces actifs "
+"et de les enregistrer correctement."
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_general_ledger.py:0
+msgid "Annual Accounts"
+msgstr "Comptes annuels"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_sales_products_to_be_received
+msgid ""
+"Are there any products to be received to be recorded in the financial year "
+"(products yet to be invoiced)?\n"
+"This check verifies whether the company has provided a service or sold a "
+"good before the closing date but has not yet sent the invoice. The product "
+"must be recorded for the current financial year."
+msgstr ""
+"Y a-t-il des produits à recevoir à enregistrer dans l'exercice (produits "
+"pas encore facturés) ?\n"
+"Ce contrôle vérifie si l'entreprise a fourni un service ou vendu un bien "
+"avant la date de clôture mais n'a pas encore envoyé la facture. Le produit "
+"doit être enregistré dans l'exercice en cours."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_inventory_value_reduction_on_old_stock
+msgid ""
+"Are there any value reductions on stock to be recorded (old stock)?\n"
+"If goods in stock have lost value (are obsolete or damaged), this must be "
+"reflected in the accounts by a value reduction, which is often tax-"
+"deductible."
+msgstr ""
+"Y a-t-il des réductions de valeur sur les stocks à enregistrer (stocks "
+"anciens) ?\n"
+"Si des marchandises en stock ont perdu de la valeur (sont obsolètes ou "
+"endommagées), cela doit être reflété dans la comptabilité par une réduction "
+"de valeur, souvent déductible fiscalement."
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_periodic_vat_xml_export__ask_restitution
+msgid "Ask Restitution"
+msgstr "Demander la restitution"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_fixed_assets_asset_disposal
+msgid "Asset Disposal"
+msgstr "Cession d'actifs"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_sales_report.py:0
+#: code:addons/l10n_be_reports/models/partner_vat_listing.py:0
+msgid "Audit"
+msgstr "Audit"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.pdf_export_filters
+msgid "Ask restitution:"
+msgstr "Demander la restitution :"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__message_attachment_count
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__message_attachment_count
+msgid "Attachment Count"
+msgstr "Nombre de pièces jointes"
+
+#. module: l10n_be_reports
+#: model:account.return.type,name:l10n_be_reports.l10n_be_audit_return_type
+msgid "Audit (BE)"
+msgstr "Audit (BE)"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.l10n_be_account_audit_account_balances_search_view_inherit
+msgid "Audit Accounts (BE)"
+msgstr "Comptes d'audit (BE)"
+
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_sales_bad_debts
+msgid "Bad Debts"
+msgstr "Créances irrécouvrables"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__partner_bce_number
+msgid "BCE number"
+msgstr "Numéro d'entreprise"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_sales_bad_debts_provision
+msgid "Bad Debts Provision"
+msgstr "Provision pour créances douteuses"
+
+#. module: l10n_be_reports
+#: model:ir.model,name:l10n_be_reports.model_l10n_be_ec_sales_report_handler
+msgid "Belgian EC Sales Report Custom Handler"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_tf_bank_balance_reco_with_stmt
+msgid "Bank Balances Reconciliation With Statements"
+msgstr "Rapprochement des soldes bancaires avec les relevés"
+
+#. module: l10n_be_reports
+#: model:ir.model,name:l10n_be_reports.model_l10n_be_ec_sales_report_handler
+msgid "Belgian EC Sales Report Custom Handler"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model:ir.model,name:l10n_be_reports.model_l10n_be_tax_report_handler
+msgid "Belgian Tax Report Custom Handler"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "CERTIFIED AS ACCURATE"
+msgstr "CERTIFIE EXACT"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_periodic_vat_xml_export__calling_export_wizard_id
+msgid "Calling Export Wizard"
+msgstr "Appeler l'assistant d'exportation"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_payroll_benefit_in_kind
+msgid "Benefit in Kind"
+msgstr "Avantage en nature"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields.selection,name:l10n_be_reports.selection__l10n_be_form_325__treatment_type__3
+#: model:ir.model.fields.selection,name:l10n_be_reports.selection__l10n_be_form_325_wizard__treatment_type__3
+msgid "Cancel"
+msgstr "Annuler"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_equity_capital_notary_fees_capitalization
+msgid "Capital & Notary Fees Capitalization"
+msgstr "Capitalisation du capital et des frais de notaire"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_rc_capital_grant
+msgid "Capital Grant"
+msgstr "Subvention en capital"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_50_divider_pdf
+msgid "Carry over from the previous divider"
+msgstr "Report de l'intercalaire précédent"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_res_partner__citizen_identification
+#: model:ir.model.fields,field_description:l10n_be_reports.field_res_users__citizen_identification
+msgid "Citizen Identification"
+msgstr "Identification du citoyen"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__partner_citizen_identification
+msgid "Citizen identification number"
+msgstr "Numéro national"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__partner_city
+msgid "City"
+msgstr "Ville"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_281_50__partner_city
+msgid "City of the partner when the form was created"
+msgstr "Commune du partenaire lors de la création de la fiche"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.pdf_export_filters
+msgid "Client nihil:"
+msgstr "Client nihil :"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.form_325_wizard_view_form
+msgid "Close"
+msgstr "Fermer"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_50_divider_pdf
+msgid "Comments"
+msgstr "Commentaires"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__commissions
+msgid "Commissions"
+msgstr "Commissions"
+
+#. module: l10n_be_reports
+#: model:ir.model,name:l10n_be_reports.model_res_company
+msgid "Companies"
+msgstr "Entreprises"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__company_id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325_wizard__company_id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_isoc_prepayment_pay_wizard__company_id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_pay_wizard__company_id
+msgid "Company"
+msgstr "Société"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "Company name or exact name (companies and other institutions)"
+msgstr ""
+"Raison sociale ou dénomination exacte (sociétés et autres institutions)"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_report.py:0
+msgid "Company: %s"
+msgstr "Entreprise : %s"
+
+#. module: l10n_be_reports
+#: model:ir.model,name:l10n_be_reports.model_res_partner
+msgid "Contact"
+msgstr "Contact"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_periodic_vat_xml_export__control_value
+msgid "Control Value"
+msgstr "Valeur de contrôle"
+
+#. module: l10n_be_reports
+#: model:ir.model,name:l10n_be_reports.model_res_partner
+msgid "Contact"
+msgstr "Contact"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_state_copyrights
+msgid "Copyrights"
+msgstr "Droits d'auteur"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_rc_correct_rec_of_financial_prod
+msgid "Correct Recording Of Financial Products"
+msgstr "Enregistrement correct des produits financiers"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__country_id
+msgid "Country"
+msgstr "Pays"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_281_50__country_id
+msgid "Country of the partner when the form was created"
+msgstr "Pays du partenaire lors de la création de la fiche"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.form_325_wizard_view_form
+msgid "Create 325 Form"
+msgstr "Créer le relevé 325"
+
+#. module: l10n_be_reports
+#: model:ir.actions.act_window,name:l10n_be_reports.action_open_create_325_form
+msgid "Create 325 form"
+msgstr "Créer le relevé 325"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__create_uid
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__create_uid
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325_wizard__create_uid
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_annual_corporate_tax_submission_wizard__create_uid
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_ec_sales_list_submission_wizard__create_uid
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_isoc_prepayment_pay_wizard__create_uid
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_listing_submission_wizard__create_uid
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_pay_wizard__create_uid
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_lock_wizard__create_uid
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_submission_wizard__create_uid
+msgid "Created by"
+msgstr "Créé par"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__create_date
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__create_date
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325_wizard__create_date
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_annual_corporate_tax_submission_wizard__create_date
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_ec_sales_list_submission_wizard__create_date
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_isoc_prepayment_pay_wizard__create_date
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_listing_submission_wizard__create_date
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_pay_wizard__create_date
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_lock_wizard__create_date
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_submission_wizard__create_date
+msgid "Created on"
+msgstr "Créé le"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__currency_id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__currency_id
+msgid "Currency"
+msgstr "Devise"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_tf_curr_exch_gap_justification
+msgid "Currency Exchange Gap Justification"
+msgstr "Justification de l'écart de change"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_sales_customers_balance
+msgid "Customers Balance"
+msgstr "Solde des clients"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "DESIGNATION OF THE FORMS"
+msgstr "DESIGNATION DES FICHES"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__debtor_id
+msgid "Debtor"
+msgstr "Débiteur"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__debtor_address
+msgid "Debtor Address"
+msgstr "Adresse du débiteur"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__debtor_bce_number
+msgid "Debtor BCE Number"
+msgstr "Numéro d'entreprise du débiteur"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__debtor_citizen_identification
+msgid "Debtor Citizen Identification"
+msgstr "Numéro national du débiteur"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__debtor_city
+msgid "Debtor City"
+msgstr "Commune du débiteur"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__debtor_country_id
+msgid "Debtor Country"
+msgstr "Pays du débiteur"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__debtor_name
+msgid "Debtor Name"
+msgstr "Nom du débiteur"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__debtor_phone_number
+msgid "Debtor Phone Number"
+msgstr "Numéro de téléphone du débiteur"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__debtor_zip
+msgid "Debtor ZIP"
+msgstr "N° postal du débiteur"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__company_id
+msgid "Debtor company"
+msgstr "Entreprise du débiteur"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_281_50__company_id
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_325__company_id
+msgid "Debtor for which the form is created"
+msgstr "Débiteur pour lequel le fiche est créé"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__debtor_is_natural_person
+msgid "Debtor is Natural Person"
+msgstr "Le débiteur est une personne physique"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_submission_wizard__prorata
+msgid "Definitive Prorata"
+msgstr "Prorata définitif"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_fixed_assets_depreciation_rate
+msgid "Depreciation Rate"
+msgstr "Taux d’amortissement"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/wizard/vat_report_export.py:0
+msgid "Definitive prorata must be an integer between 1 and 100"
+msgstr "Prorata définitif doit etre un entier entre 1 et 100"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_fixed_assets_depreciation_recording_completeness
+msgid "Depreciation Recording Completeness"
+msgstr "Exhaustivité de l’enregistrement des amortissements"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_fixed_assets_depreciaton_schedule_against_trial_balance
+msgid "Depreciation Schedule against Trial Balance"
+msgstr "Tableau d’amortissement par rapport à la balance de vérification"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_payroll_director_benefit_in_kind
+msgid "Director Benefit in Kind"
+msgstr "Avantage en nature du dirigeant"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_payroll_director_meal_vouchers
+msgid "Director Meal Vouchers"
+msgstr "Chèques-repas du dirigeant"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_account_chart_template__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_account_general_ledger_report_handler__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_account_return__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_account_return_type__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_ec_sales_report_handler__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325_wizard__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_partner_vat_handler__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_annual_corporate_tax_submission_wizard__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_ec_sales_list_submission_wizard__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_isoc_prepayment_pay_wizard__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_listing_submission_wizard__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_pay_wizard__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_lock_wizard__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_submission_wizard__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_tax_report_handler__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_mail_activity_type__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_report_l10n_be_reports_report_281_50_pdf__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_report_l10n_be_reports_report_281_50_xml__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_report_l10n_be_reports_report_325_pdf__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_res_company__display_name
+#: model:ir.model.fields,field_description:l10n_be_reports.field_res_partner__display_name
+msgid "Display Name"
+msgstr "Nom affiché"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_equity_capital_notary_fees_dividend_for_wh_tax_refund
+msgid "Dividend for Withholding Tax Refund"
+msgstr "Dividende pour remboursement du précompte mobilier"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_tf_dividends_received
+msgid "Dividends Received"
+msgstr "Dividendes reçus"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_50_divider_pdf
+msgid "Divider N°"
+msgstr "Intercalaire n°"
+
+#. module: l10n_be_reports
+#. odoo-javascript
+#: code:addons/l10n_be_reports/static/src/components/tax_report/warnings.xml:0
+msgid "Do not forget to submit the"
+msgstr "N’oubliez pas de soumettre le"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_state_adv_tax_payments_matching_with_certificate
+msgid ""
+"Do the advance tax payments have been checked against the annual certificate "
+"from the administration?\n"
+"The tax administration sends a certificate for advance tax payments. This "
+"check ensures that the amounts recorded in the accounts correspond to those "
+"declared by the administration."
+msgstr ""
+"Les versements anticipés ont-ils été vérifiés par rapport au certificat "
+"annuel de l’administration ?\n"
+"L’administration fiscale envoie un certificat pour les versements anticipés. "
+"Ce contrôle garantit que les montants enregistrés dans la comptabilité "
+"correspondent à ceux déclarés par l’administration."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_fixed_assets_vehicles
+msgid ""
+"Do you have a complete file for each vehicle (motorcycle/car/van)?\n"
+"Vehicle expenses are subject to specific deductibility rules in Belgium. A "
+"complete file is necessary to correctly calculate depreciation and "
+"deductible expenses based on CO2 emissions."
+msgstr ""
+"Avez-vous un dossier complet pour chaque véhicule (moto/voiture/camionnette) ?\n"
+"Les frais liés aux véhicules sont soumis à des règles spécifiques de "
+"déductibilité en Belgique. Un dossier complet est nécessaire pour calculer "
+"correctement l’amortissement et les frais déductibles sur base des émissions "
+"de CO2."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_payroll_28120
+msgid ""
+"Do you have a salary concordance and correspondence with the 281.20 tax "
+"form?\n"
+"The 281.20 tax form summarizes the directors' salaries. This check ensures "
+"that the salaries recorded in the accounts correspond to those declared to "
+"the tax authorities."
+msgstr ""
+"Avez-vous une concordance salariale et une correspondance avec la fiche "
+"fiscale 281.20 ?\n"
+"La fiche fiscale 281.20 reprend les rémunérations des dirigeants. Ce contrôle "
+"permet de s’assurer que les salaires enregistrés en comptabilité "
+"correspondent à ceux déclarés à l’administration fiscale."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_payroll_social_secretariat_concordance
+msgid ""
+"Do you have a salary concordance with the social secretariat?\n"
+"It is essential that the salaries recorded in the accounts correspond to the "
+"declarations made to the social secretariat. This helps avoid errors and the "
+"risk of an ONSS or tax authority audit."
+msgstr ""
+"Avez-vous une concordance salariale avec le secrétariat social ?\n"
+"Il est essentiel que les salaires enregistrés en comptabilité correspondent "
+"aux déclarations faites au secrétariat social. Cela permet d’éviter des "
+"erreurs et le risque d’un contrôle de l’ONSS ou de l’administration fiscale."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_equity_capital_notary_fees_allocation_to_legal_reserve
+msgid ""
+"Do you need to allocate an amount to the legal reserve?\n"
+"Belgian law requires companies to put a portion of their profit into a legal "
+"reserve until it reaches a certain amount. This check verifies if this "
+"obligation is met."
+msgstr ""
+"Devez-vous affecter un montant à la réserve légale ?\n"
+"La loi belge impose aux sociétés de verser une partie de leurs bénéfices "
+"dans une réserve légale jusqu’à atteindre un certain montant. Ce contrôle "
+"permet de vérifier si cette obligation est respectée."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_equity_capital_notary_fees_provision_for_liquidation_reserve
+msgid ""
+"Do you need to provide for a liquidation reserve on the profit?\n"
+"A liquidation reserve is a portion of the profit set aside to be taxed at a "
+"reduced rate in the event of future liquidation. This is an interesting tax "
+"option to check."
+msgstr ""
+"Devez-vous constituer une réserve de liquidation sur le bénéfice ?\n"
+"Une réserve de liquidation est une partie du bénéfice mise de côté pour être "
+"taxée à un taux réduit en cas de liquidation future. Il s’agit d’une option "
+"fiscale intéressante à vérifier."
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_281_50_form.py:0
+msgid "Download 281.50 Form PDF"
+msgstr "Télécharger la fiche 281.50 en PDF"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.form_281_50_view_form
+msgid "Download pdf"
+msgstr "Télécharger en PDF"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields.selection,name:l10n_be_reports.selection__l10n_be_form_325__state__draft
+msgid "Draft"
+msgstr "Brouillon"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/partner_vat_listing.py:0
+msgid "Duplicate VAT number"
+msgstr "Numéro de TVA dupliqué"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields.selection,name:l10n_be_reports.selection__l10n_be_form_325__sender_lang_code__1
+msgid "Dutch"
+msgstr "Néerlandais"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_sales_report.py:0
+msgid "EC Sales List Audit"
+msgstr "Relevé à la TVA des opérations intracommunautaires"
+
+#. module: l10n_be_reports
+#. odoo-javascript
+#: code:addons/l10n_be_reports/static/src/components/tax_report/warnings.xml:0
+msgid "EC Sales list report"
+msgstr "Relevé à la TVA des opérations intracommunautaires"
+
+#. module: l10n_be_reports
+#. odoo-javascript
+#: code:addons/l10n_be_reports/static/src/components/sales_report/warnings.xml:0
+msgid ""
+"EC Sales taxes report total does not match Tax Report lines 44 + 46L + 46T -"
+" 48s44 - 48s46L - 48s46T."
+msgstr ""
+"Le total du relevé intracommunautaire ne correspond pas aux lignes 44 + 46L "
+"+ 46T - 48s44 - 48s46L - 48s46T de la déclaration à la TVA."
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_325_form.py:0
+msgid ""
+"Either there isn't any account nor partner with a 281.50 tag or there isn't "
+"any amount to report for this period."
+msgstr ""
+"Soit il n'y a pas de compte ou de partenaire avec une étiquette de 281.50, "
+"soit il n'y a pas de montant à déclarer pour cette période."
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_281_50_pdf
+msgid "Enterprise N°:"
+msgstr "N° d'entreprise :"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.view_account_financial_report_export
+msgid "Export Options"
+msgstr "Options d'exportation"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.view_account_financial_report_export
+msgid "Export XML"
+msgstr "Exporter en XML"
+
+#. module: l10n_be_reports
+#: model:ir.model,name:l10n_be_reports.model_account_reports_export_wizard_format
+msgid "Export format for accounting's reports"
+msgstr "Format d'export pour les rapports de comptabilité"
+
+#. module: l10n_be_reports
+#: model:ir.model,name:l10n_be_reports.model_account_reports_export_wizard
+msgid "Export wizard for accounting's reports"
+msgstr "Assistant d'export pour les rapports de comptabilité"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__exposed_expenses
+msgid "Exposed expenses"
+msgstr "Frais exposés"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "FINANCES"
+msgstr "FINANCES"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_281_50_pdf
+msgid "FORM N° 281.50 (commissions, brokerage, etc) - YEAR"
+msgstr "FICHE N° 281.50 (commissions, courtages, etc) - ANNÉE"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "FORMS 325.50"
+msgstr "RELEVES 325.50"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "Federal Public Service"
+msgstr "Service Public Fédéral"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__fees
+msgid "Fees"
+msgstr "Frais"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_tf_final_cash_transaction_balance
+msgid "Final Cash Transactions And Balance"
+msgstr "Transactions de caisse finales et solde"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_rc_financial_prod_with_sp_tax_regime
+msgid "Financial Products With Special Tax Regime"
+msgstr "Produits financiers avec régime fiscal spécial"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__message_follower_ids
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__message_follower_ids
+msgid "Followers"
+msgstr "Abonnés"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__message_partner_ids
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Abonnés (Partenaires)"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_tf_foreign_curr_acc_revaluation
+msgid "Foreign Currency Revaluation At Closing"
+msgstr "Réévaluation des devises étrangères à la clôture"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_50_divider_pdf
+msgid "Form 281.50 N°"
+msgstr "Numéro de la fiche N° 281.50"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__form_325_id
+msgid "Form 325"
+msgstr "Relevé 325"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_res_partner__form_file
+#: model:ir.model.fields,field_description:l10n_be_reports.field_res_users__form_file
+msgid "Form File"
+msgstr "Fichier formulaire"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__form_281_50_ids
+msgid "Forms 281.50"
+msgstr "Fiches 281.50"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__form_281_50_count
+msgid "Forms 281.50 count"
+msgstr "Nombre de fiches 281.50"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__form_281_50_total_amount
+msgid "Forms 281.50 total"
+msgstr "Total des fiches 281.50"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields.selection,name:l10n_be_reports.selection__l10n_be_form_325__sender_lang_code__2
+msgid "French"
+msgstr "Français"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "GENERAL TAX ADMINISTRATION"
+msgstr "ADMINISTRATION GENERALE DE LA FISCALITE"
+
+#. module: l10n_be_reports
+#: model:ir.model,name:l10n_be_reports.model_account_general_ledger_report_handler
+msgid "General Ledger Custom Handler"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.form_325_view_form
+msgid "Generate 281.50 forms PDF"
+msgstr "Créer PDF des fiches 281.50"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.form_325_view_form
+msgid "Generate 281.50 forms XML"
+msgstr "Créer XML des fiches 281.50"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.form_325_wizard_view_form
+msgid "Generate 325 form"
+msgstr "Créer le relevé 325"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.form_325_view_form
+msgid "Generate 325 form PDF"
+msgstr "Créer PDF du relevé 325"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields.selection,name:l10n_be_reports.selection__l10n_be_form_325__state__generated
+msgid "Generated"
+msgstr "Généré"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields.selection,name:l10n_be_reports.selection__l10n_be_form_325__sender_lang_code__3
+msgid "German"
+msgstr "Allemand"
+
+#. module: l10n_be_reports
+#: model:ir.model,name:l10n_be_reports.model_report_l10n_be_reports_report_281_50_pdf
+msgid "Get 281.50 report as PDF."
+msgstr "Obtenir le rapport 281.50 au format PDF."
+
+#. module: l10n_be_reports
+#: model:ir.model,name:l10n_be_reports.model_report_l10n_be_reports_report_281_50_xml
+msgid "Get 281.50 report as XML."
+msgstr "Obtenir le rapport 281.50 au format XML."
+
+#. module: l10n_be_reports
+#: model:ir.model,name:l10n_be_reports.model_report_l10n_be_reports_report_325_pdf
+msgid "Get 325 Report as PDF"
+msgstr "Obtenir le relevé 325 en PDF"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__has_message
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__has_message
+msgid "Has Message"
+msgstr "A un message"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_submission_wizard__submit_more
+msgid "I want to submit more than 5 specific prorata"
+msgstr "Je souhaite soumettre plus de 5 prorata spécifiques"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_state_adv_tax_payment_rollover
+msgid ""
+"Has an advance tax payment rollover been considered (at the latest in the "
+"last quarter)?\n"
+"Early payments can reduce or avoid tax surcharges. This check reminds you to "
+"verify if the client has made their early payments and to ensure they are "
+"correctly taken into account."
+msgstr "Un report du paiement anticipé de l'impôt a-t-il été pris en compte (au plus tard au dernier trimestre) ?\nLes paiements anticipés peuvent réduire ou éviter les surtaxes fiscales. Ce contrôle vous rappelle de vérifier si le client a effectué ses paiements anticipés et de vous assurer qu'ils sont correctement pris en compte."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_fixed_assets_investments
+msgid ""
+"Has each investment been created correctly in Odoo?\n"
+"Each durable good purchased by the company (machine, furniture, etc.) must "
+"be recorded as an investment. This check ensures that these goods are "
+"properly tracked for depreciation."
+msgstr "Chaque investissement a-t-il été correctement créé dans Odoo ?\nChaque bien durable acheté par la société (machine, mobilier, etc.) doit être enregistré comme un investissement. Ce contrôle garantit que ces biens sont correctement suivis pour la dépréciation."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_tf_int_director_current_acc
+msgid ""
+"Has the company paid interest on the director's current account "
+"(verification of the market rate)?\n"
+"If a director has lent money to their company (account 489), they can "
+"receive interest. It is important to check that the interest rate is not too "
+"high, otherwise it could be reclassified for tax purposes."
+msgstr "L'entreprise a-t-elle payé des intérêts sur le compte courant du directeur (vérification du taux du marché) ?\nSi un directeur a prêté de l'argent à sa société (compte 489), il peut recevoir des intérêts. Il est important de vérifier que le taux d'intérêt n'est pas trop élevé, sinon il pourrait être reclassé à des fins fiscales."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_tf_int_related_company_loans
+msgid ""
+"Has the company paid interest to a related company (verification of the "
+"market rate)?\n"
+"This check is similar to the previous one but concerns loans between related "
+"companies. You must ensure that the interest respects the market rate to "
+"avoid tax problems."
+msgstr "L'entreprise a-t-elle payé des intérêts à une société liée (vérification du taux du marché) ?\nCe contrôle est similaire au précédent mais concerne les prêts entre sociétés liées. Vous devez vous assurer que les intérêts respectent le taux du marché pour éviter des problèmes fiscaux."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_tf_dividends_received
+msgid ""
+"Has the company received interest from a related company (verification of "
+"the market rate)?\n"
+"If the company lends money to another related company, it must receive "
+"market-rate interest to avoid a tax adjustment."
+msgstr "L'entreprise a-t-elle reçu des intérêts d'une société liée (vérification du taux du marché) ?\nSi la société prête de l'argent à une autre société liée, elle doit recevoir des intérêts au taux du marché pour éviter un ajustement fiscal."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_inventory_recording
+msgid ""
+"Has the inventory been recorded?\n"
+"Inventory (stock of goods) is an important asset that must be valued and "
+"recorded at the end of the financial year to determine the company's exact "
+"profit."
+msgstr "L'inventaire a-t-il été enregistré ?\nL'inventaire (stock de marchandises) est un actif important qui doit être évalué et enregistré à la fin de l'exercice pour déterminer le bénéfice exact de l'entreprise."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_payroll_director_benefit_in_kind
+msgid ""
+"Have all Benefits in Kind (ATNs) been recorded for the director (mobile "
+"phone, internet, PC, car, etc.)?\n"
+"As with the previous check, this is to ensure that all benefits in kind for "
+"the director are properly recorded and declared."
+msgstr "Tous les avantages en nature (ATN) ont-ils été enregistrés pour le directeur (téléphone portable, internet, PC, voiture, etc.) ?\nComme pour le contrôle précédent, cela permet de s'assurer que tous les avantages en nature du directeur sont correctement enregistrés et déclarés."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_rc_vat_rules
+msgid ""
+"Have you audited the accounting for the correct application of the VAT "
+"regime?\n"
+"This involves checking whether VAT rules (rates, deductibility, etc.) are "
+"applied correctly to all transactions. Errors can lead to tax adjustments."
+msgstr "Avez-vous audité la comptabilité pour la correcte application du régime de TVA ?\nCela implique de vérifier si les règles de TVA (taux, déductibilité, etc.) sont correctement appliquées à toutes les transactions. Les erreurs peuvent entraîner des ajustements fiscaux."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_other_prorating_expenses_income
+msgid ""
+"Have you calculated the prorated expenses/products?\n"
+"This check ensures that revenues and expenses are allocated to the correct "
+"financial year, in line with the accrual principle. In Belgium, prorating is "
+"required to present an accurate picture of the company’s financial position "
+"and results at year-end."
+msgstr "Avez-vous calculé les charges et produits proratisés ?\nCe contrôle permet de s'assurer que les revenus et dépenses sont affectés à l'exercice approprié, conformément au principe d'indépendance des exercices. En Belgique, le prorata est nécessaire pour présenter une image fidèle de la situation financière et des résultats de l'entreprise à la clôture."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_oe_provision_balance
+msgid ""
+"Have you checked if the provision balance is correct and if the uses of the "
+"account are justified?\n"
+"This check is to ensure that all of the company's provisions are correctly "
+"justified and calculated, and that they correspond to real risks or charges."
+msgstr "Avez-vous vérifié si le solde des provisions est correct et si les utilisations du compte sont justifiées ?\nCe contrôle permet de s'assurer que toutes les provisions de l'entreprise sont correctement justifiées et calculées, et qu'elles correspondent à de vrais risques ou charges."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_payroll_benefit_in_kind
+msgid ""
+"Have you checked if there is a Benefit in Kind (ATN) to calculate and if the "
+"transactions in the current account have been justified?\n"
+"The ATN is a benefit granted by the company to its director (company car, "
+"mobile phone, etc.) which is taxable. It is important to ensure that all "
+"benefits are properly declared and that the director's current account is "
+"justified."
+msgstr "Avez-vous vérifié s'il existe un avantage en nature (ATN) à calculer et si les transactions du compte courant sont justifiées ?\nL'ATN est un avantage accordé par l'entreprise à son directeur (voiture de société, téléphone portable, etc.) et est imposable. Il est important de s'assurer que tous les avantages sont correctement déclarés et que le compte courant du directeur est justifié."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_sales_customers_balance
+msgid ""
+"Have you checked open customers items (abnormal balances, pending "
+"payments...)?\n"
+"This is to ensure that the money clients owe the company is correctly "
+"recorded and tracked. Abnormal balances may indicate a billing or collection "
+"problem."
+msgstr "Avez-vous vérifié les postes clients ouverts (soldes anormaux, paiements en attente...) ?\nCela permet de s'assurer que l'argent dû par les clients à l'entreprise est correctement enregistré et suivi. Des soldes anormaux peuvent indiquer un problème de facturation ou de recouvrement."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_tf_ltst_liabilities_related_interest
+msgid ""
+"Have you checked the LT-ST accounts and the interest recorded with the "
+"liabilities?\n"
+"This check ensures that liabilities and associated interest are correctly "
+"recorded and classified between short and long term."
+msgstr "Avez-vous vérifié les comptes LT-ST et les intérêts enregistrés avec les passifs ?\nCe contrôle permet de s'assurer que les passifs et les intérêts associés sont correctement enregistrés et classés entre court terme et long terme."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_state_vat_acc_reco_with_administration
+msgid ""
+"Have you checked the VAT current account against the last account statement "
+"and the accounting records?\n"
+"The VAT account must correspond to the payments and refunds made with the "
+"administration. This check ensures there are no discrepancies and verifies "
+"the declarations."
+msgstr "Avez-vous vérifié le compte TVA par rapport au dernier relevé de compte et aux enregistrements comptables ?\nLe compte TVA doit correspondre aux paiements et remboursements effectués auprès de l'administration. Ce contrôle permet de s'assurer qu'il n'y a pas de divergences et vérifie les déclarations."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_tf_bank_balance_reco_with_stmt
+msgid ""
+"Have you checked the closing balance of the banks against the account "
+"statements and the accounting records?\n"
+"It is essential that the balance of the bank accounts in the accounting "
+"records exactly matches the balance on the bank statements at the closing "
+"date."
+msgstr "Avez-vous vérifié le solde de clôture des banques par rapport aux relevés bancaires et aux enregistrements comptables ?\nIl est essentiel que le solde des comptes bancaires dans la comptabilité corresponde exactement au solde figurant sur les relevés bancaires à la date de clôture."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_sales_purchase_sales_margin_consistency
+msgid ""
+"Have you checked the margin of purchases against sales, is it consistent?\n"
+"This check is used to ensure that the company's profit margin is realistic "
+"and consistent with the sector of activity, which can help avoid questions "
+"in the event of an audit."
+msgstr "Avez-vous vérifié la marge des achats par rapport aux ventes, est-elle cohérente ?\nCe contrôle permet de s'assurer que la marge bénéficiaire de l'entreprise est réaliste et cohérente avec le secteur d'activité, ce qui peut aider à éviter des questions en cas d'audit."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_fixed_assets_depreciaton_schedule_against_trial_balance
+msgid ""
+"Have you checked the table of investments against the trial balance?\n"
+"The list of investments must correspond to the totals of the asset accounts "
+"in the trial balance. This verification ensures that there are no omissions."
+msgstr "Avez-vous vérifié le tableau des investissements par rapport à la balance comptable ?\nLa liste des investissements doit correspondre aux totaux des comptes d'actif dans la balance. Cette vérification permet de s'assurer qu'il n'y a pas d'omissions."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_other_verify_next_year_allocations
+msgid ""
+"Have you checked with the next financial year to ensure that all amounts "
+"were properly allocated?\n"
+"This is a check to ensure that the expenses and products of one financial "
+"year have not been transferred by mistake to the next financial year, or "
+"vice versa."
+msgstr "Avez-vous vérifié avec l'exercice suivant pour vous assurer que tous les montants ont été correctement affectés ?\nCe contrôle permet de s'assurer que les charges et produits d'un exercice n'ont pas été transférés par erreur à l'exercice suivant, ou vice versa."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_payroll_personnel_acc_reco_1
+msgid ""
+"Have you matched the accounts 453, 454, and 455 to ensure that the accounts "
+"are settled or correctly justified?\n"
+"Confirm that all advances, down payments, salaries, and social charges have "
+"been properly recorded, settled, or justified (for example, salary "
+"deductions, reimbursements, social security liabilities)."
+msgstr "Avez-vous rapproché les comptes 453, 454 et 455 pour vous assurer qu'ils sont soldés ou correctement justifiés ?\nConfirmez que toutes les avances, acomptes, salaires et charges sociales ont été correctement enregistrés, soldés ou justifiés (par exemple, déductions salariales, remboursements, obligations de sécurité sociale)."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_other_turnover_against_vat_concordance
+msgid ""
+"Have you performed a turnover/VAT concordance?\n"
+"You must ensure that the turnover declared to the VAT authorities is the "
+"same as that recorded in the company's books."
+msgstr "Avez-vous effectué une concordance chiffre d'affaires/TVA ?\nVous devez vous assurer que le chiffre d'affaires déclaré aux autorités fiscales correspond à celui enregistré dans les livres de l'entreprise."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_rc_statutory_changes_review
+msgid ""
+"Have you posted the entries related to the modification of the articles of "
+"association to ensure that the accounting is up-to-date?\n"
+"If the company has modified its articles of association (change of purpose, "
+"name, etc.), it is crucial that these changes are reflected in the company's "
+"accounting and legal documentation."
+msgstr "Avez-vous enregistré les écritures liées à la modification des statuts pour vous assurer que la comptabilité est à jour ?\nSi la société a modifié ses statuts (changement d'objet, de nom, etc.), il est crucial que ces changements soient reflétés dans la comptabilité et la documentation légale de l'entreprise."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_rc_270mh_form
+msgid ""
+"Have you prepared form 270MH for rents paid (including those paid by the "
+"director) and checked if reclassification is needed?\n"
+"This check is essential for the tax return, as it ensures that any portion "
+"of the rent paid to a director that qualifies as taxable remuneration is "
+"correctly identified and reclassified."
+msgstr "Avez-vous préparé le formulaire 270MH pour les loyers payés (y compris ceux payés par le directeur) et vérifié si une reclassification est nécessaire ?\nCe contrôle est essentiel pour la déclaration fiscale, car il permet de s'assurer que toute partie du loyer versé à un directeur qui constitue une rémunération imposable est correctement identifiée et reclassée."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_payroll_
+msgid ""
+"Have you provisioned for holiday pay for workers and employees?\n"
+"Holiday pay is a cost for the company. Its amount must be provisioned for at "
+"the end of the financial year to anticipate payments for the following year."
+msgstr "Avez-vous provisionné les congés payés pour les travailleurs et employés ?\nLes congés payés représentent un coût pour l'entreprise. Leur montant doit être provisionné à la fin de l'exercice afin d'anticiper les paiements pour l'année suivante."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_state_provison_for_corporate_tax
+msgid ""
+"Have you provisioned for tax?\n"
+"At the closing, you must estimate the tax the company will have to pay on "
+"its profits and provision for it to accurately reflect its financial "
+"situation."
+msgstr "Avez-vous provisionné pour l'impôt ?\nLors de la clôture, vous devez estimer l'impôt que l'entreprise devra payer sur ses bénéfices et le provisionner afin de refléter avec précision sa situation financière."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_payroll_13_month
+msgid ""
+"Have you provisioned for the 13th month, if applicable?\n"
+"If the 13th month is an obligation, its amount must be provisioned for at "
+"the end of the financial year to accurately reflect the year's expenses."
+msgstr "Avez-vous provisionné le 13ème mois, si applicable ?\nSi le 13ème mois est obligatoire, son montant doit être provisionné à la fin de l'exercice afin de refléter fidèlement les dépenses de l'année."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_payroll_personnel_acc_reclasification_2
+msgid ""
+"Have you reclassified accounts 453 and 454 that would be included in short-"
+"term liabilities?\n"
+"Tax and social liabilities must be reclassified as short-term liabilities if "
+"they are due within the year, which is crucial for balance sheet analysis."
+msgstr "Avez-vous reclassé les comptes 453 et 454 qui devraient être inclus dans les passifs à court terme ?\nLes dettes fiscales et sociales doivent être reclassées en passifs à court terme si elles sont exigibles dans l'année, ce qui est crucial pour l'analyse du bilan."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_other_long_term_liabilities_reclassification
+msgid ""
+"Have you reclassified the long term liabilities accounts to short term "
+"liabilities?\n"
+"This check verifies that long-term liabilities due within the year are moved "
+"to short-term liabilities."
+msgstr "Avez-vous reclassé les comptes de passifs à long terme en passifs à court terme ?\nCe contrôle vérifie que les passifs à long terme exigibles dans l'année sont transférés vers les passifs à court terme."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_fixed_assets_depreciation_recording_completeness
+msgid ""
+"Have you recorded depreciation up to the end of the period?\n"
+"It is necessary to ensure that the depreciation of assets has been "
+"calculated and recorded up to the balance sheet closing date."
+msgstr "Avez-vous enregistré les amortissements jusqu'à la fin de la période ?\nIl est nécessaire de s'assurer que l'amortissement des actifs a été calculé et enregistré jusqu'à la date de clôture du bilan."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_tf_final_cash_transaction_balance
+msgid ""
+"Have you recorded the last cash transactions? Is the balance correct?\n"
+"You must ensure that all cash transactions have been recorded up to the "
+"closing date and that the cash balance is correct."
+msgstr "Avez-vous enregistré les dernières transactions en espèces ? Le solde est-il correct ?\nVous devez vous assurer que toutes les transactions en espèces ont été enregistrées jusqu'à la date de clôture et que le solde de trésorerie est correct."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_payroll_director_meal_vouchers
+msgid ""
+"Have you recorded the portion of meal vouchers paid by the director?\n"
+"The company and the employee (or director) share the cost of meal vouchers. "
+"It is important to ensure that the allocation and accounting are correct for "
+"tax reasons."
+msgstr "Avez-vous enregistré la part des chèques-repas payée par le directeur ?\nL'entreprise et l'employé (ou le directeur) partagent le coût des chèques-repas. Il est important de s'assurer que l'affectation et la comptabilité sont correctes pour des raisons fiscales."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_sales_bad_debts_provision
+msgid ""
+"Have you reviewed doubtful accounts receivable? Has an appropriate provision "
+"for doubtful debts been established or reversed.\n"
+"This ensures that overdue or risky client balances are evaluated regularly, "
+"and that provisions for potential losses are accurately reflected in the "
+"accounts based on updated payment status."
+msgstr "Avez-vous examiné les comptes clients douteux ? Une provision appropriée pour créances douteuses a-t-elle été constituée ou annulée ?\nCela garantit que les soldes clients en retard ou à risque sont régulièrement évalués et que les provisions pour pertes potentielles sont correctement reflétées dans les comptes en fonction de l'état de paiement mis à jour."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_payroll_
+msgid "Holiday Pay"
+msgstr "Congés Payés"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_account_chart_template__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_account_general_ledger_report_handler__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_account_return__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_account_return_type__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_ec_sales_report_handler__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325_wizard__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_partner_vat_handler__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_annual_corporate_tax_submission_wizard__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_ec_sales_list_submission_wizard__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_isoc_prepayment_pay_wizard__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_listing_submission_wizard__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_pay_wizard__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_lock_wizard__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_submission_wizard__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_tax_report_handler__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_mail_activity_type__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_report_l10n_be_reports_report_281_50_pdf__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_report_l10n_be_reports_report_281_50_xml__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_report_l10n_be_reports_report_325_pdf__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_res_company__id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_res_partner__id
+msgid "ID"
+msgstr "ID"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__official_id
+msgid "Identification number"
+msgstr "Numéro national"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_payroll_individual_pension_commitment
+msgid ""
+"If an EIP exists, is the amount paid tax-deductible and related to the "
+"director's salary?\n"
+"An EIP (Individual Pension Commitment) is a life insurance policy for the "
+"director. It is necessary to ensure that the premiums paid are tax-"
+"deductible, which depends on the director's salary."
+msgstr "Si un EIP existe, le montant payé est-il déductible fiscalement et lié au salaire du directeur ?\nUn EIP (Engagement Individuel de Pension) est une police d'assurance-vie pour le directeur. Il est nécessaire de s'assurer que les primes payées sont déductibles fiscalement, ce qui dépend du salaire du directeur."
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_281_50__message_needaction
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_325__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Si coché, de nouveaux messages nécessitent votre attention."
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_281_50__message_has_error
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_281_50__message_has_sms_error
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_325__message_has_error
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_325__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Si coché, certains messages ont une erreur de livraison."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_rc_correct_rec_of_financial_prod
+msgid ""
+"If financial products exist, have they been recorded correctly?\n"
+"Once financial products are identified, you must ensure that they are "
+"recorded in the correct accounts to comply with accounting and tax standards."
+msgstr "Si des produits financiers existent, ont-ils été correctement enregistrés ?\nUne fois les produits financiers identifiés, vous devez vous assurer qu'ils sont enregistrés dans les bons comptes afin de respecter les normes comptables et fiscales."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_inventory_margin
+msgid ""
+"If you have purchases of goods, have you checked if an inventory has been "
+"carried out to calculate the margin?\n"
+"This check ensures that the stock of goods has been correctly valued to "
+"calculate the gross margin and the cost of goods sold."
+msgstr "Si vous avez des achats de marchandises, avez-vous vérifié si un inventaire a été réalisé pour calculer la marge ?\nCe contrôle permet de s'assurer que le stock de marchandises a été correctement évalué pour calculer la marge brute et le coût des marchandises vendues."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_state_copyrights
+msgid ""
+"If you have received copyrights, have you checked all declarations and "
+"deductibility?\n"
+"Copyright income benefits from a specific tax regime. It is essential to "
+"ensure that this income is correctly declared and that the deductibility is "
+"properly applied."
+msgstr "Si vous avez reçu des droits d'auteur, avez-vous vérifié toutes les déclarations et la déductibilité ?\nLes revenus provenant des droits d'auteur bénéficient d'un régime fiscal spécifique. Il est essentiel de s'assurer que ces revenus sont correctement déclarés et que la déductibilité est correctement appliquée."
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__income_debtor_bce_number
+msgid "Income debtor BCE number"
+msgstr "Numéro d'entreprise du débiteur des revenus"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_325__is_test
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_325_wizard__is_test
+msgid "Indicates if the 325 is a test"
+msgstr "Indique si le 325 est un test"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_325_form.py:0
+msgid "Internal reference to the following 281.50 tags are missing:\n"
+msgstr "La référence interne aux étiquettes 281.50 suivantes manque :\n"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_payroll_individual_pension_commitment
+msgid "Individual Pension Commitment"
+msgstr "Engagement Individuel de Pension"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_tf_int_director_current_acc
+msgid "Interest On Director Current Account"
+msgstr "Intérêts sur le compte courant du directeur"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_tf_int_related_company_loans
+msgid "Interest On Related Company Loans"
+msgstr "Intérêts sur les prêts aux sociétés liées"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_inventory_recording
+msgid "Inventory Recording"
+msgstr "Enregistrement de l'inventaire"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_rc_investment_deduction
+msgid "Investment Deduction"
+msgstr "Déduction d'investissement"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_fixed_assets_investments
+msgid "Investments"
+msgstr "Investissements"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__message_is_follower
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__message_is_follower
+msgid "Is Follower"
+msgstr "Est un abonné"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_rc_capital_grant
+msgid ""
+"Is the capital grant justified and have you used the account according to "
+"the legislation in force?\n"
+"Grants received are financial aid. Their justification must be checked and "
+"they must be recorded in the correct account to comply with legal and fiscal "
+"obligations."
+msgstr "La subvention en capital est-elle justifiée et avez-vous utilisé le compte conformément à la législation en vigueur ?\nLes subventions reçues constituent une aide financière. Leur justification doit être vérifiée et elles doivent être enregistrées dans le compte approprié pour respecter les obligations légales et fiscales."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_equity_capital_notary_fees_capitalization
+msgid ""
+"Is the capital related to the incorporation, as well as the notary fees, "
+"correctly capitalized as establishment costs?\n"
+"Notary fees and initial capital are important components of establishment "
+"costs. They must be correctly recorded for the balance sheet and for "
+"depreciation."
+msgstr "Le capital lié à la constitution ainsi que les frais de notaire sont-ils correctement capitalisés en tant que frais d'établissement ?\nLes frais de notaire et le capital initial sont des éléments importants des frais d'établissement. Ils doivent être correctement enregistrés pour le bilan et pour l'amortissement."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_rc_vat_franchise
+msgid ""
+"Is the client exempt from VAT ? If so, has VAT been applied to all "
+"invoices?\n"
+"VAT exemption is a simplified regime. It is important to ensure that the "
+"client does not charge VAT and respects the turnover limits to avoid legal "
+"issues."
+msgstr "Le client est-il exonéré de TVA ? Si oui, la TVA a-t-elle été appliquée à toutes les factures ?\nL'exonération de TVA correspond à un régime simplifié. Il est important de s'assurer que le client ne facture pas de TVA et respecte les limites de chiffre d'affaires pour éviter des problèmes légaux."
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_281_50__partner_is_natural_person
+msgid "Is the partner a natural person? (as opposed to a moral person)"
+msgstr ""
+"Le partenaire est-il une personne physique (par opposition à une personne "
+"morale) ?"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_tf_suspense_account
+msgid ""
+"Is the suspense account empty?\n"
+"This temporary account (‘compte d’attente’ / ‘overlopende rekening’) should "
+"only hold amounts pending clarification. Ensure it’s empty or that any "
+"balances are justified and promptly reclassified to the correct account."
+msgstr "Le compte d'attente est-il vide ?\nCe compte temporaire (‘compte d’attente’ / ‘overlopende rekening’) ne doit contenir que des montants en attente de clarification. Assurez-vous qu’il est vide ou que tout solde est justifié et rapidement reclassé dans le compte correct."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_rc_memo
+msgid ""
+"Is the the client's Memo complete, up-to-date, and corresponds to the "
+"client's reality?\n"
+"The client's memo contains essential information (family situation, income, "
+"etc.) for an accurate tax declaration. It must be up-to-date to avoid errors."
+msgstr "Le mémo du client est-il complet, à jour et correspond-il à la réalité du client ?\nLe mémo du client contient des informations essentielles (situation familiale, revenus, etc.) pour une déclaration fiscale précise. Il doit être à jour pour éviter des erreurs."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_tf_neg_bank_balance_transfer_liability
+msgid ""
+"Is there a negative bank account that should be transferred at closing?\n"
+"A negative bank balance can indicate an overdraft. You must ensure that this "
+"balance is correctly recorded as a liability at the closing date."
+msgstr "Existe-t-il un compte bancaire négatif devant être transféré à la clôture ?\nUn solde bancaire négatif peut indiquer un découvert. Vous devez vous assurer que ce solde est correctement enregistré en tant que passif à la date de clôture."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_payroll_rent_classification
+msgid ""
+"Is there any rent in this account that could be reclassified as a salary for "
+"the excess part?\n"
+"If a director rents a property to their company, part of the rent may be "
+"considered a taxable salary if it exceeds a certain amount. This check "
+"verifies if this rule is being followed."
+msgstr "Y a-t-il un loyer dans ce compte qui pourrait être reclassé en salaire pour la partie excédentaire ?\nSi un directeur loue un bien à son entreprise, une partie du loyer peut être considérée comme un salaire imposable si elle dépasse un certain montant. Ce contrôle vérifie si cette règle est respectée."
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__partner_job_position
+msgid "Job position"
+msgstr "Profession exercée"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_tf_ltst_liabilities_related_interest
+msgid "LT-ST Liabilities And Related Interest"
+msgstr "Passifs LT-ST et intérêts associés"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__write_uid
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__write_uid
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325_wizard__write_uid
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_annual_corporate_tax_submission_wizard__write_uid
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_ec_sales_list_submission_wizard__write_uid
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_isoc_prepayment_pay_wizard__write_uid
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_listing_submission_wizard__write_uid
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_pay_wizard__write_uid
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_lock_wizard__write_uid
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_submission_wizard__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__write_date
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__write_date
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325_wizard__write_date
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_annual_corporate_tax_submission_wizard__write_date
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_ec_sales_list_submission_wizard__write_date
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_isoc_prepayment_pay_wizard__write_date
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_listing_submission_wizard__write_date
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_pay_wizard__write_date
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_lock_wizard__write_date
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_submission_wizard__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "Lastname, Firstname (natural persons)"
+msgstr "Nom, prénoms (personnes physiques)"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_281_50_pdf
+msgid ""
+"Lastname, Firstname (or denomination) and address of the recipient of the "
+"income:"
+msgstr ""
+"Nom, prénom (ou dénomination) et adresse du bénéficiaire des revenus :"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_50_divider_pdf
+msgid ""
+"Lastname, Firstname (or denomination) of beneficiaries\n"
+"                                    <br/>\n"
+"                                    Street, n°, eventually box\n"
+"                                    <br/>\n"
+"                                    Zip code and city"
+msgstr ""
+"Nom et prénom (ou dénomination) des bénéficiaires\n"
+"                                    <br/>\n"
+"                                    Rue, numéro et éventuellement boîte\n"
+"                                    <br/>\n"
+"                                    Code postal et commune"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_res_partner__forms_281_50
+#: model:ir.model.fields,help:l10n_be_reports.field_res_users__forms_281_50
+msgid "List of 281.50 forms for this partner"
+msgstr "Liste des fiches 281.50 pour ce partenaire"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_other_long_term_liabilities_reclassification
+msgid "Long Term Liabilities Reclassification"
+msgstr "Reclassement des passifs à long terme"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_inventory_margin
+msgid "Margin"
+msgstr "Marge"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_rc_memo
+msgid "Memo"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__message_has_error
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__message_has_error
+msgid "Message Delivery error"
+msgstr "Erreur d'envoi du message"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__message_ids
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__message_ids
+msgid "Messages"
+msgstr "Messages"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/res_partner.py:0
+msgid "Missing partner data"
+msgstr "Données partenaires manquantes"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields.selection,name:l10n_be_reports.selection__l10n_be_form_325__treatment_type__1
+#: model:ir.model.fields.selection,name:l10n_be_reports.selection__l10n_be_form_325_wizard__treatment_type__1
+msgid "Modification"
+msgstr "Modification"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_281_50_pdf
+msgid "NIL"
+msgstr "NEANT"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_50_divider_pdf
+msgid "NN or NE:"
+msgstr "NN ou NE :"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "NUMBER OF FORMS"
+msgstr "NOMBRE DE FICHES ETABLIES"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_281_50__partner_name
+msgid "Name of the partner when the form was created"
+msgstr "Nom du partenaire au moment de la création de la fiche"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__partner_is_natural_person
+msgid "Natural person"
+msgstr "Personne physique"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_sales_report.py:0
+#: code:addons/l10n_be_reports/models/partner_vat_listing.py:0
+msgid "No VAT number associated with your company."
+msgstr "Aucun numéro de TVA associé avec votre société."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_tf_neg_bank_balance_transfer_liability
+msgid "Negative Bank Balance Transfer To Liability"
+msgstr "Transfert du solde bancaire négatif vers un passif"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_report.py:0
+msgid "No email address associated with company %s."
+msgstr "Aucune adresse email associée à la société %s."
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_sales_report.py:0
+#: code:addons/l10n_be_reports/models/partner_vat_listing.py:0
+msgid "No email address associated with the company."
+msgstr "Addresse email manquante sur la société."
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_report.py:0
+msgid "No phone associated with company %s."
+msgstr "Aucun numéro de téléphone associé à la société %s."
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_sales_report.py:0
+#: code:addons/l10n_be_reports/models/partner_vat_listing.py:0
+msgid "No phone associated with the company."
+msgstr "Aucun numéro de téléphone associé à la société."
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_sales_report.py:0
+msgid "No vat number defined for %s."
+msgstr "Aucun numéro de TVA défini pour %s."
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_report.py:0
+msgid "Not allowed negative amounts"
+msgstr "Montants négatifs non autorisés"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__message_needaction_counter
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Nombre d'actions"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__message_has_error_counter
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__message_has_error_counter
+msgid "Number of errors"
+msgstr "Nombre d'erreurs"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_281_50__message_needaction_counter
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_325__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "Nombre de messages exigeant une action"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_281_50__message_has_error_counter
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_325__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Nombre de messages avec des erreurs d'envoi"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "N° 1"
+msgstr "n° 1"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "N° 2"
+msgstr "n° 2"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "N° 3"
+msgstr "n° 3"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/res_partner.py:0
+#, python-format
+msgid ""
+"Only users with the access group '%s' can unset the 281.50 category on "
+"partners."
+msgstr ""
+"Seuls les utilisateurs ayant le groupe d'accès '%s' peuvent désactiver la "
+"catégorie 281.50 sur les partenaires."
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.form_325_view_form
+msgid "Open"
+msgstr "Ouvrir"
+
+#. module: l10n_be_reports
+#: model:ir.ui.menu,name:l10n_be_reports.menu_action_open_325_tree_view
+msgid "Open 325 forms"
+msgstr "Ouvrir les relevés 325"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/res_partner.py:0
+msgid "Open list"
+msgstr "Ouvrir la liste"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_reports_periodic_vat_xml_export__calling_export_wizard_id
+msgid ""
+"Optional field containing the report export wizard calling this wizard, if "
+"there is one."
+msgstr ""
+"Champ facultatif contenant l'assistant d'exportation de rapport appelant cet"
+" assistant, s'il en existe un."
+
+#. module: l10n_be_reports
+#: model:ir.model.fields.selection,name:l10n_be_reports.selection__l10n_be_form_325__treatment_type__0
+#: model:ir.model.fields.selection,name:l10n_be_reports.selection__l10n_be_form_325_wizard__treatment_type__0
+msgid "Original"
+msgstr "Original"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields.selection,name:l10n_be_reports.selection__l10n_be_form_325__sending_type__0
+#: model:ir.model.fields.selection,name:l10n_be_reports.selection__l10n_be_form_325_wizard__sending_type__0
+msgid "Original send"
+msgstr "Envoi original"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "PAYROLL DEDUCTIONS"
+msgstr "PRECOMPTE PROFESSIONNEL"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__paid_amount
+msgid "Paid amount"
+msgstr "Montant payé"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__partner_id
+msgid "Partner"
+msgstr "Partenaire"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__partner_name
+msgid "Partner Name"
+msgstr "Nom du partenaire"
+
+#. module: l10n_be_reports
+#: model:ir.actions.client,name:l10n_be_reports.action_account_report_l10n_be_partner_vat_listing
+#: model:ir.actions.client,name:l10n_be_reports.action_account_report_partner_vat_listing
+#: model:ir.ui.menu,name:l10n_be_reports.menu_action_account_report_l10n_be_partner_vat_listing
+msgid "Partner VAT Listing"
+msgstr "Liste annuelle des clients assujettis à la TVA"
+
+#. module: l10n_be_reports
+#: model:ir.model,name:l10n_be_reports.model_l10n_be_partner_vat_handler
+msgid "Partner VAT Listing Custom Handler"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_281_50__partner_id
+msgid "Partner for which this 281.50 form has been created"
+msgstr "Partenaire pour lequel cette fiche 281.50 a été créée"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.view_partner_281_50_required_fields
+msgid "Partner with missing information"
+msgstr "Partenaire avec des informations manquantes"
+
+#. module: l10n_be_reports
+#. odoo-javascript
+#: code:addons/l10n_be_reports/static/src/components/partner_vat_listing/warnings.xml:0
+msgid "Partners sharing the same VAT number"
+msgstr "Les partenaires partageant le même numéro de TVA"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_payroll_personnel_acc_reclasification_2
+msgid "Personnel Accounts Reclassification"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_account_reports_export_wizard__l10n_be_reports_periodic_vat_wizard_id
+msgid "Periodic VAT Export Wizard"
+msgstr "Assistant d'exportation de rapports périodiques de TVA"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_payroll_personnel_acc_reco_1
+msgid "Personnel Accounts Reconciliation"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "Postal code and city"
+msgstr "N° postal et commune"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_281_50_pdf
+msgid "Profession:"
+msgstr "Profession exercée :"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_sales_products_to_be_received
+msgid "Products to be received"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_281_50_pdf
+msgid "National number:"
+msgstr "Numéro national:"
+
+#. module: l10n_be_reports
+#: model:ir.actions.client,name:l10n_be_reports.action_account_report_be_pl_asso_a
+#: model:ir.actions.client,name:l10n_be_reports.action_account_report_be_pl_asso_f
+#: model:ir.actions.client,name:l10n_be_reports.action_account_report_be_pl_comp_a
+#: model:ir.actions.client,name:l10n_be_reports.action_account_report_be_pl_comp_f
+msgid "Profit and Loss"
+msgstr "Compte de résultat"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_submission_wizard__is_prorata_necessary
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.vat_return_submission_wizard_form
+msgid "Prorata"
+msgstr "Prorata"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_other_prorating_expenses_income
+msgid "Prorating Expenses and Income"
+msgstr "Proratisation des charges et produits"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_state_provison_for_corporate_tax
+msgid "Provision For Corporate Tax"
+msgstr "Provision pour impôt des sociétés"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_equity_capital_notary_fees_provision_for_liquidation_reserve
+msgid "Provision For Liquidation Reserve"
+msgstr "Provision pour réserve de liquidation"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_oe_provision_balance
+msgid "Provison Balance"
+msgstr "Solde des provisions"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_submission_wizard__prorata_year
+msgid "Prorata Year"
+msgstr "Année de prorata"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_sales_purchase_sales_margin_consistency
+msgid "Purchase-Sales Margin Consistency"
+msgstr "Cohérence marge achats-ventes"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid ""
+"RECEPTION DATE\n"
+"                                                        <br/>\n"
+"                                                        (For administration use only)"
+msgstr ""
+"DATE DE RECEPTION\n"
+"                                                        <br/>\n"
+"                                                        (cadre réservé à l'administration)"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__reference_year
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325_wizard__reference_year
+msgid "Reference Year"
+msgstr "Année de référence"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__reference_year
+msgid "Reference year"
+msgstr "Année de référence"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_payroll_rent_classification
+msgid "Rent Classification"
+msgstr "Classification du loyer"
+
+#. module: l10n_be_reports
+#: model:ir.model,name:l10n_be_reports.model_l10n_be_form_281_50
+msgid "Represents a 281.50 form"
+msgstr "Représente une fiche 281.50"
+
+#. module: l10n_be_reports
+#: model:ir.model,name:l10n_be_reports.model_l10n_be_form_325
+msgid "Represents a 325 form"
+msgstr "Représente un relevé 325"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__message_has_sms_error
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "Erreur d'envoi SMS"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "SUMMARY STATEMENT YEAR"
+msgstr "RELEVE RECAPITULATIF ANNEE"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "SUMMARY TABLE OF RECORDS AND PAYROLL DEDUCTIONS (1)"
+msgstr "TABLEAU RECAPITULATIF DES FICHES ET DU PRECOMPTE PROFESSIONNEL (1)"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields.selection,name:l10n_be_reports.selection__l10n_be_form_325__sending_type__1
+#: model:ir.model.fields.selection,name:l10n_be_reports.selection__l10n_be_form_325_wizard__sending_type__1
+msgid "Send grouped corrections"
+msgstr "Envoyer des corrections groupées"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__sender_id
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325_wizard__sender_id
+msgid "Sender"
+msgstr "Expéditeur"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__sender_address
+msgid "Sender Address"
+msgstr "Adresse de l'expéditeur"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__sender_bce_number
+msgid "Sender BCE Number"
+msgstr "Numéro d'entreprise de l'expéditeur"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__sender_city
+msgid "Sender City"
+msgstr "Commune de l'expéditeur"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__sender_lang_code
+msgid "Sender Language Code"
+msgstr "Code de langue de l'expéditeur"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__sender_name
+msgid "Sender Name"
+msgstr "Nom de l'expéditeur"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__sender_phone_number
+msgid "Sender Phone Number"
+msgstr "Numéro de téléphone de l'expéditeur"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__sender_zip
+msgid "Sender ZIP"
+msgstr "N° postal de l'expéditeur"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325_wizard__sending_type
+msgid "Sending Type"
+msgstr "Type d'envoi"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__sending_type
+msgid "Sending type"
+msgstr "Type d'envoi"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_submission_wizard__show_prorata
+msgid "Show Prorata"
+msgstr "Montrer le Prorata"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,description:l10n_be_reports.account_return_check_template_be_equity_capital_notary_fees_dividend_for_wh_tax_refund
+msgid ""
+"Shouldn't a dividend of at least 800 euros be distributed to be able to get "
+"a refund of the 240 euro withholding tax on the personal income tax?\n"
+"In Belgium, it is possible to get a refund of part of the withholding tax on "
+"dividends. This check is a reminder to optimize the client's tax situation "
+"by distributing dividends."
+msgstr "Un dividende d'au moins 800 euros ne devrait-il pas être distribué pour pouvoir obtenir un remboursement de 240 euros de précompte sur l'impôt des personnes physiques ?\nEn Belgique, il est possible d'obtenir un remboursement partiel du précompte sur les dividendes. Cette vérification rappelle d'optimiser la situation fiscale du client en distribuant des dividendes."
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_payroll_social_secretariat_concordance
+msgid "Social Security Concordance"
+msgstr "Concordance Sécurité Sociale"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_report.py:0
+msgid "Some fields required for the export are missing. Please specify them."
+msgstr ""
+"Certains champs requis pour l'exportation sont manquants. Veuillez les "
+"préciser."
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/res_partner.py:0
+msgid ""
+"Some partners are not correctly configured. Please be sure that the "
+"following pieces of information are set: street, zip code, country%s and vat"
+" or citizen identification."
+msgstr ""
+"Certains partenaires ne sont pas correctement configurés. Veuillez vérifier "
+"que les informations suivantes sont bien renseignées: rue, code postal, "
+"pays%s et numéro de TVA ou de registre national."
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_submission_wizard__special_prorata_1
+msgid "Special Prorata 1"
+msgstr "Prorata spécial 1"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_submission_wizard__special_prorata_2
+msgid "Special Prorata 2"
+msgstr "Prorata spécial 2"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_submission_wizard__special_prorata_3
+msgid "Special Prorata 3"
+msgstr "Prorata spécial 3"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_submission_wizard__special_prorata_4
+msgid "Special Prorata 4"
+msgstr "Prorata spécial 4"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_submission_wizard__special_prorata_5
+msgid "Special Prorata 5"
+msgstr "Prorata spécial 5"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_reports_vat_return_submission_wizard__special_prorata_deduction
+msgid "Special Prorata Deduction %"
+msgstr "Déduction spéciale au prorata %"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_report.py:0
+msgid "Specify"
+msgstr "Spécifier"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__state
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__state
+msgid "State"
+msgstr "État"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_rc_statutory_changes_review
+msgid "Statutory Changes Review"
+msgstr "Revue des modifications statutaires"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "Street and n°"
+msgstr "Rue et n°"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "TOTAL AMOUNT"
+msgstr "MONTANT TOTAL"
+
+#. module: l10n_be_reports
+#: model:account.report.line,name:l10n_be_reports.account_financial_report_be_actif0
+msgid "TOTAL ASSETS"
+msgstr "TOTAL DE L'ACTIF"
+
+#. module: l10n_be_reports
+#: model:account.report.line,name:l10n_be_reports.account_financial_report_be_passif0
+msgid "TOTAL LIABILITIES"
+msgstr "TOTAL DU PASSIF"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "TOTALS"
+msgstr "TOTAUX"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_res_partner__form_file
+#: model:ir.model.fields,help:l10n_be_reports.field_res_users__form_file
+msgid "Technical field to store all forms file."
+msgstr "Champ technique pour stocker tous les fichiers de formulaires."
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__is_test
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325_wizard__is_test
+msgid "Test Form"
+msgstr ""
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_325_wizard__sender_id
+msgid "The company responsible for sending the form."
+msgstr "L'entreprise responsable d'envoyer le relevé."
+
+#. module: l10n_be_reports
+#. odoo-javascript
+#: code:addons/l10n_be_reports/static/src/components/tax_report/warnings.xml:0
+#, fuzzy, python-format
+#| msgid "Some controls failed"
+msgid "The following controls failed:"
+msgstr "Certains contrôles ont échoués"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/wizard/l10n_be_325_form_wizard.py:0
+msgid "The reference year must be a number."
+msgstr "L'année de référence doit être un nombre."
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/wizard/vat_report_export.py:0
+msgid "The sum of the prorata uses must be 100%"
+msgstr "La somme des utilisations réelles doit etre de 100%"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_res_partner__citizen_identification
+#: model:ir.model.fields,help:l10n_be_reports.field_res_users__citizen_identification
+msgid ""
+"This code corresponds to the personal identification number for the tax "
+"authorities."
+msgstr ""
+"Ce code correspond à l'identification personnelle pour les autorités "
+"fiscales."
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_325__sending_type
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_325_wizard__sending_type
+msgid ""
+"This field allows to make an original sending(correspond to first send) or a"
+" grouped corrections(if you have made some mistakes before)."
+msgstr ""
+"Ce champ permet de faire un envoi original (correspondant au premier envoi) "
+"ou de faire des corrections groupées (si vous avez fait des erreurs avant)."
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_281_50__treatment_type
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_325__treatment_type
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_325_wizard__treatment_type
+msgid "This field represents the nature of the form."
+msgstr "Ce champ représente la nature du formulaire."
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_50_divider_pdf
+msgid "To be completed only if this divider is not the first or the only one"
+msgstr ""
+"A ne compléter que si cet intercalaire n'est ni le premier ni l'unique "
+"intercalaire"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_50_divider_pdf
+msgid "Total amount or to be transferred to the next divider:"
+msgstr "TOTAL GENERAL OU A REPORTER SUR L'INTERCALAIRE SUIVANT :"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_50_divider_pdf
+msgid "Total mentionned in box 3 e of the form 281.50"
+msgstr "Total mentionné au cadre 3, e de la fiche N° 281.50"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__total_remuneration
+msgid "Total remuneration"
+msgstr "Total"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__treatment_type
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325_wizard__treatment_type
+msgid "Treatment Type"
+msgstr "Type de traitements"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_other_turnover_against_vat_concordance
+msgid "Turnover against VAT concordance"
+msgstr "Concordance chiffre d'affaires vs TVA"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__user_id
+msgid "User"
+msgstr "Utilisateur"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/partner_vat_listing.py:0
+msgid "VAT Listing Audit"
+msgstr "Audit de la liste de la TVA"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.res_partner_view_search
+msgid "VAT Number"
+msgstr "Numéro de TVA intracommunautaire"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_inventory_value_reduction_on_old_stock
+msgid "Value Reduction On Old Stock"
+msgstr "Réduction de valeur sur ancien stock"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_state_vat_acc_reco_with_administration
+msgid "Vat Account Reconciliation With Administration"
+msgstr "Rapprochement compte TVA avec l'administration"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_rc_vat_franchise
+msgid "Vat Franchise"
+msgstr "Franchise TVA"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_rc_vat_rules
+msgid "Vat Rules"
+msgstr "Règles TVA"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_fixed_assets_vehicles
+msgid "Vehicles"
+msgstr "Véhicules"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_other_verify_next_year_allocations
+msgid "Verify Next Year Allocations"
+msgstr "Vérifier les affectations de l'année suivante"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_sales_report.py:0
+#: code:addons/l10n_be_reports/models/partner_vat_listing.py:0
+msgid "View Partner"
+msgstr "Voir le partenaire"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__website_message_ids
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_325__website_message_ids
+msgid "Website Messages"
+msgstr "Messages du site web"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_281_50__website_message_ids
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_325__website_message_ids
+msgid "Website communication history"
+msgstr "Historique de communication du site web"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_general_ledger.py:0
+msgid "XML"
+msgstr "XML"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_report.py:0
+msgid "XML Export Options"
+msgstr "Options d'exportation en XML"
+
+#. module: l10n_be_reports
+#: model:account.return.check.template,name:l10n_be_reports.account_return_check_template_be_oe_year_end_expense_accruals
+msgid "Year-End Expense Accruals"
+msgstr "Charges à payer de fin d'année"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_325_form.py:0
+msgid "You already generated 281.50 forms for this 325 form."
+msgstr "Vous avez déjà généré les fiches 281.50 pour cet enlevé 325."
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_281_50_form.py:0
+#: code:addons/l10n_be_reports/models/account_325_form.py:0
+msgid ""
+"You can't delete a 281.50 for which its form 325 xml has been generated"
+msgstr ""
+"Vous ne pouvez pas supprimer un 281.50 pour lequel l'enlevé 325 XML a été "
+"généré"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/wizard/l10n_be_325_form_wizard.py:0
+msgid "You can't use a reference year in the future or for the current year."
+msgstr ""
+"Vous ne pouvez pas utiliser une année de référence dans le futur ou pour "
+"l'année en cours."
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/wizard/l10n_be_325_form_wizard.py:0
+msgid "You must be logged in a Belgian company to use this feature"
+msgstr ""
+"Vous devez être connecté à une entreprise belge pour utiliser cette "
+"fonctionnalité"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,field_description:l10n_be_reports.field_l10n_be_form_281_50__partner_zip
+msgid "Zip"
+msgstr "Code postal"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_l10n_be_form_281_50__partner_zip
+msgid "Zip of the partner when the form was created"
+msgstr "N° postal du partenaire au moment de la création de la fiche"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_report.py:0
+msgid ""
+"[44] < ([00] + [01] + [02] + [03] + [45] + [46] + [47] + [48] + [49]) * 200 "
+"if [44] > 99.999"
+msgstr ""
+"[44] < ([00] + [01] + [02] + [03] + [45] + [46] + [47] + [48] + [49]) * 200 "
+"si [44] > 99.999"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_report.py:0
+#, python-format
+msgid ""
+"[44] < ([00] + [01] + [02] + [03] + [45] + [46] + [47] + [48] + [49]) * 200 "
+"if [88] > 99.999"
+msgstr ""
+"[44] < ([00] + [01] + [02] + [03] + [45] + [46] + [47] + [48] + [49]) * 200 "
+"si [88] > 99.999"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_report.py:0
+msgid "[55] > 0 if [86] > 0 or [88] > 0"
+msgstr "[55] > 0 si [86] > 0 ou [88] > 0"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_report.py:0
+msgid "[56] + [57] > 0 if [87] > 0"
+msgstr "[56] + [57] > 0 if [87] > 0"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/account_report.py:0
+msgid "[88] < ([81] + [82] + [83] + [84]) * 100 if [88] > 99.999"
+msgstr "[88] < ([81] + [82] + [83] + [84]) * 100 if [88] > 99.999"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_281_50_pdf
+msgid ""
+"a) Commissions, brokerage, commercial discounts, etc:\n"
+"                                                <br/>\n"
+"                                                b) Fees or vacations:\n"
+"                                                <br/>\n"
+"                                                c) Benefits in kind (nature : ................)\n"
+"                                                <br/>\n"
+"                                                d) Expenses incurred on behalf of the beneficiary:\n"
+"                                                <br/>\n"
+"                                                e) Total (see also in sections f and g below):"
+msgstr ""
+"a) Commissions, courtages, ristournes commerciales, etc. :\n"
+"                                                <br/>\n"
+"                                                b) Honoraires ou vacations :\n"
+"                                                <br/>\n"
+"                                                c) Avantages de toute nature (nature : ................)\n"
+"                                                <br/>\n"
+"                                                d) Frais exposés pour compte du bénéficiaire :\n"
+"                                                <br/>\n"
+"                                                e) Total (voir aussi les rubriques f et g ci-après) :"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.res_partner_view_form_inherit
+msgid "e.g. 123455 555 6"
+msgstr "par ex. 123455 555 6"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.form_325_wizard_view_form
+msgid "e.g. 2018"
+msgstr "par ex. 2018"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_325_pdf
+msgid "established by :"
+msgstr "établi par :"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_281_50_pdf
+msgid ""
+"f) Enter here, if applicable, the amount included in item e\n"
+"                                            above relates to compensation paid to:\n"
+"                                            <br/>\n"
+"                                            - athletes for their sports performances:\n"
+"                                            <br/>\n"
+"                                            - trainers, coaches and accompaniers for their activity for the\n"
+"                                            benefit of the athletes:"
+msgstr ""
+"f) Si le montant indiqué à la rubrique e comprend des indemnités à des sportifs, pour des prestations sportives, ou des indemnités à des formateurs, entraîneurs ou accompagnateurs pour des activités au profit de sportifs, mentionnez ici le montant compris dans ces indemnités qui a été versé à :\n"
+"                                            <br/>\n"
+"                                            - des sportifs pour leurs prestations sportives :\n"
+"                                            <br/>\n"
+"                                            - des formateurs, entraîneurs ou accompagnateurs pour leurs activités au profit de sportifs :"
+
+#. module: l10n_be_reports
+#: model_terms:ir.ui.view,arch_db:l10n_be_reports.report_281_50_pdf
+msgid ""
+"g) If the amount indicated in item e above does not coincide with\n"
+"                                                the amount actually paid in"
+msgstr ""
+"g) Si le montant indiqué à la rubrique e ne coïncide pas avec le montant "
+"réellement payé en"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/partner_vat_listing.py:0
+#, python-format
+msgid "Missing partners"
+msgstr "Partenaires manquants"
+
+#. module: l10n_be_reports
+#. odoo-javascript
+#: code:addons/l10n_be_reports/static/src/components/partner_vat_listing/warnings.xml:0
+#, python-format
+msgid ""
+"customers with a turnover of more than 250€ or one or more credit notes in "
+"the selected period who are not included in the report. Click"
+msgstr ""
+"des clients avec un chiffre d'affaires de plus de 250€ ou une ou plusieurs "
+"notes de crédit dans la période sélectionnée qui ne sont pas inclus dans le "
+"rapport. Cliquez"
+
+#. module: l10n_be_reports
+#. odoo-javascript
+#: code:addons/l10n_be_reports/static/src/components/partner_vat_listing/warnings.xml:0
+#, python-format
+msgid "You have"
+msgstr "Vous avez"
+
+#. module: l10n_be_reports
+#. odoo-javascript
+#: code:addons/l10n_be_reports/static/src/components/partner_vat_listing/warnings.xml:0
+#, python-format
+msgid "here"
+msgstr "ici"
+
+#. module: l10n_be_reports
+#. odoo-javascript
+#: code:addons/l10n_be_reports/static/src/components/partner_vat_listing/warnings.xml:0
+#, python-format
+msgid "to see the list."
+msgstr "pour voir la liste."
+
+#. module: l10n_be_reports
+#. odoo-javascript
+#: code:addons/l10n_be_reports/static/src/components/partner_vat_listing/warnings.xml:0
+msgid "will be grouped in the XML export."
+msgstr "seront regroupés dans l'exportation XML."
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_res_company__l10n_be_region_id
+msgid ""
+"The region where the company is located. This is used for annual report "
+"export."
+msgstr "Région de l’entreprise (pour export du rapport annuel)"
+
+#. module: l10n_be_reports
+#: model:ir.model.fields,help:l10n_be_reports.field_res_company__l10n_be_company_type_id
+msgid "The type of company. This is used for annual report export."
+msgstr "Type d’entreprise (pour export du rapport annuel)"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/annual_statement_custom_handler.py:0
+msgid ""
+"XBRL export is only applicable for Belgium reports. Please change to Belgium"
+" annual statement report."
+msgstr "Export XBRL uniquement pour rapports belges. Sélectionnez le rapport annuel belge."
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/annual_statement_custom_handler.py:0
+msgid ""
+"Please add a single balance sheet and a single profit and loss report that "
+"have a matching (Abbr or Full) format for the XBRL export."
+msgstr "Ajoutez un seul bilan et un seul compte de résultats au même format (abrégé ou complet) pour l’export XBRL."
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/annual_statement_custom_handler.py:0
+msgid ""
+"The 499 accounts should always be zero before exporting XBRL. Please correct"
+" your accounts and try again."
+msgstr "Les comptes 499 doivent toujours être à zéro avant l’export XBRL. Corrigez vos comptes puis réessayez."
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/annual_statement_custom_handler.py:0
+msgid ""
+"Please fill in the following company data before generating the XBRL file: "
+"%s"
+msgstr "Veuillez compléter les données de l’entreprise avant de générer le fichier XBRL : %s"
+
+#. module: l10n_be_reports
+#. odoo-python
+#: code:addons/l10n_be_reports/models/annual_statement_custom_handler.py:0
+msgid "Go to company configuration"
+msgstr "Aller à la configuration de l’entreprise"

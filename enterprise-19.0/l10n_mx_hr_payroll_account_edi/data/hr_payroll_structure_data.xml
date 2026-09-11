@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="l10n_mx_hr_payroll.l10n_mx_regular_pay" model="hr.payroll.structure">
+        <field name="l10n_mx_payroll_type">O</field>
+    </record>
+
+    <record id="l10n_mx_hr_payroll.l10n_mx_christmas_bonus" model="hr.payroll.structure">
+        <field name="l10n_mx_payroll_type">E</field>
+    </record>
+</odoo>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="l10n_es_reports.VatBooksLineName" t-inherit="account_reports.AccountReportLineNameCustomizable">
+        <xpath expr="//t[@t-if='!props.line.visible_annotations?.length']" position="replace">
+        </xpath>
+    </t>
+</templates>

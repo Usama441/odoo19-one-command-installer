@@ -1,0 +1,92 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* esg_project
+# 
+# Translators:
+# Wil Odoo, 2025
+# Tony Ng, 2025
+# 
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server saas~18.3+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-05-06 09:46+0000\n"
+"PO-Revision-Date: 2025-05-06 11:00+0000\n"
+"Last-Translator: Tony Ng, 2025\n"
+"Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/zh_TW/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Language: zh_TW\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#. module: esg_project
+#: model:ir.ui.menu,name:esg_project.menu_esg_act
+msgid "Act"
+msgstr "行動"
+
+#. module: esg_project
+#. odoo-javascript
+#: code:addons/esg_project/static/src/components/esg_dashboard/esg_project_initiatives_box/esg_project_initiatives_box.xml:0
+msgid "Create Initiative"
+msgstr "建立倡議"
+
+#. module: esg_project
+#: model:ir.model.fields,field_description:esg_project.field_project_project__display_name
+msgid "Display Name"
+msgstr "顯示名稱"
+
+#. module: esg_project
+#: model:project.task.type,name:esg_project.esg_project_stage_2
+msgid "Done 🌳🌲"
+msgstr "已完成 🌳🌲"
+
+#. module: esg_project
+#: model:ir.model.fields,field_description:esg_project.field_project_project__id
+msgid "ID"
+msgstr "識別碼"
+
+#. module: esg_project
+#: model:project.task.type,name:esg_project.esg_project_stage_0
+msgid "Ideas 🌱"
+msgstr "想法 🌱"
+
+#. module: esg_project
+#: model:project.task.type,name:esg_project.esg_project_stage_1
+msgid "In Progress 🌳"
+msgstr "進行中 🌳"
+
+#. module: esg_project
+#. odoo-javascript
+#: code:addons/esg_project/static/src/components/esg_dashboard/esg_project_initiatives_box/esg_project_initiatives_box.xml:0
+#: model:ir.ui.menu,name:esg_project.menu_esg_initiatives
+#: model:project.project,name:esg_project.esg_project_project_0
+msgid "Initiatives"
+msgstr "倡議"
+
+#. module: esg_project
+#: model:ir.actions.server,name:esg_project.esg_initiatives_server_action
+msgid "Initiatives Server Action"
+msgstr "倡議伺服器操作"
+
+#. module: esg_project
+#: model:ir.model,name:esg_project.model_project_project
+msgid "Project"
+msgstr "專案"
+
+#. module: esg_project
+#: model:project.project,label_tasks:esg_project.esg_project_project_0
+msgid "Tasks"
+msgstr "任務"
+
+#. module: esg_project
+#. odoo-javascript
+#: code:addons/esg_project/static/src/components/esg_dashboard/esg_project_initiatives_box/esg_project_initiatives_box.xml:0
+msgid "Total"
+msgstr "總計"
+
+#. module: esg_project
+#. odoo-python
+#: code:addons/esg_project/models/project_project.py:0
+msgid "You cannot delete the ESG Project."
+msgstr "你不可刪除 ESG 專案項目。"

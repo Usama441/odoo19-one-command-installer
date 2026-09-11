@@ -1,0 +1,190 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# * hr_payroll_account
+#
+# Translators:
+# Karol Rybak <karolrybak85@gmail.com>, 2022
+# Grzegorz Grzelak <grzegorz.grzelak@openglobe.pl>, 2022
+# Piotr Szlązak <szlazakpiotr@gmail.com>, 2022
+# Piotr Strębski <strebski@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Tadeusz Karpiński <tadeuszkarpinski@gmail.com>, 2023
+# Paweł Wodyński <pw@myodoo.pl>, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-05-16 16:02+0000\n"
+"PO-Revision-Date: 2025-09-16 12:11+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Polish <https://translate.odoo.com/projects/odoo-19/"
+"hr_payroll_account/pl/>\n"
+"Language: pl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && ("
+"n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
+"n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+"X-Generator: Weblate 5.12.2\n"
+
+#. module: hr_payroll_account
+#: model:ir.model,name:hr_payroll_account.model_account_chart_template
+msgid "Account Chart Template"
+msgstr "Szablon planów kont"
+
+#. module: hr_payroll_account
+#. odoo-python
+#: code:addons/hr_payroll_account/models/account_chart_template.py:0
+msgid "Account Payslip Houserental"
+msgstr "Konto Pasek Płacowy Wynajem mieszkania"
+
+#. module: hr_payroll_account
+#: model_terms:ir.ui.view,arch_db:hr_payroll_account.hr_salary_rule_view_form
+msgid "Accounting"
+msgstr "Księgowość"
+
+#. module: hr_payroll_account
+#: model:ir.model.fields,field_description:hr_payroll_account.field_hr_payslip__move_id
+msgid "Accounting Entry"
+msgstr "Zapis księgowy"
+
+#. module: hr_payroll_account
+#. odoo-python
+#: code:addons/hr_payroll_account/models/hr_payroll_account.py:0
+msgid "Adjustment Entry"
+msgstr "Zapis korygujący"
+
+#. module: hr_payroll_account
+#: model:ir.model.fields,field_description:hr_payroll_account.field_hr_contract__analytic_account_id
+#: model:ir.model.fields,field_description:hr_payroll_account.field_hr_contract_history__analytic_account_id
+#: model:ir.model.fields,field_description:hr_payroll_account.field_hr_salary_rule__analytic_account_id
+msgid "Analytic Account"
+msgstr "Konto analityczne"
+
+#. module: hr_payroll_account
+#: model_terms:ir.ui.view,arch_db:hr_payroll_account.hr_payslip_run_view_form
+#: model_terms:ir.ui.view,arch_db:hr_payroll_account.hr_payslip_view_form
+msgid "Are you sure you want to proceed?"
+msgstr "Czy na pewno chcesz kontynuować?"
+
+#. module: hr_payroll_account
+#: model:ir.model,name:hr_payroll_account.model_hr_contract_history
+msgid "Contract history"
+msgstr "historia zatrudnienia"
+
+#. module: hr_payroll_account
+#: model_terms:ir.ui.view,arch_db:hr_payroll_account.hr_payslip_run_view_form
+#: model_terms:ir.ui.view,arch_db:hr_payroll_account.hr_payslip_view_form
+msgid "Create Draft Entry"
+msgstr "Utwórz wpis szkicu"
+
+#. module: hr_payroll_account
+#: model:ir.model.fields,field_description:hr_payroll_account.field_hr_salary_rule__account_credit
+msgid "Credit Account"
+msgstr "Konto Ma"
+
+#. module: hr_payroll_account
+#: model:ir.model.fields,field_description:hr_payroll_account.field_hr_payslip__date
+msgid "Date Account"
+msgstr "Data konta"
+
+#. module: hr_payroll_account
+#: model:ir.model.fields,field_description:hr_payroll_account.field_hr_salary_rule__account_debit
+msgid "Debit Account"
+msgstr "Konto Winien"
+
+#. module: hr_payroll_account
+#: model:ir.model,name:hr_payroll_account.model_hr_contract
+msgid "Employee Contract"
+msgstr "Umowa pracownika"
+
+#. module: hr_payroll_account
+#. odoo-python
+#: code:addons/hr_payroll_account/models/hr_payroll_account.py:0
+msgid "Incorrect journal: The journal must be in the same currency as the company"
+msgstr "Nieprawidłowy dziennik: dziennik musi być prowadzony w walucie której używa firma."
+
+#. module: hr_payroll_account
+#: model:ir.model,name:hr_payroll_account.model_account_journal
+msgid "Journal"
+msgstr "Dziennik"
+
+#. module: hr_payroll_account
+#: model:ir.model.fields,help:hr_payroll_account.field_hr_payslip__date
+msgid "Keep empty to use the period of the validation(Payslip) date."
+msgstr "Pozostaw puste żeby zastosować okresu z daty zatwierdzenia (odcinka wypłaty)."
+
+#. module: hr_payroll_account
+#. odoo-python
+#: code:addons/hr_payroll_account/models/account_chart_template.py:0
+msgid "No existing account for code %s"
+msgstr ""
+
+#. module: hr_payroll_account
+#: model:ir.model.fields,field_description:hr_payroll_account.field_hr_salary_rule__not_computed_in_net
+msgid "Not computed in net accountably"
+msgstr "Nieobliczane w ujęciu netto"
+
+#. module: hr_payroll_account
+#. odoo-python
+#: code:addons/hr_payroll_account/models/hr_payroll_account.py:0
+msgid "One of the contract for these payslips has no structure type."
+msgstr "Jedna z umów dla tych pasków wypłaty nie ma typu struktury."
+
+#. module: hr_payroll_account
+#. odoo-python
+#: code:addons/hr_payroll_account/models/hr_payroll_account.py:0
+msgid "One of the payroll structures has no account journal defined on it."
+msgstr "Jedna ze struktur płacowych nie ma zdefiniowanego na niej dziennika kont."
+
+#. module: hr_payroll_account
+#: model:ir.model,name:hr_payroll_account.model_hr_payslip
+msgid "Pay Slip"
+msgstr "Pasek wypłaty"
+
+#. module: hr_payroll_account
+#. odoo-python
+#: code:addons/hr_payroll_account/models/account_chart_template.py:0
+msgid "SLR"
+msgstr "SLR"
+
+#. module: hr_payroll_account
+#. odoo-python
+#: code:addons/hr_payroll_account/models/account_chart_template.py:0
+msgid "Salaries"
+msgstr "Wynagrodzenia"
+
+#. module: hr_payroll_account
+#: model:ir.model.fields,field_description:hr_payroll_account.field_hr_payroll_structure__journal_id
+#: model:ir.model.fields,field_description:hr_payroll_account.field_hr_payslip__journal_id
+msgid "Salary Journal"
+msgstr "Dzennik wynagrodzeń"
+
+#. module: hr_payroll_account
+#: model:ir.model,name:hr_payroll_account.model_hr_salary_rule
+msgid "Salary Rule"
+msgstr "Reguła wynagrodzenia"
+
+#. module: hr_payroll_account
+#: model:ir.model,name:hr_payroll_account.model_hr_payroll_structure
+msgid "Salary Structure"
+msgstr "Struktura wynagrodzenia"
+
+#. module: hr_payroll_account
+#. odoo-python
+#: code:addons/hr_payroll_account/models/hr_payroll_account.py:0
+msgid "The Expense Journal \"%s\" has not properly configured the default Account!"
+msgstr "Dziennik wydatków \"%s\" nie posiada właściwie skonfigurowanego konta domyślnego."
+
+#. module: hr_payroll_account
+#: model:ir.model.fields,help:hr_payroll_account.field_hr_salary_rule__not_computed_in_net
+msgid "This field allows you to delete the value of this rule in the \"Net Salary\" rule at the accounting level to explicitly display the value of this rule in the accounting. For example, if you want to display the value of your representation fees, you can check this field."
+msgstr "Pole to umożliwia usunięcie wartości tej reguły w regule \"Wynagrodzenie netto\" na poziomie księgowości, aby jednoznacznie wyświetlić wartość tej reguły w księgowości. Na przykład, jeśli chcesz wyświetlić wartość wynagrodzenia reprezentacyjnego, możesz zaznaczyć to pole."
+
+#. module: hr_payroll_account
+#. odoo-python
+#: code:addons/hr_payroll_account/models/account_journal.py:0
+msgid "You cannot delete the journal linked to a Salary Structure"
+msgstr ""

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+    <t t-name="account_accountant.BankRecBatchPaymentButton">
+        <button class="btn btn-sm btn-secondary d-flex gap-1 align-items-center" t-on-click.stop="openBatchPaymentsPopOver" t-ref="batch-payment-button">
+            Batches
+            <i class="fa fa-chevron-down"/>
+        </button>
+    </t>
+</templates>

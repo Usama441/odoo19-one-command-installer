@@ -1,0 +1,1114 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# * account_sepa_direct_debit
+#
+# Translators:
+# Vida Potočnik <vida.potocnik@mentis.si>, 2022
+# Grega Vavtar <grega@hbs.si>, 2022
+# laznikd <laznik@mentis.si>, 2022
+# Boris Kodelja <boris@hbs.si>, 2022
+# matjaz k <matjaz@mentis.si>, 2022
+# Tadej Lupšina <tadej@hbs.si>, 2022
+# Jasmina Macur <jasmina@hbs.si>, 2022
+# Martin Trigaux, 2022
+# Matjaz Mozetic <m.mozetic@matmoz.si>, 2022
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-05-16 16:02+0000\n"
+"PO-Revision-Date: 2025-09-16 21:24+0000\n"
+"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"Language-Team: Slovenian <https://translate.odoo.com/projects/odoo-19/"
+"account_sepa_direct_debit/sl/>\n"
+"Language: sl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=4; plural=n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || "
+"n%100==4 ? 2 : 3;\n"
+"X-Generator: Weblate 5.12.2\n"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "(if applicable)"
+msgstr "(če je primerno)"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "(optional)"
+msgstr "(opcijsko)"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "<strong>Address:</strong>"
+msgstr "<strong>Naslov:</strong>"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "<strong>City: </strong>"
+msgstr "<strong>Mesto: </strong>"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "<strong>Country: </strong>"
+msgstr "<strong>Država: </strong>"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "<strong>Creditor identifier:</strong>"
+msgstr "<strong>Identifikator upnika:</strong>"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "<strong>Date and place of signature:</strong> ......................................"
+msgstr "<strong>Datum in kraj podpisat:</strong> ......................................"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "<strong>Email:</strong>"
+msgstr "<strong>E-pošta:</strong>"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "<strong>IBAN:</strong>"
+msgstr "<strong>IBAN:</strong>"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "<strong>Mandate identifier:</strong>"
+msgstr "<strong>Identifikator mandata:</strong>"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "<strong>Name of the reference party:</strong> ......................................"
+msgstr ""
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "<strong>Phone:</strong>"
+msgstr "<strong>Telefon:</strong>"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "<strong>Signature:</strong>"
+msgstr "<strong>Podpis:</strong>"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "<strong>Start date:</strong>"
+msgstr "<strong>Datum začetka:</strong>"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "<strong>Transaction type:</strong> recurrent"
+msgstr "<strong>Vrsta transakcije:</strong> ponavljajoča se"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "<strong>Zip: </strong>"
+msgstr "<strong>Poštna številka: </strong>"
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/sdd_mandate.py:0
+msgid "A debtor account is required to validate a SEPA Direct Debit mandate."
+msgstr ""
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.actions.act_window,help:account_sepa_direct_debit.account_sepa_direct_debit_mandate_tree_act
+msgid ""
+"A mandate represents the authorization you receive from a customer\n"
+"                    to automatically collect money on her account."
+msgstr ""
+"Mandat predstavlja pooblastilo, ki ga prejmete od stranke\n"
+"                    da se denar samodejno nakaže na njen račun."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__partner_bank_id
+msgid "Account of the customer to collect payments from."
+msgstr "Račun stranke za pobiranje plačil."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__message_needaction
+msgid "Action Needed"
+msgstr "Potreben je ukrep"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields.selection,name:account_sepa_direct_debit.selection__sdd_mandate__state__active
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.account_sdd_mandate_search_view
+msgid "Active"
+msgstr "Aktivno"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__activity_ids
+msgid "Activities"
+msgstr "Aktivnosti"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr "Izjema pri oznaki aktivnosti"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__activity_state
+msgid "Activity State"
+msgstr "Stanje aktivnosti"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__activity_type_icon
+msgid "Activity Type Icon"
+msgstr "Ikona vrste dejavnosti"
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/account_batch_payment.py:0
+msgid "All the payments in the batch must have the same SDD scheme."
+msgstr "Vsa plačila v paketu morajo imeti isto shemo SDD."
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "As part of your rights, you are entitled to a refund from your bank under the terms and conditions of your agreement with your bank. Your rights are explained in a statement that you can obtain from your bank. A refund must be claimed within 8 weeks starting from the date on which your account was debited."
+msgstr ""
+"V okviru svojih pravic ste upravičeni do povračila s strani banke v skladu s "
+"pogoji vaše pogodbe z banko. Vaše pravice so pojasnjene v izjavi, ki jo "
+"lahko dobite pri svoji banki. Povračilo je treba zahtevati v 8 tednih od "
+"datuma, ko je bil vaš račun bremenjen."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__message_attachment_count
+msgid "Attachment Count"
+msgstr "Število prilog"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields.selection,name:account_sepa_direct_debit.selection__account_batch_payment__sdd_scheme__b2b
+#: model:ir.model.fields.selection,name:account_sepa_direct_debit.selection__sdd_mandate__sdd_scheme__b2b
+msgid "B2B"
+msgstr "B2B"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model,name:account_sepa_direct_debit.model_res_partner_bank
+msgid "Bank Accounts"
+msgstr "Bančni računi"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.view_batch_payment_form_inherit
+msgid "Batch Booking"
+msgstr "Paketna rezervacija"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model,name:account_sepa_direct_debit.model_account_batch_payment
+msgid "Batch Payment"
+msgstr "Paketno plačilo"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "By signing this mandate form, you authorise (A)"
+msgstr "S podpisom tega obrazca za pooblastilo pooblaščate (A)"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields.selection,name:account_sepa_direct_debit.selection__account_batch_payment__sdd_scheme__core
+#: model:ir.model.fields.selection,name:account_sepa_direct_debit.selection__sdd_mandate__sdd_scheme__core
+msgid "CORE"
+msgstr "JEDRO"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.account_sepa_direct_debit_mandate_form
+msgid "Cancel"
+msgstr "Prekliči"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.account_sepa_direct_debit_mandate_form
+msgid "Close"
+msgstr "Zaključi"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields.selection,name:account_sepa_direct_debit.selection__sdd_mandate__state__closed
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.account_sdd_mandate_search_view
+msgid "Closed"
+msgstr "Neaktivni"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.account_sepa_direct_debit_mandate_form
+msgid "Collections"
+msgstr "Zbirke"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model,name:account_sepa_direct_debit.model_res_company
+msgid "Companies"
+msgstr "Podjetja"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__company_id
+msgid "Company"
+msgstr "Podjetje"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__company_id
+msgid "Company for whose invoices the mandate can be used."
+msgstr "Podjetje, za katerega račune se lahko uporabi mandat."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model,name:account_sepa_direct_debit.model_res_config_settings
+msgid "Config Settings"
+msgstr "Uredi nastavitve"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model,name:account_sepa_direct_debit.model_res_partner
+msgid "Contact"
+msgstr "Stik"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_account_payment__sdd_mandate_usable
+msgid "Could a SDD mandate be used?"
+msgstr "Ali bi se lahko uporabil mandat za SDD?"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.actions.act_window,help:account_sepa_direct_debit.account_sepa_direct_debit_mandate_tree_act
+msgid "Create a new direct debit customer mandate"
+msgstr "Ustvari novo pooblastilo stranke za direktno bremenitev"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_account_payment_form
+msgid "Create it."
+msgstr "Ustvari ga."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__create_uid
+msgid "Created by"
+msgstr "Ustvaril"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__create_date
+msgid "Created on"
+msgstr "Ustvarjeno"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "Creditor"
+msgstr "Upnik"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_res_config_settings__sdd_creditor_identifier
+msgid "Creditor Identifier"
+msgstr "Identifikator upnika"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_res_config_settings__sdd_creditor_identifier
+msgid "Creditor identifier of your company within SEPA scheme."
+msgstr "Identifikator upnika vašega podjetja v okviru sheme SEPA."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__partner_id
+msgid "Customer"
+msgstr "Stranka"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.account_sepa_direct_debit_mandate_form
+msgid "Customer mandate"
+msgstr "Nalog stranke"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__partner_id
+msgid "Customer whose payments are to be managed by this mandate."
+msgstr "Stranka, katere plačila se bodo upravljala s tem mandatom."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__start_date
+msgid "Date from which the mandate can be used (inclusive)."
+msgstr "Datum, od katerega se lahko mandat uporabi (vključno)."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__end_date
+msgid "Date until which the mandate can be used. It will automatically be closed after this date."
+msgstr ""
+"Datum, do katerega je mogoče uporabiti mandat. Po tem datumu se bo samodejno "
+"zaprl."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_account_batch_payment__sdd_required_collection_date
+msgid "Date when the company expects to receive the payments of this batch."
+msgstr ""
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "Debtor"
+msgstr "Dolžnik"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__debtor_id_code
+msgid "Debtor Identifier"
+msgstr "Identifikator dolžnika"
+
+#. module: account_sepa_direct_debit
+#: model:ir.actions.act_window,name:account_sepa_direct_debit.account_sepa_direct_debit_mandate_tree_act
+#: model:ir.actions.act_window,name:account_sepa_direct_debit.account_sepa_direct_debit_partner_mandates
+#: model:ir.ui.menu,name:account_sepa_direct_debit.account_sepa_direct_debit_customer_mandates_menu
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.account_sdd_res_partner_view
+msgid "Direct Debit Mandates"
+msgstr "Mandati za direktno bremenitev"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_account_journal_dashboard_kanban_view
+msgid "Direct Debit Payment to Collect"
+msgstr "Plačilo z direktno obremenitvijo za prevzem"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__payments_to_collect_nber
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_account_journal_dashboard_kanban_view
+msgid "Direct Debit Payments to Collect"
+msgstr "Plačila z direktno obremenitvijo za prevzem"
+
+#. module: account_sepa_direct_debit
+#: model:ir.actions.act_window,name:account_sepa_direct_debit.action_sdd_payments_to_collect
+msgid "Direct debit payments to collect"
+msgstr "Plačila z direktno obremenitvijo za pobiranje"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__display_name
+msgid "Display Name"
+msgstr "Prikazani naziv"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields.selection,name:account_sepa_direct_debit.selection__sdd_mandate__state__draft
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.account_sdd_mandate_search_view
+msgid "Draft"
+msgstr "Osnutek"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__end_date
+msgid "End Date"
+msgstr "Končni datum"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "End date"
+msgstr "Končni datum"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_res_partner__sdd_mandate_ids
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_res_users__sdd_mandate_ids
+msgid "Every mandate belonging to this partner."
+msgstr "Vsak mandat tega partnerja."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__message_follower_ids
+msgid "Followers"
+msgstr "Sledilci"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Sledilci (partnerji)"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr "Font izjemna ikona npr. fa-tasks"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__debtor_id_code
+msgid "Free reference identifying the debtor in your company."
+msgstr "Brezplačna referenca za identifikacijo dolžnika v vašem podjetju."
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_account_payment_form
+msgid "Good news! A valid Sepa Mandate is available."
+msgstr ""
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__has_message
+msgid "Has Message"
+msgstr "Ima sporočilo"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__partner_bank_id
+msgid "IBAN"
+msgstr "IBAN"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__id
+msgid "ID"
+msgstr "ID"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__activity_exception_icon
+msgid "Icon"
+msgstr "Ikona"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr "Ikona za označevanje izjemne aktivnosti."
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "Identification code"
+msgstr "Identifikacijska koda"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__name
+msgid "Identifier"
+msgstr "Identifikator"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Če je označeno, zahtevajo nova sporočila vašo pozornost."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__message_has_error
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Če je označeno, nekatera sporočila vsebujejo napako pri dostavi."
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/res_company.py:0
+msgid "Invalid creditor identifier. Make sure you made no typo."
+msgstr ""
+"Neveljavna identifikacijska številka upnika. Prepričajte se, da niste "
+"naredili tipkarske napake."
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/res_company.py:0
+msgid "Invalid creditor identifier. Wrong format."
+msgstr "Neveljaven identifikator upnika. Napačna oblika."
+
+#. module: account_sepa_direct_debit
+#: model:mail.message.subtype,description:account_sepa_direct_debit.sdd_mt_invoice_paid_with_mandate
+msgid "Invoice paid via direct debit."
+msgstr "Račun plačan prek direktne obremenitve."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__paid_invoice_ids
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.account_sepa_direct_debit_mandate_form
+msgid "Invoices Paid"
+msgstr "Računi plačani"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.view_account_invoice_filter
+msgid "Invoices matching a valid SEPA Direct Debit Mandate"
+msgstr "Računi, ki se ujemajo z veljavnim mandatom za direktno obremenitev SEPA"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__paid_invoice_ids
+msgid "Invoices paid using this mandate."
+msgstr "Računi, plačani z uporabo tega mandata."
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.account_sepa_direct_debit_mandate_form
+msgid "Invoices paid with this mandate."
+msgstr "Računi plačani s tem mandatom."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__message_is_follower
+msgid "Is Follower"
+msgstr "Je sledilec"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model,name:account_sepa_direct_debit.model_account_journal
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__payment_journal_id
+msgid "Journal"
+msgstr "Dnevnik"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model,name:account_sepa_direct_debit.model_account_move
+msgid "Journal Entry"
+msgstr "Temeljnica"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model,name:account_sepa_direct_debit.model_account_move_line
+msgid "Journal Item"
+msgstr "Postavka"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__payment_journal_id
+msgid "Journal to use to receive SEPA Direct Debit payments from this mandate."
+msgstr ""
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__write_uid
+msgid "Last Updated by"
+msgstr "Zadnji posodobil"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__write_date
+msgid "Last Updated on"
+msgstr "Zadnjič posodobljeno"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__message_main_attachment_id
+msgid "Main Attachment"
+msgstr "Glavna priponka"
+
+#. module: account_sepa_direct_debit
+#: model:ir.actions.report,name:account_sepa_direct_debit.sdd_mandate_form_report_main
+msgid "Mandate form"
+msgstr "Obrazec za pooblastilo"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.constraint,message:account_sepa_direct_debit.constraint_sdd_mandate_name_unique
+msgid "Mandate identifier must be unique! Please choose another one."
+msgstr "Identifikator obrazca mora biti enoličen! Izberite drugega."
+
+#. module: account_sepa_direct_debit
+#: model:ir.actions.server,name:account_sepa_direct_debit.sdd_mandate_state_cron_ir_actions_server
+msgid "Mandate state updater"
+msgstr "Posodobitelj stanja mandata"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__message_has_error
+msgid "Message Delivery error"
+msgstr "Napaka pri dostavi sporočila"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__message_ids
+msgid "Messages"
+msgstr "Sporočila"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr "Moj rok dejavnosti"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__activity_calendar_event_id
+msgid "Next Activity Calendar Event"
+msgstr "Naslednji dogodek v koledarju"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr "Rok naslednje aktivnosti"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__activity_summary
+msgid "Next Activity Summary"
+msgstr "Povzetek naslednje aktivnosti"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__activity_type_id
+msgid "Next Activity Type"
+msgstr "Tip naslednje aktivnosti"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.actions.act_window,help:account_sepa_direct_debit.action_sdd_payments_to_collect
+msgid "No direct debit payment to collect"
+msgstr "Ni plačila z direktno obremenitvijo za prevzem"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Število aktivnosti"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__payments_to_collect_nber
+msgid "Number of Direct Debit payments to be collected for this mandate, that is, the number of payments that have been generated and posted thanks to this mandate and still needs their XML file to be generated and sent to the bank to debit the customer's account."
+msgstr ""
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__message_has_error_counter
+msgid "Number of errors"
+msgstr "Število napak"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__paid_invoices_nber
+msgid "Number of invoices paid with this mandate."
+msgstr "Število računov, plačanih s tem obrazcem."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__message_needaction_counter
+msgid "Number of messages which requires an action"
+msgstr "Število sporočil, ki zahtevajo dejavnost"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Število sporočil, ki niso bila pravilno dostavljena."
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.actions.act_window,help:account_sepa_direct_debit.account_sepa_direct_debit_mandate_tree_act
+msgid ""
+"Once an invoice is made\n"
+"                    in Odoo for a customer having a mandate active on the invoice date,\n"
+"                    its validation will trigger its automatic payment, and you will\n"
+"                    then only have to generate a SEPA Direct Debit (SDD) XML file containing this operation\n"
+"                    and send it to your bank to effectively get paid."
+msgstr ""
+"Ko je v Odooju račun izstavljen\n"
+"                    za stranko, ki ima na datum izdaje računa aktivno "
+"pooblastilo,\n"
+"                    bo njegova potrditev sprožila samodejno plačilo in vi "
+"boste\n"
+"                    potem morali le ustvariti XML datoteko SEPA Direct Debit "
+"(SDD), ki vsebuje to operacijo\n"
+"                    in ga nato pošljite svoji banki, da boste dejansko "
+"prejeli plačilo."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_account_bank_statement_line__sdd_mandate_id
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_account_move__sdd_mandate_id
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_account_payment__sdd_mandate_id
+msgid "Once this invoice has been paid with Direct Debit, contains the mandate that allowed the payment."
+msgstr ""
+"Ko je ta račun plačan z direktno obremenitvijo, vsebuje mandat, ki je "
+"omogočil plačilo."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__one_off
+msgid "One-off Mandate"
+msgstr "Enkratni obrazec"
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/sdd_mandate.py:0
+msgid "Only IBAN account numbers can receive SEPA Direct Debit payments. Please select a journal associated to one."
+msgstr ""
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/sdd_mandate.py:0
+msgid "Only mandates in draft state can be deleted from database when cancelled."
+msgstr ""
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_account_payment_form
+msgid "Oops! No valid SEPA mandate for this customer."
+msgstr "Ups! Za to stranko ni veljavnega SEPA mandata."
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.account_sdd_res_partner_view
+msgid "Open this partner's mandates"
+msgstr "Odprite mandate tega partnerja"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_account_payment_form
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_account_payment_with_mandates_tree
+msgid "Originating SEPA mandate"
+msgstr "Izvorni obrazec SEPA"
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/sdd_mandate.py:0
+msgid "Paid Invoices"
+msgstr "Plačani računi"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__paid_invoices_nber
+msgid "Paid Invoices Number"
+msgstr "Številka plačanih računov"
+
+#. module: account_sepa_direct_debit
+#: model:mail.message.subtype,name:account_sepa_direct_debit.sdd_mt_invoice_paid_with_mandate
+msgid "Paid via direct debit"
+msgstr "Plačano z direktno bremenitvijo"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model,name:account_sepa_direct_debit.model_account_payment_method
+msgid "Payment Methods"
+msgstr "Načini plačila"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model,name:account_sepa_direct_debit.model_account_payment
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__payment_ids
+msgid "Payments"
+msgstr "Plačila"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.account_sepa_direct_debit_mandate_form
+msgid "Payments generated for this mandate that have not yet been collected."
+msgstr ""
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__payment_ids
+msgid "Payments generated thanks to this mandate."
+msgstr ""
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/sdd_mandate.py:0
+msgid "Payments to Collect"
+msgstr "Plačila za prevzem"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_report_invoice_document
+msgid ""
+"Please do not pay it manually, the payment will be asked to your bank to be processed\n"
+"                        automatically."
+msgstr ""
+"Prosimo, ne plačujte ročno, plačilo bo poslano vaši banki za samodejno\n"
+"                        obdelavo."
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.account_sepa_direct_debit_mandate_form
+msgid "Print"
+msgstr "Tiskanje"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__rating_ids
+msgid "Ratings"
+msgstr "Ocene"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_account_batch_payment__sdd_batch_booking
+msgid "Request batch booking from the bank for the related bank statements."
+msgstr "Od banke zahtevajte paketno rezervacijo za povezane bančne izpiske."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_account_batch_payment__sdd_required_collection_date
+msgid "Required collection date"
+msgstr ""
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__activity_user_id
+msgid "Responsible User"
+msgstr "Odgovorni uporabnik"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.account_sepa_direct_debit_mandate_form
+msgid "Revoke"
+msgstr "Prekliči"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields.selection,name:account_sepa_direct_debit.selection__sdd_mandate__state__revoked
+msgid "Revoked"
+msgstr "Preklicano"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_view_account_payment_search
+msgid "Revoked SDD Mandate"
+msgstr "Preklican mandat za SDD"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.view_account_payment_search
+msgid "SDD B2B"
+msgstr "SDD B2B"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_account_batch_payment__sdd_batch_booking
+msgid "SDD Batch Booking"
+msgstr "SDD Paketna rezervacija"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.view_account_payment_search
+msgid "SDD CORE"
+msgstr "SDD JEDRO"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model,name:account_sepa_direct_debit.model_sdd_mandate
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.view_account_invoice_filter
+msgid "SDD Mandate"
+msgstr "SDD Obrazec"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_account_bank_statement_line__sdd_mandate_scheme
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_account_batch_payment__sdd_scheme
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_account_move__sdd_mandate_scheme
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_account_payment__sdd_mandate_scheme
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__sdd_scheme
+msgid "SDD Scheme"
+msgstr "SDD Shema"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_res_partner__sdd_count
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_res_users__sdd_count
+msgid "SDD count"
+msgstr "SDD štetje"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_res_company__sdd_creditor_identifier
+msgid "SDD creditor identifier"
+msgstr "SDD identifikator upnika"
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/account_batch_payment.py:0
+msgid "SDD scheme is set on the customer mandate."
+msgstr "SDD shema je nastavljena na podlagi naročila stranke."
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "SEPA Business-to-Business Direct Debit Mandate"
+msgstr "Obrazec za direktno obremenitev SEPA med podjetji"
+
+#. module: account_sepa_direct_debit
+#: model:account.payment.method,name:account_sepa_direct_debit.payment_method_sdd
+msgid "SEPA Direct Debit"
+msgstr "SEPA direktna bremenitev"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "SEPA Direct Debit Mandate"
+msgstr "Mandat za direktno SEPA bremenitev"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_res_company__sdd_creditor_identifier
+msgid "SEPA Direct Debit creditor identifier of the company, given by the bank."
+msgstr ""
+"Identifikator upnika SEPA direktne obremenitve podjetja, ki ga dodeli banka."
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/sdd_mandate.py:0
+msgid "SEPA Direct Debit scheme only accepts IBAN account numbers. Please select an IBAN-compliant debtor account for this mandate."
+msgstr ""
+"Shema SEPA direktnih obremenitev sprejema samo številke računov IBAN. Za to "
+"pooblastilo izberite račun dolžnika, ki je skladen z IBAN."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "Napaka pri dostavi SMS"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_account_bank_statement_line__sdd_has_usable_mandate
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_account_move__sdd_has_usable_mandate
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_account_payment__sdd_has_usable_mandate
+msgid "Sdd Has Usable Mandate"
+msgstr "SDD ima uporaben obrazec"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_account_bank_statement_line__sdd_mandate_id
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_account_move__sdd_mandate_id
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_account_payment__sdd_mandate_id
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_res_partner__sdd_mandate_ids
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_res_users__sdd_mandate_ids
+msgid "Sdd Mandate"
+msgstr "Sdd Obrazec"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "Signature"
+msgstr "Podpis"
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/account_batch_payment.py:0
+msgid "Some draft payments could not be posted because of the lack of any active mandate."
+msgstr ""
+"Nekaterih osnutkov plačil ni bilo mogoče knjižiti zaradi pomanjkanja "
+"aktivnega obrazca."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__start_date
+msgid "Start Date"
+msgstr "Začetni datum"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__state
+msgid "State"
+msgstr "Zvezna država ali regija"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+"Status na osnovi aktivnosti\n"
+"Zapadel: Rok je že prekoračen\n"
+"Danes: Datum aktivnosti je danes\n"
+"Planirano: Bodoče aktivnosti."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__suitable_journal_ids
+msgid "Suitable Journal"
+msgstr ""
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_account_bank_statement_line__sdd_mandate_scheme
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_account_batch_payment__sdd_scheme
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_account_move__sdd_mandate_scheme
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_account_payment__sdd_mandate_scheme
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__sdd_scheme
+msgid ""
+"The B2B scheme is an optional scheme,\n"
+"offered exclusively to business payers.\n"
+"Some banks/businesses might not accept B2B SDD."
+msgstr ""
+"Shema B2B je neobvezna shema, ki je na voljo izključno poslovnim plačnikom.\n"
+"Nekatere banke/podjetja morda ne sprejemajo direktnega plačila med podjetji ("
+"B2B SDD)."
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/account_payment.py:0
+msgid "The SEPA Direct Debit mandate associated to the payment has been revoked and cannot be used anymore."
+msgstr ""
+"Mandat za direktno obremenitev SEPA, povezan s plačilom, je bil preklican in "
+"ga ni več mogoče uporabljati."
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/res_company.py:0
+msgid "The creditor identifier exceeds the maximum length of 35 characters."
+msgstr "Identifikator upnika presega največjo dovoljeno dolžino 35 znakov."
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/sdd_mandate.py:0
+msgid "The debtor identifier you specified exceeds the limitation of 35 characters imposed by SEPA regulation"
+msgstr ""
+"Identifikator dolžnika, ki ste ga navedli, presega omejitev 35 znakov, ki jo "
+"določa uredba SEPA."
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/sdd_mandate.py:0
+msgid "The end date of the mandate must be posterior or equal to its start date."
+msgstr ""
+"Končni datum mandata mora biti kasnejši od njegovega začetnega datuma ali "
+"enak njemu."
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid ""
+"The mandate will only be used to pay invoices into the\n"
+"                specified time range. If no end date is specified,\n"
+"                you will have to contact us to stop its use."
+msgstr ""
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/account_payment.py:0
+msgid "The payment must be linked to a SEPA Direct Debit mandate in order to generate a Direct Debit XML."
+msgstr ""
+"Za generiranje XML-datoteke direktne obremenitve mora biti plačilo povezano "
+"z mandatom za SEPA direktno obremenitev."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__state
+msgid ""
+"The state this mandate is in. \n"
+"- 'draft' means that this mandate still needs to be confirmed before being usable. \n"
+"- 'active' means that this mandate can be used to pay invoices. \n"
+"- 'closed' designates a mandate that has been marked as not to use anymore without invalidating the previous transactions done with it.- 'revoked' means the mandate has been signaled as fraudulent by the customer. It cannot be used anymore, and should not ever have been. You will probably need to refund the related invoices, if any.\n"
+msgstr ""
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__name
+msgid "The unique identifier of this mandate."
+msgstr "Enolični identifikator tega mandata."
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_report_invoice_document
+msgid ""
+"This invoice will be paid using direct debit and is only\n"
+"                        sent for informative purposes."
+msgstr ""
+"Ta račun bo plačan z direktno obremenitvijo in je samo\n"
+"                        poslano v informativne namene."
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "This mandate is only intended for business-to-business transactions. You are not entitled to a refund from your bank after your account has been debited, but you are entitled to request your bank not to debit your account up until the day on which the payment is due."
+msgstr ""
+"Ta mandat je namenjen samo transakcijam med podjetji. Po bremenitvi vašega "
+"računa niste upravičeni do povračila s strani banke, vendar imate pravico "
+"zahtevati, da banka ne bremeni vašega računa do dneva zapadlosti plačila."
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/account_batch_payment.py:0
+msgid "To solve that, you should create a mandate for each of the involved customers, valid at the moment of the payment date."
+msgstr ""
+"Da bi to rešili, morate za vsako od vključenih strank ustvariti mandat, ki "
+"je veljaven v trenutku datuma plačila."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__one_off
+msgid "True if and only if this mandate can be used for only one transaction. It will automatically go from 'active' to 'closed' after its first use in payment if this option is set.\n"
+msgstr ""
+"Res je, če in samo če je to pooblastilo mogoče uporabiti samo za eno "
+"transakcijo. Če je ta možnost nastavljena, se bo po prvi uporabi pri plačilu "
+"samodejno spremenilo iz »aktivnega« v »zaprto«.\n"
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/account_payment.py:0
+msgid "Trying to generate a Direct Debit XML file containing payments from another company than that file's creditor."
+msgstr ""
+"Poskušam ustvariti XML datoteko za direktno bremenitev, ki vsebuje plačila "
+"drugega podjetja kot upnika te datoteke."
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/account_payment.py:0
+msgid "Trying to generate a Direct Debit XML for payments coming from another payment method than SEPA Direct Debit."
+msgstr ""
+"Poskušam ustvariti XML za direktno obremenitev za plačila, ki prihajajo iz "
+"druge plačilne metode kot SEPA direktna obremenitev."
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/account_payment.py:0
+#: code:addons/account_sepa_direct_debit/models/sdd_mandate.py:0
+msgid "Trying to register a payment on a mandate belonging to a different partner."
+msgstr ""
+"Poskus registracije plačila na podlagi mandata, ki pripada drugemu partnerju."
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr "Vrsta dejavnosti izjeme na zapisu."
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/account_invoice.py:0
+msgid "Unable to post payment %(payment)r due to no usable mandate being available at date %(date)s for partner %(partner)r. Please create one before encoding a SEPA Direct Debit payment."
+msgstr ""
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.account_sepa_direct_debit_mandate_form
+msgid "Validate"
+msgstr "Potrditev"
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "Validity"
+msgstr "Veljavnost"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,field_description:account_sepa_direct_debit.field_sdd_mandate__website_message_ids
+msgid "Website Messages"
+msgstr "Sporočila iz spletne strani"
+
+#. module: account_sepa_direct_debit
+#: model:ir.model.fields,help:account_sepa_direct_debit.field_sdd_mandate__website_message_ids
+msgid "Website communication history"
+msgstr "Kronologija komunikacij spletne strani"
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/res_partner_bank.py:0
+msgid "You cannot delete a bank account linked to an active SEPA Direct Debit mandate."
+msgstr ""
+"Bančnega računa, ki je povezan z aktivnim mandatom za direktno obremenitev "
+"SEPA, ni mogoče izbrisati."
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/account_batch_payment.py:0
+msgid "You cannot generate a SEPA Direct Debit file with a required collection date in the past."
+msgstr ""
+
+#. module: account_sepa_direct_debit
+#. odoo-python
+#: code:addons/account_sepa_direct_debit/models/account_batch_payment.py:0
+msgid "Your company must have a creditor identifier in order to issue SEPA Direct Debit payments requests. It can be defined in accounting module's settings."
+msgstr ""
+"Vaše podjetje mora imeti identifikator upnika, da lahko izda zahtevke za "
+"plačila SEPA Direct Debit. Določite ga lahko v nastavitvah računovodskega "
+"modula."
+
+#. module: account_sepa_direct_debit
+#: model_terms:ir.ui.view,arch_db:account_sepa_direct_debit.sdd_mandate_form
+msgid "to send instructions to your bank to debit your account and (B) your bank to debit your account in accordance with the instructions from"
+msgstr ""
+"poslati navodila vaši banki za bremenitev vašega računa in (B) vaši banki za "
+"bremenitev vašega računa v skladu z navodili iz"

@@ -1,0 +1,192 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# * hr_payroll_account
+#
+# Translators:
+# Martin Trigaux, 2023
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-05-16 16:02+0000\n"
+"PO-Revision-Date: 2025-09-15 23:06+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-19/"
+"hr_payroll_account/id/>\n"
+"Language: id\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 5.12.2\n"
+
+#. module: hr_payroll_account
+#: model:ir.model,name:hr_payroll_account.model_account_chart_template
+msgid "Account Chart Template"
+msgstr "Templat Bagan Akun"
+
+#. module: hr_payroll_account
+#. odoo-python
+#: code:addons/hr_payroll_account/models/account_chart_template.py:0
+msgid "Account Payslip Houserental"
+msgstr "Akun Payslip Rental Rumah"
+
+#. module: hr_payroll_account
+#: model_terms:ir.ui.view,arch_db:hr_payroll_account.hr_salary_rule_view_form
+msgid "Accounting"
+msgstr "Akuntansi"
+
+#. module: hr_payroll_account
+#: model:ir.model.fields,field_description:hr_payroll_account.field_hr_payslip__move_id
+msgid "Accounting Entry"
+msgstr "Catatan akuntansi"
+
+#. module: hr_payroll_account
+#. odoo-python
+#: code:addons/hr_payroll_account/models/hr_payroll_account.py:0
+msgid "Adjustment Entry"
+msgstr "Penyesuaian entri"
+
+#. module: hr_payroll_account
+#: model:ir.model.fields,field_description:hr_payroll_account.field_hr_contract__analytic_account_id
+#: model:ir.model.fields,field_description:hr_payroll_account.field_hr_contract_history__analytic_account_id
+#: model:ir.model.fields,field_description:hr_payroll_account.field_hr_salary_rule__analytic_account_id
+msgid "Analytic Account"
+msgstr "Akun Analitik"
+
+#. module: hr_payroll_account
+#: model_terms:ir.ui.view,arch_db:hr_payroll_account.hr_payslip_run_view_form
+#: model_terms:ir.ui.view,arch_db:hr_payroll_account.hr_payslip_view_form
+msgid "Are you sure you want to proceed?"
+msgstr "Apakah Anda yakin ingin melanjutkan?"
+
+#. module: hr_payroll_account
+#: model:ir.model,name:hr_payroll_account.model_hr_contract_history
+msgid "Contract history"
+msgstr ""
+
+#. module: hr_payroll_account
+#: model_terms:ir.ui.view,arch_db:hr_payroll_account.hr_payslip_run_view_form
+#: model_terms:ir.ui.view,arch_db:hr_payroll_account.hr_payslip_view_form
+msgid "Create Draft Entry"
+msgstr "Buat Entri Draft"
+
+#. module: hr_payroll_account
+#: model:ir.model.fields,field_description:hr_payroll_account.field_hr_salary_rule__account_credit
+msgid "Credit Account"
+msgstr "Rekening kredit"
+
+#. module: hr_payroll_account
+#: model:ir.model.fields,field_description:hr_payroll_account.field_hr_payslip__date
+msgid "Date Account"
+msgstr "Tanggal Akun"
+
+#. module: hr_payroll_account
+#: model:ir.model.fields,field_description:hr_payroll_account.field_hr_salary_rule__account_debit
+msgid "Debit Account"
+msgstr "Debet rekening"
+
+#. module: hr_payroll_account
+#: model:ir.model,name:hr_payroll_account.model_hr_contract
+msgid "Employee Contract"
+msgstr "Kontrak Karyawan"
+
+#. module: hr_payroll_account
+#. odoo-python
+#: code:addons/hr_payroll_account/models/hr_payroll_account.py:0
+msgid "Incorrect journal: The journal must be in the same currency as the company"
+msgstr ""
+"Jurnal tidak tepat: jurnal harus memiliki mata uang yang sama dengan "
+"perusahaan"
+
+#. module: hr_payroll_account
+#: model:ir.model,name:hr_payroll_account.model_account_journal
+msgid "Journal"
+msgstr "Jurnal"
+
+#. module: hr_payroll_account
+#: model:ir.model.fields,help:hr_payroll_account.field_hr_payslip__date
+msgid "Keep empty to use the period of the validation(Payslip) date."
+msgstr "Biarkan tetap kosong untuk menggunakan periode tanggal  validasi"
+
+#. module: hr_payroll_account
+#. odoo-python
+#: code:addons/hr_payroll_account/models/account_chart_template.py:0
+msgid "No existing account for code %s"
+msgstr ""
+
+#. module: hr_payroll_account
+#: model:ir.model.fields,field_description:hr_payroll_account.field_hr_salary_rule__not_computed_in_net
+msgid "Not computed in net accountably"
+msgstr "Tidak dihitung di akuntabilitas net"
+
+#. module: hr_payroll_account
+#. odoo-python
+#: code:addons/hr_payroll_account/models/hr_payroll_account.py:0
+msgid "One of the contract for these payslips has no structure type."
+msgstr "Salah satu kontrak untuk payslip ini tidak memiliki tipe struktur."
+
+#. module: hr_payroll_account
+#. odoo-python
+#: code:addons/hr_payroll_account/models/hr_payroll_account.py:0
+msgid "One of the payroll structures has no account journal defined on it."
+msgstr ""
+"Salah satu struktur payroll tidak memiliki jurnal akun yang didefinisikan "
+"padanya."
+
+#. module: hr_payroll_account
+#: model:ir.model,name:hr_payroll_account.model_hr_payslip
+msgid "Pay Slip"
+msgstr "Slip Gaji"
+
+#. module: hr_payroll_account
+#. odoo-python
+#: code:addons/hr_payroll_account/models/account_chart_template.py:0
+msgid "SLR"
+msgstr "SLR"
+
+#. module: hr_payroll_account
+#. odoo-python
+#: code:addons/hr_payroll_account/models/account_chart_template.py:0
+msgid "Salaries"
+msgstr "Gaji-Gaji"
+
+#. module: hr_payroll_account
+#: model:ir.model.fields,field_description:hr_payroll_account.field_hr_payroll_structure__journal_id
+#: model:ir.model.fields,field_description:hr_payroll_account.field_hr_payslip__journal_id
+msgid "Salary Journal"
+msgstr "Jurnal gaji"
+
+#. module: hr_payroll_account
+#: model:ir.model,name:hr_payroll_account.model_hr_salary_rule
+msgid "Salary Rule"
+msgstr "Aturan Gaji"
+
+#. module: hr_payroll_account
+#: model:ir.model,name:hr_payroll_account.model_hr_payroll_structure
+msgid "Salary Structure"
+msgstr "Struktur Gaji"
+
+#. module: hr_payroll_account
+#. odoo-python
+#: code:addons/hr_payroll_account/models/hr_payroll_account.py:0
+msgid "The Expense Journal \"%s\" has not properly configured the default Account!"
+msgstr ""
+"Jurnal Pengeluaran \"%s\" tidak dikonfigurasi dengan tepat pada Akun default!"
+
+#. module: hr_payroll_account
+#: model:ir.model.fields,help:hr_payroll_account.field_hr_salary_rule__not_computed_in_net
+msgid "This field allows you to delete the value of this rule in the \"Net Salary\" rule at the accounting level to explicitly display the value of this rule in the accounting. For example, if you want to display the value of your representation fees, you can check this field."
+msgstr ""
+"Field ini memungkinkan Anda untuk menghapus value dari peraturan ini di "
+"peraturan \"Gaji Bersih\" pada level akuntansi ini untuk menampilkan secara "
+"eksplisit nilai peraturan ini di akuntansi. Contohnya, bila Anda ingin "
+"menampilkan nilai biaya representasi, Anda harus mencetang field ini."
+
+#. module: hr_payroll_account
+#. odoo-python
+#: code:addons/hr_payroll_account/models/account_journal.py:0
+msgid "You cannot delete the journal linked to a Salary Structure"
+msgstr "Anda tidak dapat menghapus jurnal yang di-link ke Struktur Gaji"
