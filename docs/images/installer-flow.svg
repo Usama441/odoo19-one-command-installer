@@ -46,9 +46,9 @@
 
     <rect x="880" y="145" width="640" height="160" rx="20" fill="#ffffff" stroke="#d8dee9" stroke-width="2"/>
     <text class="step" x="910" y="180">STEP 3</text>
-    <text class="heading" x="910" y="217">Input + prerequisites</text>
-    <text class="body" x="910" y="252">Mode + ports • Docker check/install • existing-data safety</text>
-    <text class="body" x="910" y="280">Enterprise addons • pgAdmin choice, port and email</text>
+    <text class="heading" x="910" y="217">Audit + user approval</text>
+    <text class="body" x="910" y="252">Ubuntu updates • dependency report • bulk/one-by-one install</text>
+    <text class="body" x="910" y="280">Docker auto-start • Odoo choices • Enterprise • pgAdmin</text>
   </g>
 
   <path class="arrow" d="M 400 225 L 466 225"/>

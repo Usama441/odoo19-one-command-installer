@@ -19,6 +19,227 @@ if [[ "${ID}" != "ubuntu" || ( "${VERSION_ID}" != "22.04" && "${VERSION_ID}" != 
   exit 1
 fi
 
+APT_INDEX_READY="false"
+
+ask_yes_no() {
+  local prompt="$1" default_answer="$2" answer
+  read -r -p "$prompt" answer
+  answer="${answer:-$default_answer}"
+  case "${answer,,}" in
+    y|yes) return 0 ;;
+    n|no) return 1 ;;
+    *)
+      echo "Please enter y or n."
+      exit 1
+      ;;
+  esac
+}
+
+refresh_apt_index() {
+  if [[ "$APT_INDEX_READY" != "true" ]]; then
+    sudo apt-get update
+    APT_INDEX_READY="true"
+  fi
+}
+
+install_apt_packages() {
+  refresh_apt_index
+  sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y "$@"
+}
+
+package_installed() {
+  dpkg-query -W -f='${Status}' "$1" 2>/dev/null | grep -q 'ok installed'
+}
+
+refresh_prerequisite_status() {
+  if package_installed ca-certificates; then HAS_CA_CERTIFICATES="true"; else HAS_CA_CERTIFICATES="false"; fi
+  if command -v curl >/dev/null 2>&1; then HAS_CURL="true"; else HAS_CURL="false"; fi
+  if command -v openssl >/dev/null 2>&1; then HAS_OPENSSL="true"; else HAS_OPENSSL="false"; fi
+  if command -v docker >/dev/null 2>&1; then HAS_DOCKER="true"; else HAS_DOCKER="false"; fi
+  if [[ "$HAS_DOCKER" == "true" ]] && docker compose version >/dev/null 2>&1; then
+    HAS_COMPOSE="true"
+  else
+    HAS_COMPOSE="false"
+  fi
+}
+
+status_word() {
+  if [[ "$1" == "true" ]]; then printf 'INSTALLED'; else printf 'MISSING'; fi
+}
+
+show_prerequisite_status() {
+  echo
+  echo "Ubuntu prerequisite status"
+  printf '  %-28s %s\n' "CA certificates" "$(status_word "$HAS_CA_CERTIFICATES")"
+  printf '  %-28s %s\n' "curl" "$(status_word "$HAS_CURL")"
+  printf '  %-28s %s\n' "OpenSSL" "$(status_word "$HAS_OPENSSL")"
+  printf '  %-28s %s\n' "Docker Engine / CLI" "$(status_word "$HAS_DOCKER")"
+  printf '  %-28s %s\n' "Docker Compose plugin" "$(status_word "$HAS_COMPOSE")"
+  if systemctl is-active --quiet docker.service 2>/dev/null; then
+    printf '  %-28s %s\n' "Docker system service" "RUNNING"
+  elif [[ "$HAS_DOCKER" == "true" ]]; then
+    printf '  %-28s %s\n' "Docker system service" "STOPPED OR INACCESSIBLE"
+  else
+    printf '  %-28s %s\n' "Docker system service" "NOT INSTALLED"
+  fi
+}
+
+setup_docker_repository() {
+  install_apt_packages ca-certificates curl
+  sudo install -m 0755 -d /etc/apt/keyrings
+  sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+  sudo chmod a+r /etc/apt/keyrings/docker.asc
+  local arch codename
+  arch="$(dpkg --print-architecture)"
+  codename="${UBUNTU_CODENAME:-$VERSION_CODENAME}"
+  echo "deb [arch=$arch signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $codename stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
+  sudo apt-get update
+  APT_INDEX_READY="true"
+}
+
+echo
+echo "Ubuntu package maintenance"
+echo "This updates installed packages only; it does not change the Ubuntu release."
+if ask_yes_no "Refresh package lists and upgrade installed Ubuntu packages now? [y/N]: " "n"; then
+  sudo apt-get update
+  APT_INDEX_READY="true"
+  sudo env DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+  if [[ -f /var/run/reboot-required ]]; then
+    echo
+    echo "Ubuntu reports that a reboot is required after the package upgrade."
+    if ! ask_yes_no "Continue this installation before rebooting? [y/N]: " "n"; then
+      echo "Restart Ubuntu, then run this installer again."
+      exit 0
+    fi
+  fi
+else
+  echo "Skipping the optional Ubuntu package upgrade."
+fi
+
+refresh_prerequisite_status
+show_prerequisite_status
+
+MISSING_COUNT=0
+for installed in "$HAS_CA_CERTIFICATES" "$HAS_CURL" "$HAS_OPENSSL" "$HAS_DOCKER" "$HAS_COMPOSE"; do
+  if [[ "$installed" != "true" ]]; then MISSING_COUNT=$((MISSING_COUNT + 1)); fi
+done
+
+if (( MISSING_COUNT > 0 )); then
+  echo
+  echo "Missing prerequisites were found."
+  echo "  a = install all missing items in bulk"
+  echo "  o = approve each missing item one by one"
+  echo "  q = cancel the installer"
+  read -r -p "Choose installation mode [a/o/q] (a): " PREREQUISITE_MODE
+  PREREQUISITE_MODE="${PREREQUISITE_MODE:-a}"
+
+  INSTALL_CA_CERTIFICATES="false"
+  INSTALL_CURL="false"
+  INSTALL_OPENSSL="false"
+  INSTALL_DOCKER="false"
+  INSTALL_COMPOSE="false"
+
+  case "${PREREQUISITE_MODE,,}" in
+    a|all)
+      [[ "$HAS_CA_CERTIFICATES" != "true" ]] && INSTALL_CA_CERTIFICATES="true"
+      [[ "$HAS_CURL" != "true" ]] && INSTALL_CURL="true"
+      [[ "$HAS_OPENSSL" != "true" ]] && INSTALL_OPENSSL="true"
+      [[ "$HAS_DOCKER" != "true" ]] && INSTALL_DOCKER="true"
+      [[ "$HAS_COMPOSE" != "true" ]] && INSTALL_COMPOSE="true"
+      ;;
+    o|one|one-by-one)
+      if [[ "$HAS_CA_CERTIFICATES" != "true" ]] &&
+         ask_yes_no "Install CA certificates? [y/N]: " "n"; then INSTALL_CA_CERTIFICATES="true"; fi
+      if [[ "$HAS_CURL" != "true" ]] &&
+         ask_yes_no "Install curl? [y/N]: " "n"; then INSTALL_CURL="true"; fi
+      if [[ "$HAS_OPENSSL" != "true" ]] &&
+         ask_yes_no "Install OpenSSL? [y/N]: " "n"; then INSTALL_OPENSSL="true"; fi
+      if [[ "$HAS_DOCKER" != "true" ]] &&
+         ask_yes_no "Install Docker Engine (includes required repository packages)? [y/N]: " "n"; then INSTALL_DOCKER="true"; fi
+      if [[ "$HAS_COMPOSE" != "true" ]] &&
+         ask_yes_no "Install the Docker Compose plugin (includes required repository packages)? [y/N]: " "n"; then INSTALL_COMPOSE="true"; fi
+      ;;
+    q|quit|cancel)
+      echo "Installation cancelled; no missing prerequisites were installed."
+      exit 0
+      ;;
+    *)
+      echo "Choose a, o, or q."
+      exit 1
+      ;;
+  esac
+
+  if [[ "$INSTALL_DOCKER" == "true" || "$INSTALL_COMPOSE" == "true" ]]; then
+    INSTALL_CA_CERTIFICATES="true"
+    INSTALL_CURL="true"
+  fi
+
+  if [[ "${PREREQUISITE_MODE,,}" == "a" || "${PREREQUISITE_MODE,,}" == "all" ]]; then
+    SUPPORT_PACKAGES=()
+    [[ "$INSTALL_CA_CERTIFICATES" == "true" ]] && SUPPORT_PACKAGES+=(ca-certificates)
+    [[ "$INSTALL_CURL" == "true" ]] && SUPPORT_PACKAGES+=(curl)
+    [[ "$INSTALL_OPENSSL" == "true" ]] && SUPPORT_PACKAGES+=(openssl)
+    if (( ${#SUPPORT_PACKAGES[@]} > 0 )); then install_apt_packages "${SUPPORT_PACKAGES[@]}"; fi
+  else
+    if [[ "$INSTALL_CA_CERTIFICATES" == "true" ]]; then install_apt_packages ca-certificates; fi
+    if [[ "$INSTALL_CURL" == "true" ]]; then install_apt_packages curl; fi
+    if [[ "$INSTALL_OPENSSL" == "true" ]]; then install_apt_packages openssl; fi
+  fi
+
+  if [[ "$INSTALL_DOCKER" == "true" || "$INSTALL_COMPOSE" == "true" ]]; then
+    setup_docker_repository
+  fi
+  if [[ "$INSTALL_DOCKER" == "true" ]]; then
+    echo "Installing Docker Engine..."
+    install_apt_packages docker-ce docker-ce-cli containerd.io docker-buildx-plugin
+    sudo usermod -aG docker "$USER"
+  fi
+  if [[ "$INSTALL_COMPOSE" == "true" ]]; then
+    echo "Installing the Docker Compose plugin..."
+    if ! install_apt_packages docker-compose-plugin; then
+      echo "Docker Compose could not be installed. Check the Docker repository configuration, then rerun this installer."
+      exit 1
+    fi
+  fi
+fi
+
+refresh_prerequisite_status
+show_prerequisite_status
+if [[ "$HAS_OPENSSL" != "true" || "$HAS_DOCKER" != "true" || "$HAS_COMPOSE" != "true" ]]; then
+  echo "OpenSSL, Docker Engine, and Docker Compose are required. Rerun the installer and approve the missing items."
+  exit 1
+fi
+
+if systemctl cat docker.service >/dev/null 2>&1; then
+  echo "Enabling Docker to start automatically at boot..."
+  if ! sudo systemctl enable --now docker.service; then
+    echo "Docker could not be enabled and started. Fix the Docker system service, then rerun this installer."
+    exit 1
+  fi
+else
+  echo "Warning: docker.service was not found, so automatic Docker startup could not be configured."
+fi
+
+DOCKER=(docker)
+if ! docker info >/dev/null 2>&1; then
+  if sudo docker info >/dev/null 2>&1; then
+    DOCKER=(sudo docker)
+  else
+    echo "Docker is installed, but its engine is not running. Start Docker and rerun this installer."
+    exit 1
+  fi
+fi
+
+if ! "${DOCKER[@]}" compose version >/dev/null 2>&1; then
+  echo "Docker Compose is unavailable. Rerun the installer and approve the Compose plugin installation."
+  exit 1
+fi
+COMPOSE_UP_HELP="$("${DOCKER[@]}" compose up --help 2>&1)"
+if [[ "$COMPOSE_UP_HELP" != *"--wait-timeout"* ]]; then
+  echo "This installer requires a newer Docker Compose plugin with --wait support. Update Docker Engine/Compose, then rerun it."
+  exit 1
+fi
+
 read -r -p "Environment [testing/production] (testing): " DEPLOYMENT_MODE
 DEPLOYMENT_MODE="${DEPLOYMENT_MODE:-testing}"
 if [[ "$DEPLOYMENT_MODE" != "testing" && "$DEPLOYMENT_MODE" != "production" ]]; then
@@ -43,63 +264,6 @@ if [[ "$COMMUNITY_PORT" == "$ENTERPRISE_PORT" ]]; then
   exit 1
 fi
 
-setup_docker_repository() {
-  sudo apt-get update
-  sudo apt-get install -y ca-certificates curl openssl
-  sudo install -m 0755 -d /etc/apt/keyrings
-  sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-  sudo chmod a+r /etc/apt/keyrings/docker.asc
-  local arch codename
-  arch="$(dpkg --print-architecture)"
-  codename="${UBUNTU_CODENAME:-$VERSION_CODENAME}"
-  echo "deb [arch=$arch signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $codename stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
-  sudo apt-get update
-}
-
-if ! command -v docker >/dev/null 2>&1; then
-  echo "Installing Docker Engine and Compose plugin..."
-  setup_docker_repository
-  sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-  sudo usermod -aG docker "$USER"
-fi
-
-if systemctl cat docker.service >/dev/null 2>&1; then
-  echo "Enabling Docker to start automatically at boot..."
-  if ! sudo systemctl enable --now docker.service; then
-    echo "Docker could not be enabled and started. Fix the Docker system service, then rerun this installer."
-    exit 1
-  fi
-else
-  echo "Warning: docker.service was not found, so automatic Docker startup could not be configured."
-fi
-
-DOCKER=(docker)
-if ! docker info >/dev/null 2>&1; then
-  if sudo docker info >/dev/null 2>&1; then
-    DOCKER=(sudo docker)
-  else
-    echo "Docker is installed, but its engine is not running. Start Docker and rerun this installer."
-    exit 1
-  fi
-fi
-
-if ! "${DOCKER[@]}" compose version >/dev/null 2>&1; then
-  echo "Installing the Docker Compose plugin..."
-  setup_docker_repository
-  if ! sudo apt-get install -y docker-compose-plugin; then
-    echo "Docker Compose could not be installed. Remove conflicting Docker packages, then install Docker Engine from Docker's official Ubuntu repository."
-    exit 1
-  fi
-fi
-if ! "${DOCKER[@]}" compose version >/dev/null 2>&1; then
-  echo "Docker Compose is still unavailable. Log out and back in, then rerun this installer."
-  exit 1
-fi
-COMPOSE_UP_HELP="$("${DOCKER[@]}" compose up --help 2>&1)"
-if [[ "$COMPOSE_UP_HELP" != *"--wait-timeout"* ]]; then
-  echo "This installer requires a newer Docker Compose plugin with --wait support. Update Docker Engine/Compose, then rerun it."
-  exit 1
-fi
 COMMUNITY_DB_VOLUME_EXISTS="false"
 ENTERPRISE_DB_VOLUME_EXISTS="false"
 PGADMIN_VOLUME_EXISTS="false"
@@ -110,12 +274,6 @@ if [[ ! -f .env &&
       ( "$COMMUNITY_DB_VOLUME_EXISTS" == "true" || "$ENTERPRISE_DB_VOLUME_EXISTS" == "true" || "$PGADMIN_VOLUME_EXISTS" == "true" ) ]]; then
   echo "Existing installer data volumes were found, but .env is missing. Restore .env from backup; generated replacement credentials would not unlock the existing data."
   exit 1
-fi
-
-if ! command -v openssl >/dev/null 2>&1; then
-  echo "Installing OpenSSL for secure password generation..."
-  sudo apt-get update
-  sudo apt-get install -y openssl
 fi
 
 mkdir -p config/community config/enterprise config/pgadmin addons/community addons/enterprise addons/enterprise-custom

@@ -39,7 +39,14 @@ chmod +x install-ubuntu.sh
 ```
 
 If Docker is missing, the script installs Docker Engine and the Compose plugin
-from Docker's official Ubuntu repository. It explicitly enables and starts
+from Docker's official Ubuntu repository after receiving user approval. Before
+the Odoo questions, it can update the APT package lists and upgrade currently
+installed Ubuntu packages, then displays which prerequisites are installed or
+missing. Missing items can be installed in bulk, approved one by one, or left
+unchanged by cancelling. This package upgrade does not perform a major Ubuntu
+release upgrade such as 22.04 to 24.04.
+
+After Docker is available, the script explicitly enables and starts
 `docker.service`, so Docker starts automatically during future system boots. It
 may use `sudo docker` for the current run; log out and back in later if you want
 the new Docker group membership to take effect.
@@ -63,6 +70,35 @@ Desktop itself and waits up to three minutes when its engine is not already read
 
 Press Enter to accept the value shown in parentheses.
 
+### Ubuntu preparation questions
+
+These appear before the Odoo configuration questions:
+
+| Order | Prompt | Effect |
+|---:|---|---|
+| 1 | `Refresh package lists and upgrade installed Ubuntu packages now? [y/N]` | `y` runs `apt-get update` followed by a non-interactive `apt-get upgrade`. It does not change the Ubuntu release. |
+| 2 | `Continue this installation before rebooting? [y/N]` | Shown only when Ubuntu reports that upgraded packages require a reboot. The safe default stops so the user can reboot and rerun. |
+| 3 | `Choose installation mode [a/o/q] (a)` | Shown only when prerequisites are missing. `a` installs everything missing in bulk, `o` asks permission for every missing item, and `q` cancels. |
+| 4 | Individual package questions | Shown only in one-by-one mode for CA certificates, curl, OpenSSL, Docker Engine, and Docker Compose when each item is missing. |
+
+Before prompt 3, the installer prints a status report similar to:
+
+```text
+Ubuntu prerequisite status
+  CA certificates              INSTALLED
+  curl                         INSTALLED
+  OpenSSL                      INSTALLED
+  Docker Engine / CLI          MISSING
+  Docker Compose plugin        MISSING
+  Docker system service        NOT INSTALLED
+```
+
+OpenSSL, Docker Engine, and Docker Compose are required to continue. If any of
+them remain missing after the user's choices, the installer stops and explains
+how to rerun it.
+
+### Odoo service questions
+
 | Order | Prompt | What it controls |
 |---:|---|---|
 | 1 | `Environment [testing/production] (testing)` | `testing` runs with zero workers. `production` enables two workers and basic memory limits. |
@@ -79,6 +115,8 @@ never requested. The installer generates strong random values automatically.
 Example Community + pgAdmin installation:
 
 ```text
+Refresh package lists and upgrade installed Ubuntu packages now? [y/N]: n
+Choose installation mode [a/o/q] (a): a
 Environment [testing/production] (testing):
 Community port (8069):
 Enterprise port (8070):
@@ -90,34 +128,39 @@ pgAdmin login email (admin@example.com): admin@example.com
 
 ## Complete execution flow
 
-1. **Validate the platform and input.** Ubuntu checks for Ubuntu 22.04/24.04
-   and refuses to run as root. Both scripts validate the environment choice and
-   require unique port numbers from `1` to `65535`.
-2. **Prepare Docker.** Ubuntu installs or checks Docker Engine and Compose, then
-   enables and starts the Docker system service. Windows checks Docker Desktop,
+1. **Validate the platform.** Ubuntu checks for Ubuntu 22.04/24.04 and refuses
+   to run as root. Windows starts through PowerShell from the project folder.
+2. **Offer Ubuntu maintenance.** The Ubuntu script asks whether to refresh APT
+   metadata and upgrade installed packages. If a reboot becomes necessary, the
+   user can stop safely and continue after restarting the machine.
+3. **Audit and prepare prerequisites.** Ubuntu displays CA certificates, curl,
+   OpenSSL, Docker Engine, Compose, and Docker service status. Missing items are
+   installed only after bulk or per-item approval. Windows checks Docker Desktop,
    can install it through `winget`, and configures it to start at user sign-in.
-   A recent Compose version with `--wait` support is required.
-3. **Protect existing data.** The script detects installer-created Docker
+4. **Collect and validate input.** Both scripts validate the environment choice
+   and require unique port numbers from `1` to `65535`. A recent Compose version
+   with `--wait` support is required.
+5. **Protect existing data.** The script detects installer-created Docker
    volumes. If data volumes exist but `.env` is missing, it stops instead of
    creating new passwords that cannot access the existing data.
-4. **Prepare Enterprise.** A supplied Enterprise folder is copied into
+6. **Prepare Enterprise.** A supplied Enterprise folder is copied into
    `addons/enterprise`. Blank input reuses that folder when it already contains
    addons; otherwise the Enterprise services are not started.
-5. **Configure pgAdmin.** If selected, the script prepares pgAdmin login data,
+7. **Configure pgAdmin.** If selected, the script prepares pgAdmin login data,
    a server-definition file, and a protected PostgreSQL password file. It
    registers Community automatically and also registers Enterprise when that
    stack will start.
-6. **Generate or reuse configuration.** On the first run, random passwords are
+8. **Generate or reuse configuration.** On the first run, random passwords are
    generated. On reruns, database, Odoo master, and pgAdmin credentials are
    preserved. `.env` and the Odoo configuration files are then updated with the
    current ports and environment mode.
-7. **Pull and start containers.** The pinned images are downloaded. Community
+9. **Pull and start containers.** The pinned images are downloaded. Community
    always starts; Enterprise and pgAdmin start only when selected by the earlier
    choices. Every created service has the `restart: unless-stopped` policy.
-8. **Wait for health.** Docker Compose waits up to 300 seconds for all requested
+10. **Wait for health.** Docker Compose waits up to 300 seconds for all requested
    services. On Ubuntu, an already-active UFW firewall receives allow rules for
    the selected public web ports.
-9. **Write the result.** The terminal prints the URLs and login details, and the
+11. **Write the result.** The terminal prints the URLs and login details, and the
    same information is saved to `installation-info.txt`.
 
 ## Runtime architecture
