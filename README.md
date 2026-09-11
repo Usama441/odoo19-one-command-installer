@@ -60,15 +60,22 @@ Set-ExecutionPolicy -Scope Process Bypass
 .\install-windows.ps1
 ```
 
-If Docker Desktop is missing, the script installs it through `winget` and then
-stops. It also configures Docker Desktop to launch whenever the current Windows
-user signs in. Restart Windows, sign in, accept Docker's terms if prompted, and
-run the same installer command again. On later runs, the installer starts Docker
-Desktop itself and waits up to three minutes when its engine is not already ready.
+If Docker Desktop is missing, the script asks permission, installs it through
+`winget`, and then stops. It also configures Docker Desktop to launch whenever
+the current Windows user signs in. Restart Windows, sign in, accept Docker's
+terms if prompted, and run the same installer command again. On later runs, the
+installer starts Docker Desktop itself and waits up to three minutes when its
+engine is not already ready.
 
 ## Questions the installer asks
 
-Press Enter to accept the value shown in parentheses.
+Press Enter to accept the value shown in square brackets.
+If a user mistypes a choice, port, Enterprise folder, email, or yes/no answer,
+the installer explains the expected value and asks the same question again.
+
+On Windows, `Install Docker Desktop now using winget? [Y/n]` appears first only
+when Docker is missing. Answering `n` cancels cleanly; answering `y` installs
+Docker Desktop and explains the required restart before Odoo setup continues.
 
 ### Ubuntu preparation questions
 
@@ -78,7 +85,7 @@ These appear before the Odoo configuration questions:
 |---:|---|---|
 | 1 | `Refresh package lists and upgrade installed Ubuntu packages now? [y/N]` | `y` runs `apt-get update` followed by a non-interactive `apt-get upgrade`. It does not change the Ubuntu release. |
 | 2 | `Continue this installation before rebooting? [y/N]` | Shown only when Ubuntu reports that upgraded packages require a reboot. The safe default stops so the user can reboot and rerun. |
-| 3 | `Choose installation mode [a/o/q] (a)` | Shown only when prerequisites are missing. `a` installs everything missing in bulk, `o` asks permission for every missing item, and `q` cancels. |
+| 3 | `Choose an option [1]` | Shown only when prerequisites are missing. `1` installs everything missing, `2` asks permission for each item, and `3` cancels. |
 | 4 | Individual package questions | Shown only in one-by-one mode for CA certificates, curl, OpenSSL, Docker Engine, and Docker Compose when each item is missing. |
 
 Before prompt 3, the installer prints a status report similar to:
@@ -101,30 +108,37 @@ how to rerun it.
 
 | Order | Prompt | What it controls |
 |---:|---|---|
-| 1 | `Environment [testing/production] (testing)` | `testing` runs with zero workers. `production` enables two workers and basic memory limits. |
-| 2 | `Community port (8069)` | Browser port for Odoo Community. |
-| 3 | `Enterprise port (8070)` | Browser port reserved for Odoo Enterprise. It must differ from the Community port, even if Enterprise will not start. |
-| 4 | `Path to licensed Odoo 19 Enterprise addons (...)` | Copies licensed addons into `addons/enterprise`. Blank reuses existing copied addons; if none exist, only Community starts. |
-| 5 | `Install/update and configure pgAdmin? [y/N]` | `y` enables the pgAdmin web application. If saved configuration says pgAdmin was enabled, the displayed default changes to `[Y/n]`. |
-| 6 | `pgAdmin port (5050)` | Asked only when pgAdmin is enabled. It must differ from both Odoo ports. On a rerun, the saved pgAdmin port is displayed. |
-| 7 | `pgAdmin login email (admin@example.com)` | Asked only on the first pgAdmin setup. Existing pgAdmin data reuses the saved email. |
+| 1 | `Choose a profile [1]` | `1` selects testing. `2` selects production with two workers and basic memory limits. |
+| 2 | `Community web port [8069]` | Browser port for Odoo Community. |
+| 3 | `Choose an edition option [1]` | Selects Community only, detected/existing Enterprise addons, or another Enterprise folder. The recommended choice adapts to what the installer detects. |
+| 4 | `Enterprise addons folder` | Asked only when Enterprise was selected but no detected folder is being used. The folder is validated before it is copied. |
+| 5 | `Enterprise web port [8070]` | Asked only when Enterprise will start. It must differ from the Community port. |
+| 6 | `Add pgAdmin to this installation? [y/N]` | Enables the optional pgAdmin web application. A rerun with pgAdmin enabled instead asks whether to keep it enabled. |
+| 7 | `pgAdmin web port [5050]` | Asked only when pgAdmin is enabled. It must differ from the enabled Odoo ports. |
+| 8 | `pgAdmin login email [admin@example.com]` | Asked only on the first pgAdmin setup. Existing pgAdmin data reuses the saved email. |
+| 9 | `Start this installation now? [Y/n]` | Shows after a complete plan summary and provides a final chance to cancel before configuration or Enterprise addons are changed. |
 
 The PostgreSQL passwords, Odoo master passwords, and pgAdmin login password are
 never requested. The installer generates strong random values automatically.
 
-Example Community + pgAdmin installation:
+Example Community + pgAdmin installation when no Enterprise folder is detected:
 
 ```text
 Refresh package lists and upgrade installed Ubuntu packages now? [y/N]: n
-Choose installation mode [a/o/q] (a): a
-Environment [testing/production] (testing):
-Community port (8069):
-Enterprise port (8070):
-Path to licensed Odoo 19 Enterprise addons (blank reuses existing addons, or starts Community only):
-Install/update and configure pgAdmin? [y/N]: y
-pgAdmin port (5050):
-pgAdmin login email (admin@example.com): admin@example.com
+Choose an option [1]:
+Choose a profile [1]:
+Community web port [8069]:
+Choose an edition option [1]: 1
+Add pgAdmin to this installation? [y/N]: y
+pgAdmin web port [5050]:
+pgAdmin login email [admin@example.com]: admin@example.com
+Start this installation now? [Y/n]:
 ```
+
+When `enterprise-19.0/` is beside the installer, both scripts detect it and show
+its full path. The user normally presses Enter to accept it instead of typing a
+folder path. On a rerun, selecting Community only stops previously running
+Enterprise containers, and disabling pgAdmin stops its existing container.
 
 ## Complete execution flow
 
@@ -137,15 +151,16 @@ pgAdmin login email (admin@example.com): admin@example.com
    OpenSSL, Docker Engine, Compose, and Docker service status. Missing items are
    installed only after bulk or per-item approval. Windows checks Docker Desktop,
    can install it through `winget`, and configures it to start at user sign-in.
-4. **Collect and validate input.** Both scripts validate the environment choice
-   and require unique port numbers from `1` to `65535`. A recent Compose version
-   with `--wait` support is required.
+4. **Guide the user through choices.** Numbered menus select testing/production,
+   Community/Enterprise, optional pgAdmin, and only the ports that are relevant.
+   A recent Compose version with `--wait` support is required.
 5. **Protect existing data.** The script detects installer-created Docker
    volumes. If data volumes exist but `.env` is missing, it stops instead of
    creating new passwords that cannot access the existing data.
-6. **Prepare Enterprise.** A supplied Enterprise folder is copied into
-   `addons/enterprise`. Blank input reuses that folder when it already contains
-   addons; otherwise the Enterprise services are not started.
+6. **Prepare Enterprise.** The installer first detects existing copied addons or
+   `enterprise-19.0/` beside the script. Manual path entry is requested only when
+   the user selects another folder. The folder must contain addon manifests and
+   `web_enterprise` before it is copied into `addons/enterprise`.
 7. **Configure pgAdmin.** If selected, the script prepares pgAdmin login data,
    a server-definition file, and a protected PostgreSQL password file. It
    registers Community automatically and also registers Enterprise when that
@@ -154,14 +169,17 @@ pgAdmin login email (admin@example.com): admin@example.com
    generated. On reruns, database, Odoo master, and pgAdmin credentials are
    preserved. `.env` and the Odoo configuration files are then updated with the
    current ports and environment mode.
-9. **Pull and start containers.** The pinned images are downloaded. Community
+9. **Review and confirm.** A summary shows the selected profile, editions, ports,
+   pgAdmin choice, and automatic restart state before Odoo configuration or
+   Enterprise addons are changed.
+10. **Pull and start containers.** The pinned images are downloaded. Community
    always starts; Enterprise and pgAdmin start only when selected by the earlier
    choices. Every created service has the `restart: unless-stopped` policy.
-10. **Wait for health.** Docker Compose waits up to 300 seconds for all requested
+11. **Wait for health.** Docker Compose waits up to 300 seconds for all requested
    services. On Ubuntu, an already-active UFW firewall receives allow rules for
    the selected public web ports.
-11. **Write the result.** The terminal prints the URLs and login details, and the
-   same information is saved to `installation-info.txt`.
+12. **Show next steps.** The terminal prints URLs, credentials, and browser setup
+   guidance. The access information is also saved to `installation-info.txt`.
 
 ## Runtime architecture
 
@@ -259,9 +277,9 @@ refreshed when pgAdmin starts; manually added server definitions may be replaced
 | Database passwords | Generated | Reused from `.env` |
 | Odoo master passwords | Generated | Reused from `.env` or existing Odoo config |
 | pgAdmin password | Generated | Reused from `.env` |
-| Odoo ports and mode | Asked | Asked again and configuration updated |
+| Odoo ports and mode | Selected through guided menus | Asked again and configuration updated |
 | pgAdmin choice and port | Asked; disabled by default | Asked again; previous enabled state and port become defaults |
-| Enterprise addons | Supplied path is copied | New path can be copied, or blank reuses existing addons |
+| Enterprise addons | Nearby folder is auto-detected or another folder is selected | Existing addons are recommended automatically, with an option to update or disable Enterprise |
 | Persistent databases and filestores | Created | Kept and reused |
 
 If an existing database or pgAdmin volume is present but its required saved
@@ -274,9 +292,10 @@ the official Odoo 19 image together with your licensed Enterprise addon files.
 You must have a valid Odoo Enterprise subscription and a legal local copy of
 those addons.
 
-To add Enterprise after a Community-only installation, place the licensed
-modules in `addons/enterprise`, rerun the installer, and leave the Enterprise
-path blank. The existing addons will be detected and Enterprise will start.
+To add Enterprise after a Community-only installation, place the licensed folder
+beside the installer and name it `enterprise-19.0`, or choose its location from
+the edition menu. Existing modules under `addons/enterprise` are detected and
+offered as the recommended choice on later runs.
 
 ## Useful commands
 

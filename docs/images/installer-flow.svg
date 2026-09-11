@@ -29,7 +29,7 @@
 
   <rect width="1600" height="1120" rx="28" fill="#f4f7fb"/>
   <text class="title" x="80" y="70">Odoo 19 one-command installer — complete flow</text>
-  <text class="subtitle" x="80" y="104">The same guided workflow is implemented for Ubuntu and Windows.</text>
+  <text class="subtitle" x="80" y="104">Guided choices, automatic Enterprise detection, plan review, and clear next steps.</text>
 
   <g filter="url(#shadow)">
     <rect x="80" y="145" width="320" height="160" rx="20" fill="#ffffff" stroke="#d8dee9" stroke-width="2"/>
@@ -58,8 +58,8 @@
   <g filter="url(#shadow)">
     <rect x="250" y="390" width="1100" height="120" rx="20" fill="#714b67"/>
     <text class="step" x="290" y="425" fill="#f4dff0">STEP 4</text>
-    <text class="white-heading" x="290" y="462">Generate or safely reuse configuration</text>
-    <text class="white-body" x="290" y="490">Passwords • .env • Odoo configs • pgAdmin server definitions • pgpass credentials</text>
+    <text class="white-heading" x="290" y="462">Detect available options, review the plan, and confirm</text>
+    <text class="white-body" x="290" y="490">Adaptive menus • enabled services • selected ports • final user approval</text>
   </g>
 
   <path class="arrow" d="M 800 510 L 800 555 L 260 555 L 260 595"/>
@@ -75,14 +75,14 @@
     <text class="small" x="110" y="744">Default web port: 8069</text>
 
     <rect x="620" y="600" width="360" height="155" rx="20" fill="#ffffff" stroke="#714b67" stroke-width="3"/>
-    <rect x="645" y="620" width="128" height="27" rx="14" fill="#d97706"/>
+    <rect x="645" y="620" width="150" height="27" rx="14" fill="#d97706"/>
     <text class="badge" x="661" y="639">CONDITIONAL</text>
     <text class="heading" x="650" y="686">Enterprise stack</text>
     <text class="body" x="650" y="720">Odoo + licensed Enterprise addons</text>
     <text class="small" x="650" y="744">Starts when addons are supplied</text>
 
     <rect x="1160" y="600" width="360" height="155" rx="20" fill="#ffffff" stroke="#336791" stroke-width="3"/>
-    <rect x="1185" y="620" width="128" height="27" rx="14" fill="#d97706"/>
+    <rect x="1185" y="620" width="150" height="27" rx="14" fill="#d97706"/>
     <text class="badge" x="1201" y="639">CONDITIONAL</text>
     <text class="heading" x="1190" y="686">pgAdmin stack</text>
     <text class="body" x="1190" y="720">Web UI + registered DB servers</text>
@@ -96,7 +96,7 @@
   <g filter="url(#shadow)">
     <rect x="250" y="840" width="1100" height="105" rx="20" fill="#ffffff" stroke="#16a34a" stroke-width="3"/>
     <text class="step" x="290" y="875" fill="#15803d">STEP 5</text>
-    <text class="heading" x="290" y="912">Pull images, enable automatic restarts, wait up to 5 minutes for health</text>
+    <text class="heading" x="290" y="912">Generate config, pull images, start services, and wait for health</text>
   </g>
 
   <path class="arrow" d="M 800 945 L 800 985"/>

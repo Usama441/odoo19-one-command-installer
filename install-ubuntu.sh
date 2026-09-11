@@ -4,6 +4,25 @@ set -Eeuo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+print_banner() {
+  cat <<'EOF'
+
+============================================================
+              Odoo 19 Guided Installer
+     Community • Enterprise • PostgreSQL • pgAdmin
+============================================================
+EOF
+}
+
+section() {
+  printf '\n[%s] %s\n' "$1" "$2"
+  printf '%s\n' "------------------------------------------------------------"
+}
+
+print_banner
+echo "Follow the six guided steps. Press Enter to accept a recommended default."
+echo "You will review the complete Odoo plan before configuration or services change."
+
 if [[ "${EUID}" -eq 0 ]]; then
   echo "Run this script as your normal sudo-enabled user, not as root."
   exit 1
@@ -23,16 +42,29 @@ APT_INDEX_READY="false"
 
 ask_yes_no() {
   local prompt="$1" default_answer="$2" answer
-  read -r -p "$prompt" answer
-  answer="${answer:-$default_answer}"
-  case "${answer,,}" in
-    y|yes) return 0 ;;
-    n|no) return 1 ;;
-    *)
-      echo "Please enter y or n."
-      exit 1
-      ;;
-  esac
+  while true; do
+    read -r -p "$prompt" answer
+    answer="${answer:-$default_answer}"
+    case "${answer,,}" in
+      y|yes) return 0 ;;
+      n|no) return 1 ;;
+      *) echo "Please enter y for yes or n for no." ;;
+    esac
+  done
+}
+
+read_choice() {
+  local target="$1" prompt="$2" default_answer="$3" allowed="$4" answer
+  while true; do
+    read -r -p "$prompt" answer
+    answer="${answer:-$default_answer}"
+    answer="${answer,,}"
+    if [[ " $allowed " == *" $answer "* ]]; then
+      printf -v "$target" '%s' "$answer"
+      return
+    fi
+    echo "Please choose one of the listed options."
+  done
 }
 
 refresh_apt_index() {
@@ -97,7 +129,7 @@ setup_docker_repository() {
   APT_INDEX_READY="true"
 }
 
-echo
+section "1/6" "Prepare Ubuntu and check requirements"
 echo "Ubuntu package maintenance"
 echo "This updates installed packages only; it does not change the Ubuntu release."
 if ask_yes_no "Refresh package lists and upgrade installed Ubuntu packages now? [y/N]: " "n"; then
@@ -127,11 +159,10 @@ done
 if (( MISSING_COUNT > 0 )); then
   echo
   echo "Missing prerequisites were found."
-  echo "  a = install all missing items in bulk"
-  echo "  o = approve each missing item one by one"
-  echo "  q = cancel the installer"
-  read -r -p "Choose installation mode [a/o/q] (a): " PREREQUISITE_MODE
-  PREREQUISITE_MODE="${PREREQUISITE_MODE:-a}"
+  echo "  1) Install all missing requirements (recommended)"
+  echo "  2) Review and approve each requirement"
+  echo "  3) Cancel"
+  read_choice PREREQUISITE_MODE "Choose an option [1]: " "1" "1 2 3 a all o one one-by-one q quit cancel"
 
   INSTALL_CA_CERTIFICATES="false"
   INSTALL_CURL="false"
@@ -140,14 +171,14 @@ if (( MISSING_COUNT > 0 )); then
   INSTALL_COMPOSE="false"
 
   case "${PREREQUISITE_MODE,,}" in
-    a|all)
+    1|a|all)
       [[ "$HAS_CA_CERTIFICATES" != "true" ]] && INSTALL_CA_CERTIFICATES="true"
       [[ "$HAS_CURL" != "true" ]] && INSTALL_CURL="true"
       [[ "$HAS_OPENSSL" != "true" ]] && INSTALL_OPENSSL="true"
       [[ "$HAS_DOCKER" != "true" ]] && INSTALL_DOCKER="true"
       [[ "$HAS_COMPOSE" != "true" ]] && INSTALL_COMPOSE="true"
       ;;
-    o|one|one-by-one)
+    2|o|one|one-by-one)
       if [[ "$HAS_CA_CERTIFICATES" != "true" ]] &&
          ask_yes_no "Install CA certificates? [y/N]: " "n"; then INSTALL_CA_CERTIFICATES="true"; fi
       if [[ "$HAS_CURL" != "true" ]] &&
@@ -159,12 +190,12 @@ if (( MISSING_COUNT > 0 )); then
       if [[ "$HAS_COMPOSE" != "true" ]] &&
          ask_yes_no "Install the Docker Compose plugin (includes required repository packages)? [y/N]: " "n"; then INSTALL_COMPOSE="true"; fi
       ;;
-    q|quit|cancel)
+    3|q|quit|cancel)
       echo "Installation cancelled; no missing prerequisites were installed."
       exit 0
       ;;
     *)
-      echo "Choose a, o, or q."
+      echo "Choose 1, 2, or 3."
       exit 1
       ;;
   esac
@@ -174,7 +205,7 @@ if (( MISSING_COUNT > 0 )); then
     INSTALL_CURL="true"
   fi
 
-  if [[ "${PREREQUISITE_MODE,,}" == "a" || "${PREREQUISITE_MODE,,}" == "all" ]]; then
+  if [[ "${PREREQUISITE_MODE,,}" == "1" || "${PREREQUISITE_MODE,,}" == "a" || "${PREREQUISITE_MODE,,}" == "all" ]]; then
     SUPPORT_PACKAGES=()
     [[ "$INSTALL_CA_CERTIFICATES" == "true" ]] && SUPPORT_PACKAGES+=(ca-certificates)
     [[ "$INSTALL_CURL" == "true" ]] && SUPPORT_PACKAGES+=(curl)
@@ -240,29 +271,31 @@ if [[ "$COMPOSE_UP_HELP" != *"--wait-timeout"* ]]; then
   exit 1
 fi
 
-read -r -p "Environment [testing/production] (testing): " DEPLOYMENT_MODE
-DEPLOYMENT_MODE="${DEPLOYMENT_MODE:-testing}"
-if [[ "$DEPLOYMENT_MODE" != "testing" && "$DEPLOYMENT_MODE" != "production" ]]; then
-  echo "Please enter testing or production."
-  exit 1
-fi
-read -r -p "Community port (8069): " COMMUNITY_PORT
-COMMUNITY_PORT="${COMMUNITY_PORT:-8069}"
-read -r -p "Enterprise port (8070): " ENTERPRISE_PORT
-ENTERPRISE_PORT="${ENTERPRISE_PORT:-8070}"
 valid_port() {
   [[ "$1" =~ ^[0-9]{1,5}$ ]] && (( 10#$1 >= 1 && 10#$1 <= 65535 ))
 }
-if ! valid_port "$COMMUNITY_PORT" || ! valid_port "$ENTERPRISE_PORT"; then
-  echo "Ports must be numbers from 1 to 65535."
-  exit 1
-fi
+
+section "2/6" "Choose how Odoo should run"
+echo "Select a setup profile:"
+echo "  1) Testing (recommended for evaluation and development)"
+echo "  2) Production (enables two Odoo workers and memory limits)"
+read_choice DEPLOYMENT_CHOICE "Choose a profile [1]: " "1" "1 2 testing production"
+case "${DEPLOYMENT_CHOICE,,}" in
+  1|testing) DEPLOYMENT_MODE="testing" ;;
+  2|production) DEPLOYMENT_MODE="production" ;;
+  *) echo "Choose 1 for testing or 2 for production."; exit 1 ;;
+esac
+
+echo
+echo "The Community web port is used in the browser URL."
+while true; do
+  read -r -p "Community web port [8069]: " COMMUNITY_PORT
+  COMMUNITY_PORT="${COMMUNITY_PORT:-8069}"
+  if valid_port "$COMMUNITY_PORT"; then break; fi
+  echo "Please enter a port number from 1 to 65535."
+done
 COMMUNITY_PORT="$((10#$COMMUNITY_PORT))"
-ENTERPRISE_PORT="$((10#$ENTERPRISE_PORT))"
-if [[ "$COMMUNITY_PORT" == "$ENTERPRISE_PORT" ]]; then
-  echo "Community and Enterprise must use different ports."
-  exit 1
-fi
+ENTERPRISE_PORT="8070"
 
 COMMUNITY_DB_VOLUME_EXISTS="false"
 ENTERPRISE_DB_VOLUME_EXISTS="false"
@@ -277,20 +310,102 @@ if [[ ! -f .env &&
 fi
 
 mkdir -p config/community config/enterprise config/pgadmin addons/community addons/enterprise addons/enterprise-custom
-read -r -p "Path to licensed Odoo 19 Enterprise addons (blank reuses existing addons, or starts Community only): " ENTERPRISE_SOURCE
+
+has_enterprise_addons() {
+  local source="$1"
+  [[ -d "$source" ]] &&
+    find "$source" -mindepth 2 -maxdepth 2 -type f -name '__manifest__.py' -print -quit | grep -q .
+}
+
+read_enterprise_source() {
+  local suggested_path="$1" entered_path
+  while true; do
+    if [[ -n "$suggested_path" ]]; then
+      read -r -p "Enterprise addons folder [$suggested_path]: " entered_path
+      entered_path="${entered_path:-$suggested_path}"
+    else
+      echo "Example: /home/your-user/enterprise-19.0"
+      read -r -p "Enterprise addons folder: " entered_path
+    fi
+    entered_path="${entered_path#\"}"
+    entered_path="${entered_path%\"}"
+    if ! has_enterprise_addons "$entered_path"; then
+      echo "That folder does not contain Odoo addon manifests. Please select the folder whose direct subfolders are Enterprise modules."
+      continue
+    fi
+    if [[ ! -f "$entered_path/web_enterprise/__manifest__.py" ]]; then
+      echo "The web_enterprise module was not found. Please select a complete Odoo 19 Enterprise addon folder."
+      continue
+    fi
+    ENTERPRISE_SOURCE="$entered_path"
+    return
+  done
+}
+
+section "3/6" "Choose Community or Enterprise"
 START_ENTERPRISE="false"
-if [[ -n "$ENTERPRISE_SOURCE" ]]; then
-  if [[ ! -d "$ENTERPRISE_SOURCE" ]]; then
-    echo "Enterprise addons directory was not found."
-    exit 1
+ENTERPRISE_SOURCE=""
+BUNDLED_ENTERPRISE_SOURCE=""
+for candidate in "$SCRIPT_DIR/enterprise-19.0" "$SCRIPT_DIR/enterprise"; do
+  if has_enterprise_addons "$candidate"; then
+    BUNDLED_ENTERPRISE_SOURCE="$candidate"
+    break
   fi
-  if [[ "$(realpath "$ENTERPRISE_SOURCE")" != "$(realpath addons/enterprise)" ]]; then
-    cp -a "$ENTERPRISE_SOURCE"/. addons/enterprise/
-  fi
-  START_ENTERPRISE="true"
-elif find addons/enterprise -mindepth 1 ! -name .gitkeep -print -quit | grep -q .; then
-  echo "Reusing the Enterprise addons already in addons/enterprise."
-  START_ENTERPRISE="true"
+done
+
+if has_enterprise_addons "$SCRIPT_DIR/addons/enterprise"; then
+  echo "Existing Enterprise addons are already installed."
+  echo "  1) Reuse the installed Enterprise addons (recommended)"
+  echo "  2) Import or update Enterprise addons from another folder"
+  echo "  3) Start Community only"
+  read_choice EDITION_CHOICE "Choose an edition option [1]: " "1" "1 2 3"
+  case "$EDITION_CHOICE" in
+    1) START_ENTERPRISE="true" ;;
+    2) read_enterprise_source "$BUNDLED_ENTERPRISE_SOURCE"; START_ENTERPRISE="true" ;;
+    3) START_ENTERPRISE="false" ;;
+    *) echo "Choose 1, 2, or 3."; exit 1 ;;
+  esac
+elif [[ -n "$BUNDLED_ENTERPRISE_SOURCE" ]]; then
+  echo "Enterprise addons were detected automatically:"
+  echo "  $BUNDLED_ENTERPRISE_SOURCE"
+  echo "  1) Install Community + Enterprise using this folder (recommended)"
+  echo "  2) Select a different Enterprise folder"
+  echo "  3) Install Community only"
+  read_choice EDITION_CHOICE "Choose an edition option [1]: " "1" "1 2 3"
+  case "$EDITION_CHOICE" in
+    1) ENTERPRISE_SOURCE="$BUNDLED_ENTERPRISE_SOURCE"; START_ENTERPRISE="true" ;;
+    2) read_enterprise_source ""; START_ENTERPRISE="true" ;;
+    3) START_ENTERPRISE="false" ;;
+    *) echo "Choose 1, 2, or 3."; exit 1 ;;
+  esac
+else
+  echo "Community is free and requires no additional files."
+  echo "Enterprise requires your licensed Odoo 19 Enterprise addon folder."
+  echo "  1) Install Community only (recommended)"
+  echo "  2) Install Community + Enterprise"
+  read_choice EDITION_CHOICE "Choose an edition option [1]: " "1" "1 2"
+  case "$EDITION_CHOICE" in
+    1) START_ENTERPRISE="false" ;;
+    2) read_enterprise_source ""; START_ENTERPRISE="true" ;;
+    *) echo "Choose 1 or 2."; exit 1 ;;
+  esac
+fi
+
+if [[ "$START_ENTERPRISE" == "true" ]]; then
+  while true; do
+    read -r -p "Enterprise web port [8070]: " ENTERPRISE_PORT
+    ENTERPRISE_PORT="${ENTERPRISE_PORT:-8070}"
+    if ! valid_port "$ENTERPRISE_PORT"; then
+      echo "Please enter a port number from 1 to 65535."
+      continue
+    fi
+    ENTERPRISE_PORT="$((10#$ENTERPRISE_PORT))"
+    if [[ "$COMMUNITY_PORT" == "$ENTERPRISE_PORT" ]]; then
+      echo "Community and Enterprise need different web ports."
+      continue
+    fi
+    break
+  done
 fi
 
 get_env_value() {
@@ -358,43 +473,56 @@ else
   PGADMIN_PASSWORD="$(openssl rand -hex 24)"
 fi
 
+section "4/6" "Choose optional pgAdmin"
+echo "pgAdmin is an optional browser-based database manager."
+echo "Odoo works normally without it."
 if [[ "$PGADMIN_ENABLED" == "true" ]]; then
-  read -r -p "Install/update and configure pgAdmin? [Y/n]: " PGADMIN_CHOICE
-  PGADMIN_CHOICE="${PGADMIN_CHOICE:-y}"
+  if ask_yes_no "Keep pgAdmin enabled? [Y/n]: " "y"; then
+    PGADMIN_ENABLED="true"
+  else
+    PGADMIN_ENABLED="false"
+  fi
 else
-  read -r -p "Install/update and configure pgAdmin? [y/N]: " PGADMIN_CHOICE
-  PGADMIN_CHOICE="${PGADMIN_CHOICE:-n}"
+  if ask_yes_no "Add pgAdmin to this installation? [y/N]: " "n"; then
+    PGADMIN_ENABLED="true"
+  else
+    PGADMIN_ENABLED="false"
+  fi
 fi
-case "${PGADMIN_CHOICE,,}" in
-  y|yes) PGADMIN_ENABLED="true" ;;
-  n|no) PGADMIN_ENABLED="false" ;;
-  *) echo "Please enter y or n."; exit 1 ;;
-esac
 
 if [[ "$PGADMIN_ENABLED" == "true" ]]; then
   if [[ "$PGADMIN_CREDENTIALS_MISSING" == "true" ]]; then
     echo "The existing pgAdmin data volume was found, but its saved login credentials are missing from .env. Restore .env from backup before enabling pgAdmin."
     exit 1
   fi
-  read -r -p "pgAdmin port ($PGADMIN_PORT): " PGADMIN_PORT_INPUT
-  PGADMIN_PORT="${PGADMIN_PORT_INPUT:-$PGADMIN_PORT}"
-  if ! valid_port "$PGADMIN_PORT"; then
-    echo "The pgAdmin port must be a number from 1 to 65535."
-    exit 1
-  fi
-  PGADMIN_PORT="$((10#$PGADMIN_PORT))"
-  if [[ "$PGADMIN_PORT" == "$COMMUNITY_PORT" || "$PGADMIN_PORT" == "$ENTERPRISE_PORT" ]]; then
-    echo "The pgAdmin port must be different from both Odoo ports."
-    exit 1
-  fi
+  while true; do
+    read -r -p "pgAdmin web port [$PGADMIN_PORT]: " PGADMIN_PORT_INPUT
+    PGADMIN_PORT="${PGADMIN_PORT_INPUT:-$PGADMIN_PORT}"
+    if ! valid_port "$PGADMIN_PORT"; then
+      echo "Please enter a port number from 1 to 65535."
+      continue
+    fi
+    PGADMIN_PORT="$((10#$PGADMIN_PORT))"
+    if [[ "$PGADMIN_PORT" == "$COMMUNITY_PORT" ||
+          ( "$START_ENTERPRISE" == "true" && "$PGADMIN_PORT" == "$ENTERPRISE_PORT" ) ]]; then
+      echo "The pgAdmin port must be different from the enabled Odoo web ports."
+      continue
+    fi
+    break
+  done
   if [[ "$PGADMIN_VOLUME_EXISTS" == "true" ]]; then
     echo "Reusing existing pgAdmin login email: $PGADMIN_EMAIL"
   else
-    read -r -p "pgAdmin login email ($PGADMIN_EMAIL): " PGADMIN_EMAIL_INPUT
-    PGADMIN_EMAIL="${PGADMIN_EMAIL_INPUT:-$PGADMIN_EMAIL}"
+    echo "This email is used only to sign in to the local pgAdmin web page."
+    while true; do
+      read -r -p "pgAdmin login email [$PGADMIN_EMAIL]: " PGADMIN_EMAIL_INPUT
+      PGADMIN_EMAIL="${PGADMIN_EMAIL_INPUT:-$PGADMIN_EMAIL}"
+      if [[ "$PGADMIN_EMAIL" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]]; then break; fi
+      echo "Please enter a valid email address, for example admin@example.com."
+    done
   fi
   if [[ ! "$PGADMIN_EMAIL" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]]; then
-    echo "Enter a valid pgAdmin login email address."
+    echo "The saved pgAdmin login email is invalid. Correct PGADMIN_EMAIL in .env, then rerun the installer."
     exit 1
   fi
 fi
@@ -407,6 +535,39 @@ if [[ ! "$ODOO_IMAGE" =~ ^[A-Za-z0-9][A-Za-z0-9._/@:-]+$ ||
   echo "An image reference in .env is invalid."
   exit 1
 fi
+
+section "5/6" "Review the installation plan"
+printf '  %-24s %s\n' "Profile" "$DEPLOYMENT_MODE"
+printf '  %-24s %s\n' "Community" "enabled on port $COMMUNITY_PORT"
+if [[ "$START_ENTERPRISE" == "true" ]]; then
+  printf '  %-24s %s\n' "Enterprise" "enabled on port $ENTERPRISE_PORT"
+  if [[ -n "$ENTERPRISE_SOURCE" ]]; then
+    printf '  %-24s %s\n' "Enterprise addons" "import from $ENTERPRISE_SOURCE"
+  else
+    printf '  %-24s %s\n' "Enterprise addons" "reuse installed addons"
+  fi
+else
+  printf '  %-24s %s\n' "Enterprise" "not selected"
+fi
+if [[ "$PGADMIN_ENABLED" == "true" ]]; then
+  printf '  %-24s %s\n' "pgAdmin" "enabled on port $PGADMIN_PORT"
+  printf '  %-24s %s\n' "pgAdmin login" "$PGADMIN_EMAIL"
+else
+  printf '  %-24s %s\n' "pgAdmin" "not selected"
+fi
+printf '  %-24s %s\n' "Automatic restart" "enabled"
+echo
+if ! ask_yes_no "Start this installation now? [Y/n]: " "y"; then
+  echo "Installation cancelled. No Odoo configuration or Enterprise addons were changed."
+  exit 0
+fi
+
+if [[ -n "$ENTERPRISE_SOURCE" && "$(realpath "$ENTERPRISE_SOURCE")" != "$(realpath addons/enterprise)" ]]; then
+  echo "Copying Enterprise addons into this installation. This may take a moment..."
+  cp -a "$ENTERPRISE_SOURCE"/. addons/enterprise/
+fi
+
+echo "Generating private configuration and credentials..."
 
 umask 077
 cat > .env <<EOF
@@ -506,6 +667,7 @@ chmod 600 .env config/community/odoo.conf config/enterprise/odoo.conf config/pga
 
 COMPOSE_PROFILE=()
 if [[ "$PGADMIN_ENABLED" == "true" ]]; then COMPOSE_PROFILE=(--profile pgadmin); fi
+echo "Downloading the required Docker images..."
 "${DOCKER[@]}" compose "${COMPOSE_PROFILE[@]}" pull
 
 # Keep the configuration private from other host users while making it readable
@@ -542,16 +704,23 @@ if [[ "$PGADMIN_ENABLED" == "true" ]]; then
   fi
 fi
 
+if [[ "$START_ENTERPRISE" != "true" ]] &&
+   { [[ -n "$("${DOCKER[@]}" compose ps -q enterprise)" ]] ||
+     [[ -n "$("${DOCKER[@]}" compose ps -q db-enterprise)" ]]; }; then
+  echo "Stopping the previously running Enterprise services because Community-only was selected..."
+  "${DOCKER[@]}" compose stop enterprise db-enterprise
+fi
+if [[ "$PGADMIN_ENABLED" != "true" ]] &&
+   [[ -n "$("${DOCKER[@]}" compose --profile pgadmin ps -q pgadmin)" ]]; then
+  echo "Stopping pgAdmin because it was not selected..."
+  "${DOCKER[@]}" compose --profile pgadmin stop pgadmin
+fi
 if [[ "$START_ENTERPRISE" == "true" ]]; then
   "${DOCKER[@]}" compose "${COMPOSE_PROFILE[@]}" up -d --wait --wait-timeout 300
 else
   START_SERVICES=(db-community community)
   if [[ "$PGADMIN_ENABLED" == "true" ]]; then START_SERVICES+=(pgadmin); fi
   "${DOCKER[@]}" compose "${COMPOSE_PROFILE[@]}" up -d --wait --wait-timeout 300 "${START_SERVICES[@]}"
-fi
-if [[ "$PGADMIN_ENABLED" != "true" ]] &&
-   [[ -n "$("${DOCKER[@]}" compose --profile pgadmin ps -q pgadmin)" ]]; then
-  "${DOCKER[@]}" compose --profile pgadmin stop pgadmin
 fi
 
 if command -v ufw >/dev/null 2>&1 && sudo ufw status | grep -q '^Status: active'; then
@@ -598,6 +767,16 @@ if [[ "$PGADMIN_ENABLED" == "true" ]]; then echo "pgAdmin image: $PGADMIN_IMAGE"
 } > installation-info.txt
 chmod 600 .env installation-info.txt
 
-echo
+section "6/6" "Installation complete"
 cat installation-info.txt
+echo
+echo "Next steps:"
+echo "  1) Open the Community URL above in your browser."
+echo "  2) Use its Odoo master password on the database creation page."
+if [[ "$START_ENTERPRISE" == "true" ]]; then
+  echo "  3) Open the Enterprise URL and use its separate master password."
+fi
+if [[ "$PGADMIN_ENABLED" == "true" ]]; then
+  echo "  - Sign in to pgAdmin with the email and password shown above."
+fi
 echo "Credentials are stored in $SCRIPT_DIR/installation-info.txt (owner-readable only)."

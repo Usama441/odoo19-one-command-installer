@@ -4,30 +4,57 @@ param()
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
 
-$mode = Read-Host "Environment [testing/production] (testing)"
-if ([string]::IsNullOrWhiteSpace($mode)) { $mode = "testing" }
-if ($mode -notin @("testing", "production")) { throw "Enter testing or production." }
-if ($mode -eq "production") {
-    Write-Warning "For a real production server, Ubuntu is recommended instead of Windows Desktop."
+function Write-Section([string]$Number, [string]$Title) {
+    Write-Host ""
+    Write-Host "[$Number] $Title" -ForegroundColor Cyan
+    Write-Host "------------------------------------------------------------" -ForegroundColor DarkGray
 }
 
-$communityPort = Read-Host "Community port (8069)"
-if ([string]::IsNullOrWhiteSpace($communityPort)) { $communityPort = "8069" }
-$enterprisePort = Read-Host "Enterprise port (8070)"
-if ([string]::IsNullOrWhiteSpace($enterprisePort)) { $enterprisePort = "8070" }
-[int]$parsedCommunityPort = 0
-[int]$parsedEnterprisePort = 0
-if ((-not [int]::TryParse($communityPort, [ref]$parsedCommunityPort)) -or
-    (-not [int]::TryParse($enterprisePort, [ref]$parsedEnterprisePort)) -or
-    ($parsedCommunityPort -lt 1) -or ($parsedCommunityPort -gt 65535) -or
-    ($parsedEnterprisePort -lt 1) -or ($parsedEnterprisePort -gt 65535)) {
-    throw "Ports must be numbers from 1 to 65535."
+function Read-YesNo([string]$Prompt, [bool]$DefaultYes = $false) {
+    $suffix = if ($DefaultYes) { "[Y/n]" } else { "[y/N]" }
+    while ($true) {
+        $answer = Read-Host "$Prompt $suffix"
+        if ([string]::IsNullOrWhiteSpace($answer)) { return $DefaultYes }
+        switch ($answer.ToLowerInvariant()) {
+            { $_ -in @("y", "yes") } { return $true }
+            { $_ -in @("n", "no") } { return $false }
+            default { Write-Warning "Please enter y for yes or n for no." }
+        }
+    }
 }
-if ($parsedCommunityPort -eq $parsedEnterprisePort) {
-    throw "Community and Enterprise must use different ports."
+
+function Read-MenuChoice([string]$Prompt, [string]$Default, [string[]]$Allowed) {
+    while ($true) {
+        $answer = Read-Host $Prompt
+        if ([string]::IsNullOrWhiteSpace($answer)) { $answer = $Default }
+        $answer = $answer.ToLowerInvariant()
+        if ($Allowed -contains $answer) { return $answer }
+        Write-Warning "Please choose one of the listed options."
+    }
 }
-$communityPort = $parsedCommunityPort.ToString()
-$enterprisePort = $parsedEnterprisePort.ToString()
+
+function Read-Port([string]$Prompt, [int]$Default, [int[]]$Forbidden = @()) {
+    while ($true) {
+        $answer = Read-Host "$Prompt [$Default]"
+        if ([string]::IsNullOrWhiteSpace($answer)) { $answer = $Default.ToString() }
+        [int]$parsed = 0
+        if (([int]::TryParse($answer, [ref]$parsed)) -and
+            ($parsed -ge 1) -and ($parsed -le 65535)) {
+            if ($Forbidden -notcontains $parsed) { return $parsed }
+            Write-Warning "That port is already selected. Please choose a different port."
+        } else {
+            Write-Warning "Please enter a port number from 1 to 65535."
+        }
+    }
+}
+
+Write-Host ""
+Write-Host "============================================================" -ForegroundColor DarkCyan
+Write-Host "              Odoo 19 Guided Installer" -ForegroundColor Cyan
+Write-Host "     Community | Enterprise | PostgreSQL | pgAdmin" -ForegroundColor Gray
+Write-Host "============================================================" -ForegroundColor DarkCyan
+Write-Host "Follow the six guided steps. Press Enter to accept a recommended default."
+Write-Host "You will review the complete Odoo plan before configuration or services change."
 
 function Invoke-NativeChecked([string]$FilePath, [string[]]$ArgumentList) {
     & $FilePath @ArgumentList
@@ -69,9 +96,15 @@ function Start-DockerDesktopAndWait([string]$DockerDesktopPath, [int]$TimeoutSec
     return $false
 }
 
+Write-Section "1/6" "Check Docker Desktop"
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+    Write-Host "Docker Desktop is required but is not installed."
     if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
         throw "Docker Desktop is missing and winget is unavailable. Install Docker Desktop, restart Windows, then run this script again."
+    }
+    if (-not (Read-YesNo "Install Docker Desktop now using winget?" $true)) {
+        Write-Host "Installation cancelled. Install Docker Desktop before running this installer again."
+        exit 0
     }
     Write-Host "Installing Docker Desktop..."
     Invoke-NativeChecked "winget" @("install", "--id", "Docker.DockerDesktop", "--exact", "--accept-package-agreements", "--accept-source-agreements")
@@ -102,6 +135,7 @@ $composeUpHelp = (& docker compose up --help 2>&1 | Out-String)
 if (($LASTEXITCODE -ne 0) -or ($composeUpHelp -notmatch '--wait-timeout')) {
     throw "This installer requires a newer Docker Compose plugin with --wait support. Update Docker Desktop, then rerun it."
 }
+Write-Host "Docker Desktop and Docker Compose are ready." -ForegroundColor Green
 $existingVolumeNames = @(& docker volume ls --quiet)
 if ($LASTEXITCODE -ne 0) { throw "Docker volumes could not be inspected." }
 $communityDbVolumeExists = ($existingVolumeNames -contains "odoo19-dual_community-db")
@@ -112,20 +146,115 @@ if ((-not (Test-Path -LiteralPath ".env" -PathType Leaf)) -and
     throw "Existing installer data volumes were found, but .env is missing. Restore .env from backup; generated replacement credentials would not unlock the existing data."
 }
 
+Write-Section "2/6" "Choose how Odoo should run"
+Write-Host "Select a setup profile:"
+Write-Host "  1) Testing (recommended for evaluation and development)"
+Write-Host "  2) Production (enables two Odoo workers and memory limits)"
+$modeChoice = Read-MenuChoice "Choose a profile [1]" "1" @("1", "2", "testing", "production")
+switch ($modeChoice.ToLowerInvariant()) {
+    { $_ -in @("1", "testing") } { $mode = "testing" }
+    { $_ -in @("2", "production") } { $mode = "production" }
+    default { throw "Choose 1 for testing or 2 for production." }
+}
+if ($mode -eq "production") {
+    Write-Warning "For a real production server, Ubuntu is recommended instead of Windows Desktop."
+}
+
+Write-Host ""
+Write-Host "The Community web port is used in the browser URL."
+[int]$parsedCommunityPort = Read-Port "Community web port" 8069
+$communityPort = $parsedCommunityPort.ToString()
+$enterprisePort = "8070"
+[int]$parsedEnterprisePort = 8070
+
 @("config/community", "config/enterprise", "config/pgadmin", "addons/community", "addons/enterprise", "addons/enterprise-custom") |
     ForEach-Object { New-Item -ItemType Directory -Force -Path $_ | Out-Null }
 
-$enterpriseSource = Read-Host "Path to licensed Odoo 19 Enterprise addons (blank reuses existing addons, or starts Community only)"
-$startEnterprise = $false
-if (-not [string]::IsNullOrWhiteSpace($enterpriseSource)) {
-    if (-not (Test-Path -LiteralPath $enterpriseSource -PathType Container)) { throw "Enterprise addons directory was not found." }
-    if ((Resolve-Path -LiteralPath $enterpriseSource).Path -ne (Resolve-Path -LiteralPath "addons/enterprise").Path) {
-        Get-ChildItem -LiteralPath $enterpriseSource -Force | Copy-Item -Destination "addons/enterprise" -Recurse -Force
+function Test-EnterpriseAddons([string]$Path) {
+    if ([string]::IsNullOrWhiteSpace($Path) -or
+        (-not (Test-Path -LiteralPath $Path -PathType Container))) { return $false }
+    $manifest = Get-ChildItem -LiteralPath $Path -Directory -ErrorAction SilentlyContinue |
+        Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName "__manifest__.py") -PathType Leaf } |
+        Select-Object -First 1
+    return ($null -ne $manifest)
+}
+
+function Read-EnterpriseSource([string]$SuggestedPath = "") {
+    while ($true) {
+        if (-not [string]::IsNullOrWhiteSpace($SuggestedPath)) {
+            $enteredPath = Read-Host "Enterprise addons folder [$SuggestedPath]"
+            if ([string]::IsNullOrWhiteSpace($enteredPath)) { $enteredPath = $SuggestedPath }
+        } else {
+            Write-Host "Example: C:\Users\YourName\enterprise-19.0"
+            $enteredPath = Read-Host "Enterprise addons folder"
+        }
+        $enteredPath = $enteredPath.Trim().Trim('"')
+        if (-not (Test-EnterpriseAddons $enteredPath)) {
+            Write-Warning "That folder does not contain Odoo addon manifests. Please select the folder whose direct subfolders are Enterprise modules."
+            continue
+        }
+        if (-not (Test-Path -LiteralPath (Join-Path $enteredPath "web_enterprise\__manifest__.py") -PathType Leaf)) {
+            Write-Warning "The web_enterprise module was not found. Please select a complete Odoo 19 Enterprise addon folder."
+            continue
+        }
+        return (Resolve-Path -LiteralPath $enteredPath).Path
     }
-    $startEnterprise = $true
-} elseif (@(Get-ChildItem -LiteralPath "addons/enterprise" -Force | Where-Object { $_.Name -ne ".gitkeep" }).Count -gt 0) {
-    Write-Host "Reusing the Enterprise addons already in addons/enterprise."
-    $startEnterprise = $true
+}
+
+Write-Section "3/6" "Choose Community or Enterprise"
+$startEnterprise = $false
+$enterpriseSource = ""
+$installedEnterprisePath = Join-Path $PSScriptRoot "addons\enterprise"
+$bundledEnterpriseSource = ""
+foreach ($candidateName in @("enterprise-19.0", "enterprise")) {
+    $candidatePath = Join-Path $PSScriptRoot $candidateName
+    if (Test-EnterpriseAddons $candidatePath) {
+        $bundledEnterpriseSource = $candidatePath
+        break
+    }
+}
+
+if (Test-EnterpriseAddons $installedEnterprisePath) {
+    Write-Host "Existing Enterprise addons are already installed."
+    Write-Host "  1) Reuse the installed Enterprise addons (recommended)"
+    Write-Host "  2) Import or update Enterprise addons from another folder"
+    Write-Host "  3) Start Community only"
+    $editionChoice = Read-MenuChoice "Choose an edition option [1]" "1" @("1", "2", "3")
+    switch ($editionChoice) {
+        "1" { $startEnterprise = $true }
+        "2" { $enterpriseSource = Read-EnterpriseSource $bundledEnterpriseSource; $startEnterprise = $true }
+        "3" { $startEnterprise = $false }
+        default { throw "Choose 1, 2, or 3." }
+    }
+} elseif (-not [string]::IsNullOrWhiteSpace($bundledEnterpriseSource)) {
+    Write-Host "Enterprise addons were detected automatically:"
+    Write-Host "  $bundledEnterpriseSource" -ForegroundColor Green
+    Write-Host "  1) Install Community + Enterprise using this folder (recommended)"
+    Write-Host "  2) Select a different Enterprise folder"
+    Write-Host "  3) Install Community only"
+    $editionChoice = Read-MenuChoice "Choose an edition option [1]" "1" @("1", "2", "3")
+    switch ($editionChoice) {
+        "1" { $enterpriseSource = $bundledEnterpriseSource; $startEnterprise = $true }
+        "2" { $enterpriseSource = Read-EnterpriseSource; $startEnterprise = $true }
+        "3" { $startEnterprise = $false }
+        default { throw "Choose 1, 2, or 3." }
+    }
+} else {
+    Write-Host "Community is free and requires no additional files."
+    Write-Host "Enterprise requires your licensed Odoo 19 Enterprise addon folder."
+    Write-Host "  1) Install Community only (recommended)"
+    Write-Host "  2) Install Community + Enterprise"
+    $editionChoice = Read-MenuChoice "Choose an edition option [1]" "1" @("1", "2")
+    switch ($editionChoice) {
+        "1" { $startEnterprise = $false }
+        "2" { $enterpriseSource = Read-EnterpriseSource; $startEnterprise = $true }
+        default { throw "Choose 1 or 2." }
+    }
+}
+
+if ($startEnterprise) {
+    $parsedEnterprisePort = Read-Port "Enterprise web port" 8070 @($parsedCommunityPort)
+    $enterprisePort = $parsedEnterprisePort.ToString()
 }
 
 function New-RandomHex([int]$bytes = 24) {
@@ -196,45 +325,41 @@ if (Test-Path -LiteralPath ".env" -PathType Leaf) {
     $pgAdminPassword = New-RandomHex
 }
 
+Write-Section "4/6" "Choose optional pgAdmin"
+Write-Host "pgAdmin is an optional browser-based database manager."
+Write-Host "Odoo works normally without it."
 if ($pgAdminEnabled) {
-    $pgAdminChoice = Read-Host "Install/update and configure pgAdmin? [Y/n]"
-    if ([string]::IsNullOrWhiteSpace($pgAdminChoice)) { $pgAdminChoice = "y" }
+    $pgAdminEnabled = Read-YesNo "Keep pgAdmin enabled?" $true
 } else {
-    $pgAdminChoice = Read-Host "Install/update and configure pgAdmin? [y/N]"
-    if ([string]::IsNullOrWhiteSpace($pgAdminChoice)) { $pgAdminChoice = "n" }
-}
-$normalizedPgAdminChoice = $pgAdminChoice.ToLowerInvariant()
-if ($normalizedPgAdminChoice -in @("y", "yes")) {
-    $pgAdminEnabled = $true
-} elseif ($normalizedPgAdminChoice -in @("n", "no")) {
-    $pgAdminEnabled = $false
-} else {
-    throw "Enter y or n for the pgAdmin choice."
+    $pgAdminEnabled = Read-YesNo "Add pgAdmin to this installation?" $false
 }
 
 if ($pgAdminEnabled) {
     if ($pgAdminCredentialsMissing) {
         throw "The existing pgAdmin data volume was found, but its saved login credentials are missing from .env. Restore .env from backup before enabling pgAdmin."
     }
-    $pgAdminPortInput = Read-Host "pgAdmin port ($pgAdminPort)"
-    if (-not [string]::IsNullOrWhiteSpace($pgAdminPortInput)) { $pgAdminPort = $pgAdminPortInput }
-    [int]$parsedPgAdminPort = 0
-    if ((-not [int]::TryParse($pgAdminPort, [ref]$parsedPgAdminPort)) -or
-        ($parsedPgAdminPort -lt 1) -or ($parsedPgAdminPort -gt 65535)) {
-        throw "The pgAdmin port must be a number from 1 to 65535."
+    $forbiddenPorts = @($parsedCommunityPort)
+    if ($startEnterprise) { $forbiddenPorts += $parsedEnterprisePort }
+    [int]$pgAdminDefaultPort = 5050
+    if ((-not [int]::TryParse($pgAdminPort, [ref]$pgAdminDefaultPort)) -or
+        ($pgAdminDefaultPort -lt 1) -or ($pgAdminDefaultPort -gt 65535)) {
+        $pgAdminDefaultPort = 5050
     }
-    if (($parsedPgAdminPort -eq $parsedCommunityPort) -or ($parsedPgAdminPort -eq $parsedEnterprisePort)) {
-        throw "The pgAdmin port must be different from both Odoo ports."
-    }
+    [int]$parsedPgAdminPort = Read-Port "pgAdmin web port" $pgAdminDefaultPort $forbiddenPorts
     $pgAdminPort = $parsedPgAdminPort.ToString()
     if ($pgAdminVolumeExists) {
         Write-Host "Reusing existing pgAdmin login email: $pgAdminEmail"
     } else {
-        $pgAdminEmailInput = Read-Host "pgAdmin login email ($pgAdminEmail)"
-        if (-not [string]::IsNullOrWhiteSpace($pgAdminEmailInput)) { $pgAdminEmail = $pgAdminEmailInput }
+        Write-Host "This email is used only to sign in to the local pgAdmin web page."
+        while ($true) {
+            $pgAdminEmailInput = Read-Host "pgAdmin login email [$pgAdminEmail]"
+            if (-not [string]::IsNullOrWhiteSpace($pgAdminEmailInput)) { $pgAdminEmail = $pgAdminEmailInput }
+            if ($pgAdminEmail -match '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$') { break }
+            Write-Warning "Please enter a valid email address, for example admin@example.com."
+        }
     }
     if ($pgAdminEmail -notmatch '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$') {
-        throw "Enter a valid pgAdmin login email address."
+        throw "The saved pgAdmin login email is invalid. Correct PGADMIN_EMAIL in .env, then rerun the installer."
     }
 }
 [int]$unusedPgAdminPort = 0
@@ -246,6 +371,41 @@ if (($odooImage -notmatch '^[A-Za-z0-9][A-Za-z0-9._/@:-]+$') -or
     ($pgAdminImage -notmatch '^[A-Za-z0-9][A-Za-z0-9._/@:-]+$')) {
     throw "An image reference in .env is invalid."
 }
+
+Write-Section "5/6" "Review the installation plan"
+Write-Host ("  {0,-24} {1}" -f "Profile", $mode)
+Write-Host ("  {0,-24} {1}" -f "Community", "enabled on port $communityPort")
+if ($startEnterprise) {
+    Write-Host ("  {0,-24} {1}" -f "Enterprise", "enabled on port $enterprisePort")
+    if ([string]::IsNullOrWhiteSpace($enterpriseSource)) {
+        Write-Host ("  {0,-24} {1}" -f "Enterprise addons", "reuse installed addons")
+    } else {
+        Write-Host ("  {0,-24} {1}" -f "Enterprise addons", "import from $enterpriseSource")
+    }
+} else {
+    Write-Host ("  {0,-24} {1}" -f "Enterprise", "not selected")
+}
+if ($pgAdminEnabled) {
+    Write-Host ("  {0,-24} {1}" -f "pgAdmin", "enabled on port $pgAdminPort")
+    Write-Host ("  {0,-24} {1}" -f "pgAdmin login", $pgAdminEmail)
+} else {
+    Write-Host ("  {0,-24} {1}" -f "pgAdmin", "not selected")
+}
+Write-Host ("  {0,-24} {1}" -f "Automatic restart", "enabled after Windows sign-in")
+Write-Host ""
+if (-not (Read-YesNo "Start this installation now?" $true)) {
+    Write-Host "Installation cancelled. No Odoo configuration or Enterprise addons were changed."
+    exit 0
+}
+
+if (-not [string]::IsNullOrWhiteSpace($enterpriseSource) -and
+    ((Resolve-Path -LiteralPath $enterpriseSource).Path -ne (Resolve-Path -LiteralPath $installedEnterprisePath).Path)) {
+    Write-Host "Copying Enterprise addons into this installation. This may take a moment..."
+    Get-ChildItem -LiteralPath $enterpriseSource -Force |
+        Copy-Item -Destination $installedEnterprisePath -Recurse -Force
+}
+
+Write-Host "Generating private configuration and credentials..."
 
 @"
 ODOO_IMAGE=$odooImage
@@ -324,20 +484,33 @@ $pgpassContent = "db-community:5432:*:odoo:$communityDbPassword`n" +
 
 $composePrefix = @("compose")
 if ($pgAdminEnabled) { $composePrefix += @("--profile", "pgadmin") }
+Write-Host "Downloading the required Docker images..."
 Invoke-NativeChecked "docker" ($composePrefix + @("pull"))
+if (-not $startEnterprise) {
+    $enterpriseContainerId = (& docker compose ps -q enterprise | Out-String).Trim()
+    if ($LASTEXITCODE -ne 0) { throw "The existing Enterprise application state could not be inspected." }
+    $enterpriseDbContainerId = (& docker compose ps -q db-enterprise | Out-String).Trim()
+    if ($LASTEXITCODE -ne 0) { throw "The existing Enterprise database state could not be inspected." }
+    if ((-not [string]::IsNullOrWhiteSpace($enterpriseContainerId)) -or
+        (-not [string]::IsNullOrWhiteSpace($enterpriseDbContainerId))) {
+        Write-Host "Stopping the previously running Enterprise services because Community-only was selected..."
+        Invoke-NativeChecked "docker" @("compose", "stop", "enterprise", "db-enterprise")
+    }
+}
+if (-not $pgAdminEnabled) {
+    $pgAdminContainerId = (& docker compose --profile pgadmin ps -q pgadmin | Out-String).Trim()
+    if ($LASTEXITCODE -ne 0) { throw "The existing pgAdmin container state could not be inspected." }
+    if (-not [string]::IsNullOrWhiteSpace($pgAdminContainerId)) {
+        Write-Host "Stopping pgAdmin because it was not selected..."
+        Invoke-NativeChecked "docker" @("compose", "--profile", "pgadmin", "stop", "pgadmin")
+    }
+}
 $upArguments = $composePrefix + @("up", "-d", "--wait", "--wait-timeout", "300")
 if (-not $startEnterprise) {
     $upArguments += @("db-community", "community")
     if ($pgAdminEnabled) { $upArguments += "pgadmin" }
 }
 Invoke-NativeChecked "docker" $upArguments
-if (-not $pgAdminEnabled) {
-    $pgAdminContainerId = (& docker compose --profile pgadmin ps -q pgadmin | Out-String).Trim()
-    if ($LASTEXITCODE -ne 0) { throw "The existing pgAdmin container state could not be inspected." }
-    if (-not [string]::IsNullOrWhiteSpace($pgAdminContainerId)) {
-        Invoke-NativeChecked "docker" @("compose", "--profile", "pgadmin", "stop", "pgadmin")
-    }
-}
 
 $hostIp = (Get-NetIPAddress -AddressFamily IPv4 |
     Where-Object { $_.IPAddress -notlike "127.*" -and $_.InterfaceOperationalStatus -eq "Up" } |
@@ -373,5 +546,16 @@ $installationInfo += @(
 )
 if ($pgAdminEnabled) { $installationInfo += "pgAdmin image: $pgAdminImage" }
 $installationInfo | Set-Content -Encoding utf8 "installation-info.txt"
+Write-Section "6/6" "Installation complete"
 Get-Content "installation-info.txt"
+Write-Host ""
+Write-Host "Next steps:" -ForegroundColor Cyan
+Write-Host "  1) Open the Community URL above in your browser."
+Write-Host "  2) Use its Odoo master password on the database creation page."
+if ($startEnterprise) {
+    Write-Host "  3) Open the Enterprise URL and use its separate master password."
+}
+if ($pgAdminEnabled) {
+    Write-Host "  - Sign in to pgAdmin with the email and password shown above."
+}
 Write-Host "Credentials are stored in $PSScriptRoot\installation-info.txt"
