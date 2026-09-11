@@ -42,8 +42,12 @@ chmod +x install-ubuntu.sh
 ```
 
 When run interactively, the Ubuntu script first clears the previous terminal
-output and then opens this color menu before performing package maintenance or
-starting services:
+output and then opens a keyboard-controlled dashboard before performing package
+maintenance or starting services. Use the Up/Down arrow keys and Enter, press a
+number directly, or press Esc/Ctrl+C to exit. On terminals smaller than 112×30,
+and during redirected or automated runs, it falls back to a clean numbered menu.
+
+![Ubuntu terminal dashboard](docs/images/ubuntu-terminal-dashboard.png)
 
 ```text
 ============================================================
@@ -67,8 +71,12 @@ Quick system snapshot
   [4] Check Ubuntu updates and missing dependencies
   [5] Uninstall Odoo
   [6] Exit
-Choose an option [1]:
+Choose an option [3]:
 ```
+
+When complete Enterprise addons are available, Both is highlighted as the
+recommended default. Without Enterprise addons, Community becomes the safe
+recommended default instead.
 
 Option 5 has a safe uninstall submenu. Its recommended choice removes containers
 but preserves databases and filestores. Permanent data deletion requires the

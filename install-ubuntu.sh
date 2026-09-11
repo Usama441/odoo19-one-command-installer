@@ -12,15 +12,23 @@ fi
 if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
   COLOR_PURPLE=$'\033[38;5;97m'
   COLOR_CYAN=$'\033[38;5;37m'
+  COLOR_BLUE=$'\033[38;5;81m'
   COLOR_GREEN=$'\033[38;5;34m'
   COLOR_YELLOW=$'\033[38;5;214m'
+  COLOR_WHITE=$'\033[38;5;255m'
+  COLOR_MUTED=$'\033[38;5;110m'
+  COLOR_MAGENTA_BG=$'\033[48;5;97m'
   COLOR_BOLD=$'\033[1m'
   COLOR_RESET=$'\033[0m'
 else
   COLOR_PURPLE=""
   COLOR_CYAN=""
+  COLOR_BLUE=""
   COLOR_GREEN=""
   COLOR_YELLOW=""
+  COLOR_WHITE=""
+  COLOR_MUTED=""
+  COLOR_MAGENTA_BG=""
   COLOR_BOLD=""
   COLOR_RESET=""
 fi
@@ -188,6 +196,140 @@ show_control_center_status() {
   echo "Choose an action below. Press Enter for the recommended default."
 }
 
+enterprise_addons_ready() {
+  [[ -f "$SCRIPT_DIR/enterprise-19.0/web_enterprise/__manifest__.py" ||
+     -f "$SCRIPT_DIR/enterprise/web_enterprise/__manifest__.py" ||
+     -f "$SCRIPT_DIR/addons/enterprise/web_enterprise/__manifest__.py" ]]
+}
+
+repeat_character() {
+  local character="$1" count="$2" repeated
+  printf -v repeated '%*s' "$count" ''
+  printf '%s' "${repeated// /$character}"
+}
+
+dashboard_border() {
+  printf '%b%s' "$COLOR_PURPLE" "$1"
+  repeat_character '─' 110
+  printf '%s%b\n' "$2" "$COLOR_RESET"
+}
+
+dashboard_line() {
+  local color="$1" content="$2"
+  printf '│  %b%-106s%b  │\n' "$color" "$content" "$COLOR_RESET"
+}
+
+draw_interactive_dashboard() {
+  local selected="$1" recommended="$2"
+  local docker_status enterprise_status installation_status line index label icon tag row_color selector
+
+  if command -v docker >/dev/null 2>&1; then
+    docker_status="●  Available"
+  else
+    docker_status="●  Not installed"
+  fi
+  if enterprise_addons_ready; then
+    enterprise_status="●  Ready"
+  else
+    enterprise_status="●  Not detected"
+  fi
+  if [[ -f "$SCRIPT_DIR/.env" ]]; then
+    installation_status="●  Existing configuration found"
+  else
+    installation_status="●  New installation"
+  fi
+
+  printf '\033[2J\033[H'
+  dashboard_border '╭' '╮'
+  dashboard_line "$COLOR_PURPLE$COLOR_BOLD" "odoo 19  │  ODOO 19 DEPLOYMENT CONTROL CENTER                                      [ ✓ READY ]"
+  dashboard_line "$COLOR_BLUE" "         │  Community  •  Enterprise  •  PostgreSQL  •  pgAdmin"
+  dashboard_line "$COLOR_MUTED" "         │  Script by TI ASSOCIATES  •  Developed by USAMA ARSHAD"
+  dashboard_border '╰' '╯'
+  echo
+  printf '%b%*s%b\n' "$COLOR_WHITE$COLOR_BOLD" 86 "Welcome to your all-in-one Odoo 19 deployment workspace." "$COLOR_RESET"
+  printf '%b%*s%b\n' "$COLOR_MUTED" 92 "Install, inspect, maintain, or safely remove your stack from one place." "$COLOR_RESET"
+  echo
+  dashboard_border '╭' '╮'
+  dashboard_line "$COLOR_CYAN$COLOR_BOLD" "▣  SYSTEM SNAPSHOT  ─────────────────────────────────────────────────────────────────────────────────"
+  printf -v line 'Ubuntu                 %s' "${PRETTY_NAME:-Unknown}"
+  dashboard_line "$COLOR_WHITE" "$line"
+  printf -v line 'Docker CLI             %s' "$docker_status"
+  if [[ "$docker_status" == *Available ]]; then dashboard_line "$COLOR_GREEN" "$line"; else dashboard_line "$COLOR_YELLOW" "$line"; fi
+  printf -v line 'Enterprise addons      %s' "$enterprise_status"
+  if [[ "$enterprise_status" == *Ready ]]; then dashboard_line "$COLOR_GREEN" "$line"; else dashboard_line "$COLOR_YELLOW" "$line"; fi
+  printf -v line 'Installer state        %s' "$installation_status"
+  dashboard_line "$COLOR_GREEN" "$line"
+  dashboard_border '╰' '╯'
+  echo
+  dashboard_border '╭' '╮'
+  dashboard_line "$COLOR_PURPLE$COLOR_BOLD" "☷  SELECT AN ACTION                         Use ↑/↓ to move  •  Enter to select  •  ★ Recommended"
+
+  for index in 1 2 3 4 5 6; do
+    case "$index" in
+      1) icon="⇩"; label="Install Odoo Community only" ;;
+      2) icon="⇩"; label="Install Odoo Enterprise only" ;;
+      3) icon="⇩"; label="Install both Community and Enterprise" ;;
+      4) icon="⚙"; label="Check Ubuntu updates and missing dependencies" ;;
+      5) icon="♲"; label="Uninstall Odoo" ;;
+      6) icon="↩"; label="Exit" ;;
+    esac
+    tag=""
+    if (( index == recommended )); then tag="★ RECOMMENDED"; fi
+    selector=" "
+    row_color="$COLOR_WHITE"
+    if (( index == selected )); then
+      selector="›"
+      row_color="$COLOR_MAGENTA_BG$COLOR_WHITE$COLOR_BOLD"
+    fi
+    printf -v line '%s  [%s]  %-3s %-70s %s' "$selector" "$index" "$icon" "$label" "$tag"
+    dashboard_line "$row_color" "$line"
+  done
+  dashboard_border '╰' '╯'
+  echo
+  dashboard_border '╭' '╮'
+  dashboard_line "$COLOR_MUTED" "Enter  Select        ↑↓  Navigate        Esc  Exit        Ctrl+C  Exit"
+  dashboard_border '╰' '╯'
+}
+
+interactive_dashboard_supported() {
+  local terminal_columns terminal_rows
+  [[ -t 0 && -t 1 && -z "${NO_COLOR:-}" && "${TERM:-dumb}" != "dumb" ]] || return 1
+  command -v tput >/dev/null 2>&1 || return 1
+  terminal_columns="$(tput cols 2>/dev/null || printf '0')"
+  terminal_rows="$(tput lines 2>/dev/null || printf '0')"
+  [[ "$terminal_columns" =~ ^[0-9]+$ && "$terminal_rows" =~ ^[0-9]+$ ]] &&
+    (( terminal_columns >= 112 && terminal_rows >= 30 ))
+}
+
+read_interactive_main_choice() {
+  local selected="$1" recommended="$1" key sequence
+  printf '\033[?25l'
+  trap 'printf "\033[?25h"' EXIT
+  while true; do
+    draw_interactive_dashboard "$selected" "$recommended"
+    IFS= read -rsn1 key || true
+    case "$key" in
+      '') MAIN_CHOICE="$selected"; break ;;
+      [1-6]) MAIN_CHOICE="$key"; break ;;
+      k|K) (( selected > 1 )) && selected=$((selected - 1)) ;;
+      j|J) (( selected < 6 )) && selected=$((selected + 1)) ;;
+      q|Q) MAIN_CHOICE="6"; break ;;
+      $'\033')
+        sequence=""
+        IFS= read -rsn2 -t 0.08 sequence || true
+        case "$sequence" in
+          '[A') (( selected > 1 )) && selected=$((selected - 1)) ;;
+          '[B') (( selected < 6 )) && selected=$((selected + 1)) ;;
+          '') MAIN_CHOICE="6"; break ;;
+        esac
+        ;;
+    esac
+  done
+  printf '\033[?25h'
+  trap - EXIT
+  echo
+}
+
 run_uninstaller() {
   section "UNINSTALL" "Remove this Odoo installation"
   echo "Docker itself and your source-code folders will not be removed."
@@ -257,15 +399,25 @@ run_uninstaller() {
   esac
 }
 
-show_control_center_status
-section "MENU" "What would you like to do?"
-menu_item "1" "Install Odoo Community only"
-menu_item "2" "Install Odoo Enterprise only"
-menu_item "3" "Install both Community and Enterprise"
-menu_item "4" "Check Ubuntu updates and missing dependencies"
-menu_item "5" "Uninstall Odoo"
-menu_item "6" "Exit"
-read_choice MAIN_CHOICE "Choose an option [1]: " "1" "1 2 3 4 5 6"
+if enterprise_addons_ready; then
+  DEFAULT_MAIN_CHOICE="3"
+else
+  DEFAULT_MAIN_CHOICE="1"
+fi
+
+if interactive_dashboard_supported; then
+  read_interactive_main_choice "$DEFAULT_MAIN_CHOICE"
+else
+  show_control_center_status
+  section "MENU" "What would you like to do?"
+  menu_item "1" "Install Odoo Community only"
+  menu_item "2" "Install Odoo Enterprise only"
+  menu_item "3" "Install both Community and Enterprise"
+  menu_item "4" "Check Ubuntu updates and missing dependencies"
+  menu_item "5" "Uninstall Odoo"
+  menu_item "6" "Exit"
+  read_choice MAIN_CHOICE "Choose an option [$DEFAULT_MAIN_CHOICE]: " "$DEFAULT_MAIN_CHOICE" "1 2 3 4 5 6"
+fi
 
 INSTALL_ACTION="install"
 START_COMMUNITY="false"
