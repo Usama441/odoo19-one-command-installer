@@ -208,6 +208,16 @@ repeat_character() {
   printf '%s' "${repeated// /$character}"
 }
 
+print_padded_text() {
+  local content="$1" width="$2" content_width padding
+  content_width="${#content}"
+  printf '%s' "$content"
+  if (( content_width < width )); then
+    padding=$((width - content_width))
+    printf '%*s' "$padding" ''
+  fi
+}
+
 dashboard_border() {
   printf '%b%s' "$COLOR_PURPLE" "$1"
   repeat_character '─' 110
@@ -216,28 +226,31 @@ dashboard_border() {
 
 dashboard_line() {
   local color="$1" content="$2"
-  printf '│  %b%-106s%b  │\n' "$color" "$content" "$COLOR_RESET"
+  printf '│  %b' "$color"
+  print_padded_text "$content" 106
+  printf '%b  │\n' "$COLOR_RESET"
 }
 
 dashboard_header_row() {
   local left_color="$1" left="$2" center_color="$3" center="$4" right_color="$5" right="$6"
-  printf '%b│%b  %b%-18s%b %b│%b %b%-55s%b %b│%b %b%-27s%b  %b│%b\n' \
-    "$COLOR_PURPLE" "$COLOR_RESET" \
-    "$left_color" "$left" "$COLOR_RESET" \
-    "$COLOR_MUTED" "$COLOR_RESET" \
-    "$center_color" "$center" "$COLOR_RESET" \
-    "$COLOR_MUTED" "$COLOR_RESET" \
-    "$right_color" "$right" "$COLOR_RESET" \
-    "$COLOR_PURPLE" "$COLOR_RESET"
+  printf '%b│%b  %b' "$COLOR_PURPLE" "$COLOR_RESET" "$left_color"
+  print_padded_text "$left" 18
+  printf '%b %b│%b %b' "$COLOR_RESET" "$COLOR_MUTED" "$COLOR_RESET" "$center_color"
+  print_padded_text "$center" 55
+  printf '%b %b│%b %b' "$COLOR_RESET" "$COLOR_MUTED" "$COLOR_RESET" "$right_color"
+  print_padded_text "$right" 27
+  printf '%b  %b│%b\n' "$COLOR_RESET" "$COLOR_PURPLE" "$COLOR_RESET"
 }
 
 dashboard_snapshot_row() {
   local icon="$1" label="$2" value="$3" value_color="$4"
-  printf '│  %b%-4s%b%-30s%b%-72s%b  │\n' \
-    "$COLOR_BLUE$COLOR_BOLD" "$icon" \
-    "$COLOR_WHITE" "$label" \
-    "$value_color" "$value" \
-    "$COLOR_RESET"
+  printf '│  %b' "$COLOR_BLUE$COLOR_BOLD"
+  print_padded_text "$icon" 4
+  printf '%b' "$COLOR_WHITE"
+  print_padded_text "$label" 30
+  printf '%b' "$value_color"
+  print_padded_text "$value" 72
+  printf '%b  │\n' "$COLOR_RESET"
 }
 
 draw_interactive_dashboard() {
