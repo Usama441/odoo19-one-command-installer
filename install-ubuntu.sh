@@ -30,8 +30,10 @@ print_banner() {
   cat <<'EOF'
 
 ============================================================
-              Odoo 19 Guided Installer
+             ODOO 19 DEPLOYMENT CONTROL CENTER
      Community • Enterprise • PostgreSQL • pgAdmin
+                  Script by TI ASSOCIATES
+              Developed by USAMA ARSHAD
 ============================================================
 EOF
   printf '%b' "$COLOR_RESET"
@@ -42,9 +44,13 @@ section() {
   printf '%s\n' "------------------------------------------------------------"
 }
 
+menu_item() {
+  printf '  %b[%s]%b %s\n' "$COLOR_GREEN$COLOR_BOLD" "$1" "$COLOR_RESET" "$2"
+}
+
 print_banner
-echo "Choose an action below. Installations use a six-step guided setup."
-echo "Press Enter to accept a recommended default."
+printf '%b\n' "${COLOR_BOLD}Welcome to your all-in-one Odoo 19 deployment workspace.${COLOR_RESET}"
+echo "Install, inspect, maintain, or safely remove your stack from one place."
 
 if [[ "${EUID}" -eq 0 ]]; then
   echo "Run this script as your normal sudo-enabled user, not as root."
@@ -152,6 +158,36 @@ setup_docker_repository() {
   APT_INDEX_READY="true"
 }
 
+show_control_center_status() {
+  local docker_status enterprise_status installation_status
+  if command -v docker >/dev/null 2>&1; then
+    docker_status="Available"
+  else
+    docker_status="Not installed"
+  fi
+  if [[ -f "$SCRIPT_DIR/enterprise-19.0/web_enterprise/__manifest__.py" ||
+        -f "$SCRIPT_DIR/enterprise/web_enterprise/__manifest__.py" ||
+        -f "$SCRIPT_DIR/addons/enterprise/web_enterprise/__manifest__.py" ]]; then
+    enterprise_status="Ready"
+  else
+    enterprise_status="Not detected"
+  fi
+  if [[ -f "$SCRIPT_DIR/.env" ]]; then
+    installation_status="Existing configuration found"
+  else
+    installation_status="New installation"
+  fi
+
+  echo
+  printf '%b\n' "${COLOR_BOLD}Quick system snapshot${COLOR_RESET}"
+  printf '  %-22s %s\n' "Ubuntu" "${PRETTY_NAME:-Unknown}"
+  printf '  %-22s %s\n' "Docker CLI" "$docker_status"
+  printf '  %-22s %s\n' "Enterprise addons" "$enterprise_status"
+  printf '  %-22s %s\n' "Installer state" "$installation_status"
+  echo
+  echo "Choose an action below. Press Enter for the recommended default."
+}
+
 run_uninstaller() {
   section "UNINSTALL" "Remove this Odoo installation"
   echo "Docker itself and your source-code folders will not be removed."
@@ -221,13 +257,14 @@ run_uninstaller() {
   esac
 }
 
+show_control_center_status
 section "MENU" "What would you like to do?"
-echo "  1) Install Odoo Community only"
-echo "  2) Install Odoo Enterprise only"
-echo "  3) Install both Community and Enterprise"
-echo "  4) Check Ubuntu updates and missing dependencies"
-echo "  5) Uninstall Odoo"
-echo "  6) Exit"
+menu_item "1" "Install Odoo Community only"
+menu_item "2" "Install Odoo Enterprise only"
+menu_item "3" "Install both Community and Enterprise"
+menu_item "4" "Check Ubuntu updates and missing dependencies"
+menu_item "5" "Uninstall Odoo"
+menu_item "6" "Exit"
 read_choice MAIN_CHOICE "Choose an option [1]: " "1" "1 2 3 4 5 6"
 
 INSTALL_ACTION="install"

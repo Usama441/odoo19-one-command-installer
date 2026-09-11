@@ -4,6 +4,8 @@ Guided installers for Ubuntu and Windows that run Community only, Enterprise
 only, or both Odoo 19 editions, with optional pgAdmin, as isolated Docker
 services.
 
+**Script by TI ASSOCIATES · Developed by USAMA ARSHAD**
+
 ![Odoo 19 installer flow](docs/images/installer-flow.svg)
 
 ## What gets installed
@@ -44,14 +46,27 @@ output and then opens this color menu before performing package maintenance or
 starting services:
 
 ```text
+============================================================
+             ODOO 19 DEPLOYMENT CONTROL CENTER
+     Community • Enterprise • PostgreSQL • pgAdmin
+                  Script by TI ASSOCIATES
+              Developed by USAMA ARSHAD
+============================================================
+
+Quick system snapshot
+  Ubuntu                 Ubuntu 24.04 LTS
+  Docker CLI             Available
+  Enterprise addons      Ready
+  Installer state        New installation
+
 [MENU] What would you like to do?
 ------------------------------------------------------------
-  1) Install Odoo Community only
-  2) Install Odoo Enterprise only
-  3) Install both Community and Enterprise
-  4) Check Ubuntu updates and missing dependencies
-  5) Uninstall Odoo
-  6) Exit
+  [1] Install Odoo Community only
+  [2] Install Odoo Enterprise only
+  [3] Install both Community and Enterprise
+  [4] Check Ubuntu updates and missing dependencies
+  [5] Uninstall Odoo
+  [6] Exit
 Choose an option [1]:
 ```
 
