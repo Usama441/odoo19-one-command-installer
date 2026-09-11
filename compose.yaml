@@ -83,9 +83,6 @@ services:
     image: ${PGADMIN_IMAGE:-dpage/pgadmin4:9.17}
     profiles: ["pgadmin"]
     restart: unless-stopped
-    depends_on:
-      db-community:
-        condition: service_healthy
     ports:
       - "${PGADMIN_PORT}:80"
     environment:

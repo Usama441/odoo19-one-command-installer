@@ -1,7 +1,8 @@
-# Odoo 19 dual-edition one-command installer
+# Odoo 19 multi-mode one-command installer
 
-Guided installers for Ubuntu and Windows that run Odoo 19 Community, optional
-Odoo 19 Enterprise, and optional pgAdmin as isolated Docker services.
+Guided installers for Ubuntu and Windows that run Community only, Enterprise
+only, or both Odoo 19 editions, with optional pgAdmin, as isolated Docker
+services.
 
 ![Odoo 19 installer flow](docs/images/installer-flow.svg)
 
@@ -9,8 +10,8 @@ Odoo 19 Enterprise, and optional pgAdmin as isolated Docker services.
 
 | Component | When it starts | Default address |
 |---|---|---|
-| Odoo 19 Community + PostgreSQL | Always | `http://SERVER-IP:8069` |
-| Odoo 19 Enterprise + PostgreSQL | When licensed Enterprise addons are supplied or already present | `http://SERVER-IP:8070` |
+| Odoo 19 Community + PostgreSQL | Community or Both is selected | `http://SERVER-IP:8069` |
+| Odoo 19 Enterprise + PostgreSQL | Enterprise or Both is selected and licensed addons exist | `http://SERVER-IP:8070` |
 | pgAdmin 4 web application | When the user answers `y` | `http://SERVER-IP:5050` |
 
 Community and Enterprise use separate databases, passwords, filestores, ports,
@@ -37,6 +38,26 @@ your sudo password when Ubuntu requests it.
 chmod +x install-ubuntu.sh
 ./install-ubuntu.sh
 ```
+
+The Ubuntu installer opens this color terminal menu before performing package
+maintenance or starting services:
+
+```text
+[MENU] What would you like to do?
+------------------------------------------------------------
+  1) Install Odoo Community only
+  2) Install Odoo Enterprise only
+  3) Install both Community and Enterprise
+  4) Check Ubuntu updates and missing dependencies
+  5) Uninstall Odoo
+  6) Exit
+Choose an option [1]:
+```
+
+Option 5 has a safe uninstall submenu. Its recommended choice removes containers
+but preserves databases and filestores. Permanent data deletion requires the
+user to select the destructive option and type `DELETE`; Docker and source-code
+folders are never removed.
 
 If Docker is missing, the script installs Docker Engine and the Compose plugin
 from Docker's official Ubuntu repository after receiving user approval. Before
@@ -79,7 +100,7 @@ Docker Desktop and explains the required restart before Odoo setup continues.
 
 ### Ubuntu preparation questions
 
-These appear before the Odoo configuration questions:
+These appear after choosing install or dependency check from the main menu:
 
 | Order | Prompt | Effect |
 |---:|---|---|
@@ -104,19 +125,21 @@ OpenSSL, Docker Engine, and Docker Compose are required to continue. If any of
 them remain missing after the user's choices, the installer stops and explains
 how to rerun it.
 
-### Odoo service questions
+### Odoo installation questions
 
 | Order | Prompt | What it controls |
 |---:|---|---|
 | 1 | `Choose a profile [1]` | `1` selects testing. `2` selects production with two workers and basic memory limits. |
-| 2 | `Community web port [8069]` | Browser port for Odoo Community. |
-| 3 | `Choose an edition option [1]` | Selects Community only, detected/existing Enterprise addons, or another Enterprise folder. The recommended choice adapts to what the installer detects. |
-| 4 | `Enterprise addons folder` | Asked only when Enterprise was selected but no detected folder is being used. The folder is validated before it is copied. |
-| 5 | `Enterprise web port [8070]` | Asked only when Enterprise will start. It must differ from the Community port. |
-| 6 | `Add pgAdmin to this installation? [y/N]` | Enables the optional pgAdmin web application. A rerun with pgAdmin enabled instead asks whether to keep it enabled. |
-| 7 | `pgAdmin web port [5050]` | Asked only when pgAdmin is enabled. It must differ from the enabled Odoo ports. |
-| 8 | `pgAdmin login email [admin@example.com]` | Asked only on the first pgAdmin setup. Existing pgAdmin data reuses the saved email. |
-| 9 | `Start this installation now? [Y/n]` | Shows after a complete plan summary and provides a final chance to cancel before configuration or Enterprise addons are changed. |
+| 2 | `Community web port [8069]` | Asked only when Community or Both was selected in the Ubuntu menu. |
+| 3 | `Enterprise addons folder` | Asked only when Enterprise is selected and complete addons were not detected automatically. |
+| 4 | `Enterprise web port [8070]` | Asked only when Enterprise will start. In Both mode it must differ from the Community port. |
+| 5 | `Add pgAdmin to this installation? [y/N]` | Enables the optional pgAdmin web application. A rerun with pgAdmin enabled instead asks whether to keep it enabled. |
+| 6 | `pgAdmin web port [5050]` | Asked only when pgAdmin is enabled. It must differ from the selected Odoo ports. |
+| 7 | `pgAdmin login email [admin@example.com]` | Asked only on the first pgAdmin setup. Existing pgAdmin data reuses the saved email. |
+| 8 | `Start this installation now? [Y/n]` | Shows after a complete plan summary and provides a final chance to cancel before configuration or Enterprise addons are changed. |
+
+Windows still uses its adaptive edition menu inside the guided wizard. The new
+top-level action and uninstall menu are specific to the Ubuntu terminal script.
 
 The PostgreSQL passwords, Odoo master passwords, and pgAdmin login password are
 never requested. The installer generates strong random values automatically.
@@ -124,63 +147,65 @@ never requested. The installer generates strong random values automatically.
 Example Community + pgAdmin installation when no Enterprise folder is detected:
 
 ```text
+Choose an option [1]: 1
 Refresh package lists and upgrade installed Ubuntu packages now? [y/N]: n
-Choose an option [1]:
 Choose a profile [1]:
 Community web port [8069]:
-Choose an edition option [1]: 1
 Add pgAdmin to this installation? [y/N]: y
 pgAdmin web port [5050]:
 pgAdmin login email [admin@example.com]: admin@example.com
 Start this installation now? [Y/n]:
 ```
 
-When `enterprise-19.0/` is beside the installer, both scripts detect it and show
-its full path. The user normally presses Enter to accept it instead of typing a
-folder path. The path is built from the installer's current location, so Linux
-and Windows usernames are detected automatically instead of being hard-coded.
-On a rerun, selecting Community only stops previously running Enterprise
-containers, and disabling pgAdmin stops its existing container.
+When `enterprise-19.0/` is beside the installer, both scripts detect its full
+path. Ubuntu uses it automatically after Enterprise or Both is selected; Windows
+offers it as the recommended edition source. The path is built from the
+installer's current location, so Linux and Windows usernames are detected
+automatically instead of being hard-coded.
+On a rerun, selecting only one edition stops the other edition's previously
+running containers, and disabling pgAdmin stops its existing container.
 
 ## Complete execution flow
 
 1. **Validate the platform.** Ubuntu checks for Ubuntu 22.04/24.04 and refuses
    to run as root. Windows starts through PowerShell from the project folder.
-2. **Offer Ubuntu maintenance.** The Ubuntu script asks whether to refresh APT
+2. **Choose an Ubuntu action.** The first menu offers Community, Enterprise,
+   Both, dependency maintenance, safe uninstall, or exit.
+3. **Offer Ubuntu maintenance.** The Ubuntu script asks whether to refresh APT
    metadata and upgrade installed packages. If a reboot becomes necessary, the
    user can stop safely and continue after restarting the machine.
-3. **Audit and prepare prerequisites.** Ubuntu displays CA certificates, curl,
+4. **Audit and prepare prerequisites.** Ubuntu displays CA certificates, curl,
    OpenSSL, Docker Engine, Compose, and Docker service status. Missing items are
    installed only after bulk or per-item approval. Windows checks Docker Desktop,
    can install it through `winget`, and configures it to start at user sign-in.
-4. **Guide the user through choices.** Numbered menus select testing/production,
-   Community/Enterprise, optional pgAdmin, and only the ports that are relevant.
+5. **Guide the user through choices.** Numbered menus select testing/production,
+   optional pgAdmin, and only the ports relevant to the chosen Odoo editions.
    A recent Compose version with `--wait` support is required.
-5. **Protect existing data.** The script detects installer-created Docker
+6. **Protect existing data.** The script detects installer-created Docker
    volumes. If data volumes exist but `.env` is missing, it stops instead of
    creating new passwords that cannot access the existing data.
-6. **Prepare Enterprise.** The installer first detects existing copied addons or
+7. **Prepare Enterprise.** The installer first detects existing copied addons or
    `enterprise-19.0/` beside the script. Manual path entry is requested only when
-   the user selects another folder. The folder must contain addon manifests and
-   `web_enterprise` before it is copied into `addons/enterprise`.
-7. **Configure pgAdmin.** If selected, the script prepares pgAdmin login data,
+   complete Enterprise addons were not detected. The folder must contain addon
+   manifests and `web_enterprise` before it is copied into `addons/enterprise`.
+8. **Configure pgAdmin.** If selected, the script prepares pgAdmin login data,
    a server-definition file, and a protected PostgreSQL password file. It
-   registers Community automatically and also registers Enterprise when that
-   stack will start.
-8. **Generate or reuse configuration.** On the first run, random passwords are
+   registers only the Community and/or Enterprise databases selected for this
+   run.
+9. **Generate or reuse configuration.** On the first run, random passwords are
    generated. On reruns, database, Odoo master, and pgAdmin credentials are
    preserved. `.env` and the Odoo configuration files are then updated with the
    current ports and environment mode.
-9. **Review and confirm.** A summary shows the selected profile, editions, ports,
+10. **Review and confirm.** A summary shows the selected profile, editions, ports,
    pgAdmin choice, and automatic restart state before Odoo configuration or
    Enterprise addons are changed.
-10. **Pull and start containers.** The pinned images are downloaded. Community
-   always starts; Enterprise and pgAdmin start only when selected by the earlier
-   choices. Every created service has the `restart: unless-stopped` policy.
-11. **Wait for health.** Docker Compose waits up to 300 seconds for all requested
+11. **Pull and start containers.** The pinned images are downloaded. Only the
+   selected Odoo editions and optional pgAdmin start. Every created service has
+   the `restart: unless-stopped` policy.
+12. **Wait for health.** Docker Compose waits up to 300 seconds for all requested
    services. On Ubuntu, an already-active UFW firewall receives allow rules for
    the selected public web ports.
-12. **Show next steps.** The terminal prints URLs, credentials, and browser setup
+13. **Show next steps.** The terminal prints URLs, credentials, and browser setup
    guidance. The access information is also saved to `installation-info.txt`.
 
 ## Runtime architecture
@@ -189,8 +214,8 @@ containers, and disabling pgAdmin stops its existing container.
 
 | Web service | Internal database | Persistent storage | Start condition |
 |---|---|---|---|
-| `community` | `db-community` | `community-data`, `community-db` | Always |
-| `enterprise` | `db-enterprise` | `enterprise-data`, `enterprise-db` | Enterprise addons exist |
+| `community` | `db-community` | `community-data`, `community-db` | Community or Both is selected |
+| `enterprise` | `db-enterprise` | `enterprise-data`, `enterprise-db` | Enterprise or Both is selected and addons exist |
 | `pgadmin` | Connects to the selected internal databases | `pgadmin-data` | User enables pgAdmin |
 
 The two PostgreSQL services listen only on Docker's internal network. Only the
@@ -212,9 +237,9 @@ No installer rerun is normally required after restarting the machine:
   stopped. `docker compose down` removes the containers, so run the installer or
   `docker compose up -d` before expecting automatic restarts again.
 
-Only services that were actually created will restart. For example, Enterprise
-will not appear after reboot unless Enterprise addons were supplied, and pgAdmin
-will not appear unless it was enabled during installation.
+Only services selected during installation will restart. For example, an
+Enterprise-only setup does not start Community, and pgAdmin does not appear
+unless it was enabled during installation.
 
 ## Files created or updated
 
@@ -265,7 +290,8 @@ desktop application.
 1. Open the pgAdmin URL from `installation-info.txt`.
 2. Sign in with its saved **pgAdmin login email** and **pgAdmin login password**.
 3. Expand the `Odoo 19` group in the left panel.
-4. Open `Odoo 19 Community PostgreSQL`, or the Enterprise server when present.
+4. Open the registered server for the Community and/or Enterprise edition that
+   was selected during installation.
 
 The installer-generated `pgpass` file allows those registered servers to
 connect without requesting the PostgreSQL password. Because
@@ -281,7 +307,7 @@ refreshed when pgAdmin starts; manually added server definitions may be replaced
 | pgAdmin password | Generated | Reused from `.env` |
 | Odoo ports and mode | Selected through guided menus | Asked again and configuration updated |
 | pgAdmin choice and port | Asked; disabled by default | Asked again; previous enabled state and port become defaults |
-| Enterprise addons | Nearby folder is auto-detected or another folder is selected | Existing addons are recommended automatically, with an option to update or disable Enterprise |
+| Enterprise addons | Nearby folder is detected automatically or its path is requested | Existing copied addons are reused automatically when Enterprise is selected |
 | Persistent databases and filestores | Created | Kept and reused |
 
 If an existing database or pgAdmin volume is present but its required saved
@@ -295,9 +321,9 @@ You must have a valid Odoo Enterprise subscription and a legal local copy of
 those addons.
 
 To add Enterprise after a Community-only installation, place the licensed folder
-beside the installer and name it `enterprise-19.0`, or choose its location from
-the edition menu. Existing modules under `addons/enterprise` are detected and
-offered as the recommended choice on later runs.
+beside the installer and name it `enterprise-19.0`, then choose Enterprise or
+Both from the Ubuntu main menu. Existing modules under `addons/enterprise` are
+detected and reused automatically on later runs.
 
 ## Useful commands
 

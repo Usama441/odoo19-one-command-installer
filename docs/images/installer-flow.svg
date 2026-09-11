@@ -46,9 +46,9 @@
 
     <rect x="880" y="145" width="640" height="160" rx="20" fill="#ffffff" stroke="#d8dee9" stroke-width="2"/>
     <text class="step" x="910" y="180">STEP 3</text>
-    <text class="heading" x="910" y="217">Audit + user approval</text>
-    <text class="body" x="910" y="252">Ubuntu updates • dependency report • bulk/one-by-one install</text>
-    <text class="body" x="910" y="280">Docker auto-start • Odoo choices • Enterprise • pgAdmin</text>
+    <text class="heading" x="910" y="217">Choose an action</text>
+    <text class="body" x="910" y="252">Ubuntu: Community • Enterprise • Both • dependencies • uninstall</text>
+    <text class="body" x="910" y="280">Windows: guided editions • both platforms check Docker</text>
   </g>
 
   <path class="arrow" d="M 400 225 L 466 225"/>
@@ -58,8 +58,8 @@
   <g filter="url(#shadow)">
     <rect x="250" y="390" width="1100" height="120" rx="20" fill="#714b67"/>
     <text class="step" x="290" y="425" fill="#f4dff0">STEP 4</text>
-    <text class="white-heading" x="290" y="462">Detect available options, review the plan, and confirm</text>
-    <text class="white-body" x="290" y="490">Adaptive menus • enabled services • selected ports • final user approval</text>
+    <text class="white-heading" x="290" y="462">Configure selected services, review the plan, and confirm</text>
+    <text class="white-body" x="290" y="490">Detected Enterprise addons • relevant ports • pgAdmin • final approval</text>
   </g>
 
   <path class="arrow" d="M 800 510 L 800 555 L 260 555 L 260 595"/>
@@ -68,8 +68,8 @@
 
   <g filter="url(#shadow)">
     <rect x="80" y="600" width="360" height="155" rx="20" fill="#ffffff" stroke="#714b67" stroke-width="3"/>
-    <rect x="105" y="620" width="92" height="27" rx="14" fill="#16a34a"/>
-    <text class="badge" x="124" y="639">ALWAYS</text>
+    <rect x="105" y="620" width="118" height="27" rx="14" fill="#16a34a"/>
+    <text class="badge" x="121" y="639">SELECTABLE</text>
     <text class="heading" x="110" y="686">Community stack</text>
     <text class="body" x="110" y="720">Odoo Community + PostgreSQL</text>
     <text class="small" x="110" y="744">Default web port: 8069</text>

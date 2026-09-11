@@ -4,7 +4,24 @@ set -Eeuo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
+  COLOR_PURPLE=$'\033[38;5;97m'
+  COLOR_CYAN=$'\033[38;5;37m'
+  COLOR_GREEN=$'\033[38;5;34m'
+  COLOR_YELLOW=$'\033[38;5;214m'
+  COLOR_BOLD=$'\033[1m'
+  COLOR_RESET=$'\033[0m'
+else
+  COLOR_PURPLE=""
+  COLOR_CYAN=""
+  COLOR_GREEN=""
+  COLOR_YELLOW=""
+  COLOR_BOLD=""
+  COLOR_RESET=""
+fi
+
 print_banner() {
+  printf '%b' "$COLOR_PURPLE$COLOR_BOLD"
   cat <<'EOF'
 
 ============================================================
@@ -12,16 +29,17 @@ print_banner() {
      Community • Enterprise • PostgreSQL • pgAdmin
 ============================================================
 EOF
+  printf '%b' "$COLOR_RESET"
 }
 
 section() {
-  printf '\n[%s] %s\n' "$1" "$2"
+  printf '\n%b[%s] %s%b\n' "$COLOR_CYAN$COLOR_BOLD" "$1" "$2" "$COLOR_RESET"
   printf '%s\n' "------------------------------------------------------------"
 }
 
 print_banner
-echo "Follow the six guided steps. Press Enter to accept a recommended default."
-echo "You will review the complete Odoo plan before configuration or services change."
+echo "Choose an action below. Installations use a six-step guided setup."
+echo "Press Enter to accept a recommended default."
 
 if [[ "${EUID}" -eq 0 ]]; then
   echo "Run this script as your normal sudo-enabled user, not as root."
@@ -128,6 +146,96 @@ setup_docker_repository() {
   sudo apt-get update
   APT_INDEX_READY="true"
 }
+
+run_uninstaller() {
+  section "UNINSTALL" "Remove this Odoo installation"
+  echo "Docker itself and your source-code folders will not be removed."
+
+  if ! command -v docker >/dev/null 2>&1; then
+    echo "Docker is not installed, so there are no Docker-based Odoo services to remove."
+    return
+  fi
+
+  local docker_command=(docker)
+  if ! docker info >/dev/null 2>&1; then
+    if sudo docker info >/dev/null 2>&1; then
+      docker_command=(sudo docker)
+    else
+      echo "Docker is installed but its engine is not running. Start Docker, then choose uninstall again."
+      return
+    fi
+  fi
+  if ! "${docker_command[@]}" compose version >/dev/null 2>&1; then
+    echo "Docker Compose is unavailable, so the installer services cannot be removed safely."
+    return
+  fi
+
+  export COMMUNITY_DB_PASSWORD="${COMMUNITY_DB_PASSWORD:-unused}"
+  export ENTERPRISE_DB_PASSWORD="${ENTERPRISE_DB_PASSWORD:-unused}"
+  export COMMUNITY_PORT="${COMMUNITY_PORT:-8069}"
+  export ENTERPRISE_PORT="${ENTERPRISE_PORT:-8070}"
+  export PGADMIN_PORT="${PGADMIN_PORT:-5050}"
+  export PGADMIN_EMAIL="${PGADMIN_EMAIL:-admin@example.com}"
+  export PGADMIN_PASSWORD="${PGADMIN_PASSWORD:-unused}"
+
+  echo
+  echo "Current installer-managed containers:"
+  "${docker_command[@]}" compose --profile pgadmin ps -a || true
+  echo
+  echo "  1) Remove containers but keep databases and filestores (recommended)"
+  echo "  2) Permanently delete containers, databases, filestores, and pgAdmin data"
+  echo "  3) Cancel"
+  local uninstall_choice confirmation
+  read_choice uninstall_choice "Choose an uninstall option [1]: " "1" "1 2 3"
+
+  case "$uninstall_choice" in
+    1)
+      "${docker_command[@]}" compose --profile pgadmin down
+      echo
+      printf '%b\n' "${COLOR_GREEN}Odoo containers were removed. Persistent data was kept.${COLOR_RESET}"
+      echo "Run this installer again whenever you want to recreate the services."
+      ;;
+    2)
+      printf '%b\n' "${COLOR_YELLOW}WARNING: This permanently deletes all installer-managed Docker data.${COLOR_RESET}"
+      read -r -p "Type DELETE to confirm permanent data removal: " confirmation
+      if [[ "$confirmation" != "DELETE" ]]; then
+        echo "Permanent uninstall cancelled; nothing was removed."
+        return
+      fi
+      "${docker_command[@]}" compose --profile pgadmin down --volumes
+      rm -f .env installation-info.txt \
+        config/community/odoo.conf config/enterprise/odoo.conf \
+        config/pgadmin/servers.json config/pgadmin/pgpass
+      echo
+      printf '%b\n' "${COLOR_GREEN}Odoo containers and persistent Docker data were removed.${COLOR_RESET}"
+      echo "Enterprise source, copied addons, and custom-addon folders were preserved."
+      ;;
+    3)
+      echo "Uninstall cancelled; nothing was removed."
+      ;;
+  esac
+}
+
+section "MENU" "What would you like to do?"
+echo "  1) Install Odoo Community only"
+echo "  2) Install Odoo Enterprise only"
+echo "  3) Install both Community and Enterprise"
+echo "  4) Check Ubuntu updates and missing dependencies"
+echo "  5) Uninstall Odoo"
+echo "  6) Exit"
+read_choice MAIN_CHOICE "Choose an option [1]: " "1" "1 2 3 4 5 6"
+
+INSTALL_ACTION="install"
+START_COMMUNITY="false"
+START_ENTERPRISE="false"
+case "$MAIN_CHOICE" in
+  1) START_COMMUNITY="true" ;;
+  2) START_ENTERPRISE="true" ;;
+  3) START_COMMUNITY="true"; START_ENTERPRISE="true" ;;
+  4) INSTALL_ACTION="dependencies" ;;
+  5) run_uninstaller; exit 0 ;;
+  6) echo "Goodbye."; exit 0 ;;
+esac
 
 section "1/6" "Prepare Ubuntu and check requirements"
 echo "Ubuntu package maintenance"
@@ -271,6 +379,12 @@ if [[ "$COMPOSE_UP_HELP" != *"--wait-timeout"* ]]; then
   exit 1
 fi
 
+if [[ "$INSTALL_ACTION" == "dependencies" ]]; then
+  echo
+  printf '%b\n' "${COLOR_GREEN}Dependency check complete. Ubuntu is ready for the Odoo installer.${COLOR_RESET}"
+  exit 0
+fi
+
 valid_port() {
   [[ "$1" =~ ^[0-9]{1,5}$ ]] && (( 10#$1 >= 1 && 10#$1 <= 65535 ))
 }
@@ -287,15 +401,20 @@ case "${DEPLOYMENT_CHOICE,,}" in
 esac
 
 echo
-echo "The Community web port is used in the browser URL."
-while true; do
-  read -r -p "Community web port [8069]: " COMMUNITY_PORT
-  COMMUNITY_PORT="${COMMUNITY_PORT:-8069}"
-  if valid_port "$COMMUNITY_PORT"; then break; fi
-  echo "Please enter a port number from 1 to 65535."
-done
-COMMUNITY_PORT="$((10#$COMMUNITY_PORT))"
+COMMUNITY_PORT="8069"
 ENTERPRISE_PORT="8070"
+if [[ "$START_COMMUNITY" == "true" ]]; then
+  echo "The Community web port is used in the browser URL."
+  while true; do
+    read -r -p "Community web port [8069]: " COMMUNITY_PORT
+    COMMUNITY_PORT="${COMMUNITY_PORT:-8069}"
+    if valid_port "$COMMUNITY_PORT"; then break; fi
+    echo "Please enter a port number from 1 to 65535."
+  done
+  COMMUNITY_PORT="$((10#$COMMUNITY_PORT))"
+else
+  echo "Community was not selected, so its port question is skipped."
+fi
 
 COMMUNITY_DB_VOLUME_EXISTS="false"
 ENTERPRISE_DB_VOLUME_EXISTS="false"
@@ -321,7 +440,7 @@ read_enterprise_source() {
   local suggested_path="$1" entered_path
   suggested_path="${suggested_path:-$SCRIPT_DIR/enterprise-19.0}"
   while true; do
-    echo "Enterprise path detected from the current installer location:"
+    echo "Default Enterprise path based on the current installer location:"
     echo "  $suggested_path"
     read -r -p "Enterprise addons folder [$suggested_path]: " entered_path
     entered_path="${entered_path:-$suggested_path}"
@@ -340,53 +459,30 @@ read_enterprise_source() {
   done
 }
 
-section "3/6" "Choose Community or Enterprise"
-START_ENTERPRISE="false"
+section "3/6" "Prepare the selected Odoo edition"
 ENTERPRISE_SOURCE=""
 BUNDLED_ENTERPRISE_SOURCE=""
 for candidate in "$SCRIPT_DIR/enterprise-19.0" "$SCRIPT_DIR/enterprise"; do
-  if has_enterprise_addons "$candidate"; then
+  if has_enterprise_addons "$candidate" && [[ -f "$candidate/web_enterprise/__manifest__.py" ]]; then
     BUNDLED_ENTERPRISE_SOURCE="$candidate"
     break
   fi
 done
 
-if has_enterprise_addons "$SCRIPT_DIR/addons/enterprise"; then
-  echo "Existing Enterprise addons are already installed."
-  echo "  1) Reuse the installed Enterprise addons (recommended)"
-  echo "  2) Import or update Enterprise addons from another folder"
-  echo "  3) Start Community only"
-  read_choice EDITION_CHOICE "Choose an edition option [1]: " "1" "1 2 3"
-  case "$EDITION_CHOICE" in
-    1) START_ENTERPRISE="true" ;;
-    2) read_enterprise_source "$BUNDLED_ENTERPRISE_SOURCE"; START_ENTERPRISE="true" ;;
-    3) START_ENTERPRISE="false" ;;
-    *) echo "Choose 1, 2, or 3."; exit 1 ;;
-  esac
-elif [[ -n "$BUNDLED_ENTERPRISE_SOURCE" ]]; then
-  echo "Enterprise addons were detected automatically:"
-  echo "  $BUNDLED_ENTERPRISE_SOURCE"
-  echo "  1) Install Community + Enterprise using this folder (recommended)"
-  echo "  2) Select a different Enterprise folder"
-  echo "  3) Install Community only"
-  read_choice EDITION_CHOICE "Choose an edition option [1]: " "1" "1 2 3"
-  case "$EDITION_CHOICE" in
-    1) ENTERPRISE_SOURCE="$BUNDLED_ENTERPRISE_SOURCE"; START_ENTERPRISE="true" ;;
-    2) read_enterprise_source ""; START_ENTERPRISE="true" ;;
-    3) START_ENTERPRISE="false" ;;
-    *) echo "Choose 1, 2, or 3."; exit 1 ;;
-  esac
+if [[ "$START_ENTERPRISE" == "true" ]]; then
+  if has_enterprise_addons "$SCRIPT_DIR/addons/enterprise" &&
+     [[ -f "$SCRIPT_DIR/addons/enterprise/web_enterprise/__manifest__.py" ]]; then
+    echo "Reusing the complete Enterprise addons already installed in addons/enterprise."
+  elif [[ -n "$BUNDLED_ENTERPRISE_SOURCE" ]]; then
+    ENTERPRISE_SOURCE="$BUNDLED_ENTERPRISE_SOURCE"
+    echo "Complete Enterprise addons were detected automatically:"
+    printf '  %b%s%b\n' "$COLOR_GREEN" "$ENTERPRISE_SOURCE" "$COLOR_RESET"
+  else
+    echo "Enterprise requires your licensed Odoo 19 Enterprise addon folder."
+    read_enterprise_source ""
+  fi
 else
-  echo "Community is free and requires no additional files."
-  echo "Enterprise requires your licensed Odoo 19 Enterprise addon folder."
-  echo "  1) Install Community only (recommended)"
-  echo "  2) Install Community + Enterprise"
-  read_choice EDITION_CHOICE "Choose an edition option [1]: " "1" "1 2"
-  case "$EDITION_CHOICE" in
-    1) START_ENTERPRISE="false" ;;
-    2) read_enterprise_source ""; START_ENTERPRISE="true" ;;
-    *) echo "Choose 1 or 2."; exit 1 ;;
-  esac
+  echo "Community-only installation selected; no licensed Enterprise files are required."
 fi
 
 if [[ "$START_ENTERPRISE" == "true" ]]; then
@@ -398,7 +494,7 @@ if [[ "$START_ENTERPRISE" == "true" ]]; then
       continue
     fi
     ENTERPRISE_PORT="$((10#$ENTERPRISE_PORT))"
-    if [[ "$COMMUNITY_PORT" == "$ENTERPRISE_PORT" ]]; then
+    if [[ "$START_COMMUNITY" == "true" && "$COMMUNITY_PORT" == "$ENTERPRISE_PORT" ]]; then
       echo "Community and Enterprise need different web ports."
       continue
     fi
@@ -501,7 +597,7 @@ if [[ "$PGADMIN_ENABLED" == "true" ]]; then
       continue
     fi
     PGADMIN_PORT="$((10#$PGADMIN_PORT))"
-    if [[ "$PGADMIN_PORT" == "$COMMUNITY_PORT" ||
+    if [[ ( "$START_COMMUNITY" == "true" && "$PGADMIN_PORT" == "$COMMUNITY_PORT" ) ||
           ( "$START_ENTERPRISE" == "true" && "$PGADMIN_PORT" == "$ENTERPRISE_PORT" ) ]]; then
       echo "The pgAdmin port must be different from the enabled Odoo web ports."
       continue
@@ -536,7 +632,11 @@ fi
 
 section "5/6" "Review the installation plan"
 printf '  %-24s %s\n' "Profile" "$DEPLOYMENT_MODE"
-printf '  %-24s %s\n' "Community" "enabled on port $COMMUNITY_PORT"
+if [[ "$START_COMMUNITY" == "true" ]]; then
+  printf '  %-24s %s\n' "Community" "enabled on port $COMMUNITY_PORT"
+else
+  printf '  %-24s %s\n' "Community" "not selected"
+fi
 if [[ "$START_ENTERPRISE" == "true" ]]; then
   printf '  %-24s %s\n' "Enterprise" "enabled on port $ENTERPRISE_PORT"
   if [[ -n "$ENTERPRISE_SOURCE" ]]; then
@@ -615,7 +715,7 @@ EOF
 write_config config/community/odoo.conf db-community "$COMMUNITY_DB_PASSWORD" "$COMMUNITY_ADMIN_PASSWORD" "/usr/lib/python3/dist-packages/odoo/addons,/mnt/extra-addons"
 write_config config/enterprise/odoo.conf db-enterprise "$ENTERPRISE_DB_PASSWORD" "$ENTERPRISE_ADMIN_PASSWORD" "/mnt/enterprise-addons,/usr/lib/python3/dist-packages/odoo/addons,/mnt/extra-addons"
 
-if [[ "$START_ENTERPRISE" == "true" ]]; then
+if [[ "$START_COMMUNITY" == "true" && "$START_ENTERPRISE" == "true" ]]; then
   cat > config/pgadmin/servers.json <<'EOF'
 {
   "Servers": {
@@ -629,6 +729,22 @@ if [[ "$START_ENTERPRISE" == "true" ]]; then
       "SSLMode": "prefer"
     },
     "2": {
+      "Name": "Odoo 19 Enterprise PostgreSQL",
+      "Group": "Odoo 19",
+      "Host": "db-enterprise",
+      "Port": 5432,
+      "MaintenanceDB": "postgres",
+      "Username": "odoo",
+      "SSLMode": "prefer"
+    }
+  }
+}
+EOF
+elif [[ "$START_ENTERPRISE" == "true" ]]; then
+  cat > config/pgadmin/servers.json <<'EOF'
+{
+  "Servers": {
+    "1": {
       "Name": "Odoo 19 Enterprise PostgreSQL",
       "Group": "Odoo 19",
       "Host": "db-enterprise",
@@ -702,10 +818,16 @@ if [[ "$PGADMIN_ENABLED" == "true" ]]; then
   fi
 fi
 
+if [[ "$START_COMMUNITY" != "true" ]] &&
+   { [[ -n "$("${DOCKER[@]}" compose ps -q community)" ]] ||
+     [[ -n "$("${DOCKER[@]}" compose ps -q db-community)" ]]; }; then
+  echo "Stopping the previously running Community services because they were not selected..."
+  "${DOCKER[@]}" compose stop community db-community
+fi
 if [[ "$START_ENTERPRISE" != "true" ]] &&
    { [[ -n "$("${DOCKER[@]}" compose ps -q enterprise)" ]] ||
      [[ -n "$("${DOCKER[@]}" compose ps -q db-enterprise)" ]]; }; then
-  echo "Stopping the previously running Enterprise services because Community-only was selected..."
+  echo "Stopping the previously running Enterprise services because they were not selected..."
   "${DOCKER[@]}" compose stop enterprise db-enterprise
 fi
 if [[ "$PGADMIN_ENABLED" != "true" ]] &&
@@ -713,16 +835,16 @@ if [[ "$PGADMIN_ENABLED" != "true" ]] &&
   echo "Stopping pgAdmin because it was not selected..."
   "${DOCKER[@]}" compose --profile pgadmin stop pgadmin
 fi
-if [[ "$START_ENTERPRISE" == "true" ]]; then
-  "${DOCKER[@]}" compose "${COMPOSE_PROFILE[@]}" up -d --wait --wait-timeout 300
-else
-  START_SERVICES=(db-community community)
-  if [[ "$PGADMIN_ENABLED" == "true" ]]; then START_SERVICES+=(pgadmin); fi
-  "${DOCKER[@]}" compose "${COMPOSE_PROFILE[@]}" up -d --wait --wait-timeout 300 "${START_SERVICES[@]}"
-fi
+START_SERVICES=()
+if [[ "$START_COMMUNITY" == "true" ]]; then START_SERVICES+=(db-community community); fi
+if [[ "$START_ENTERPRISE" == "true" ]]; then START_SERVICES+=(db-enterprise enterprise); fi
+if [[ "$PGADMIN_ENABLED" == "true" ]]; then START_SERVICES+=(pgadmin); fi
+"${DOCKER[@]}" compose "${COMPOSE_PROFILE[@]}" up -d --wait --wait-timeout 300 "${START_SERVICES[@]}"
 
 if command -v ufw >/dev/null 2>&1 && sudo ufw status | grep -q '^Status: active'; then
-  sudo ufw allow "${COMMUNITY_PORT}/tcp"
+  if [[ "$START_COMMUNITY" == "true" ]]; then
+    sudo ufw allow "${COMMUNITY_PORT}/tcp"
+  fi
   if [[ "$START_ENTERPRISE" == "true" ]]; then
     sudo ufw allow "${ENTERPRISE_PORT}/tcp"
   fi
@@ -737,9 +859,15 @@ HOST_IP="${HOST_IP:-127.0.0.1}"
 cat <<EOF
 Mode: $DEPLOYMENT_MODE
 Automatic startup: enabled (Docker at boot; containers restart unless manually stopped)
+EOF
+if [[ "$START_COMMUNITY" == "true" ]]; then
+cat <<EOF
 Community: http://$HOST_IP:$COMMUNITY_PORT
 Community Odoo master password: $COMMUNITY_ADMIN_PASSWORD
 EOF
+else
+  echo "Community: not started"
+fi
 if [[ "$START_ENTERPRISE" == "true" ]]; then
 cat <<EOF
 Enterprise: http://$HOST_IP:$ENTERPRISE_PORT
@@ -769,10 +897,11 @@ section "6/6" "Installation complete"
 cat installation-info.txt
 echo
 echo "Next steps:"
-echo "  1) Open the Community URL above in your browser."
-echo "  2) Use its Odoo master password on the database creation page."
+if [[ "$START_COMMUNITY" == "true" ]]; then
+  echo "  - Open the Community URL and use its master password on the database creation page."
+fi
 if [[ "$START_ENTERPRISE" == "true" ]]; then
-  echo "  3) Open the Enterprise URL and use its separate master password."
+  echo "  - Open the Enterprise URL and use its master password on the database creation page."
 fi
 if [[ "$PGADMIN_ENABLED" == "true" ]]; then
   echo "  - Sign in to pgAdmin with the email and password shown above."
