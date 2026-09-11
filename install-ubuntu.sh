@@ -202,6 +202,17 @@ enterprise_addons_ready() {
      -f "$SCRIPT_DIR/addons/enterprise/web_enterprise/__manifest__.py" ]]
 }
 
+DASHBOARD_MIN_WIDTH=112
+DASHBOARD_MAX_WIDTH=132
+DASHBOARD_MIN_HEIGHT=32
+DASHBOARD_MAX_HEIGHT=42
+DASHBOARD_CONTENT_HEIGHT=30
+DASHBOARD_WIDTH="$DASHBOARD_MIN_WIDTH"
+DASHBOARD_CONTENT_WIDTH=$((DASHBOARD_WIDTH - 6))
+DASHBOARD_LEFT=0
+DASHBOARD_TOP=0
+DASHBOARD_MENU_ROW=19
+
 repeat_character() {
   local character="$1" count="$2" repeated
   printf -v repeated '%*s' "$count" ''
@@ -229,25 +240,41 @@ print_padded_text() {
   fi
 }
 
+dashboard_indent() {
+  printf '%*s' "$DASHBOARD_LEFT" ''
+}
+
+dashboard_centered_text() {
+  local color="$1" content="$2" content_width left_padding
+  content_width="${#content}"
+  left_padding=$(((DASHBOARD_WIDTH - content_width) / 2))
+  (( left_padding < 0 )) && left_padding=0
+  printf '%*s%b%s%b\n' "$((DASHBOARD_LEFT + left_padding))" '' "$color" "$content" "$COLOR_RESET"
+}
+
 dashboard_border() {
+  dashboard_indent
   printf '%b%s' "$COLOR_PURPLE" "$1"
-  repeat_character '─' 110
+  repeat_character '─' "$((DASHBOARD_WIDTH - 2))"
   printf '%s%b\n' "$2" "$COLOR_RESET"
 }
 
 dashboard_line() {
   local color="$1" content="$2"
+  dashboard_indent
   printf '│  %b' "$color"
-  print_padded_text "$content" 106
+  print_padded_text "$content" "$DASHBOARD_CONTENT_WIDTH"
   printf '%b  │\n' "$COLOR_RESET"
 }
 
 dashboard_header_row() {
   local left_color="$1" left="$2" center_color="$3" center="$4" right_color="$5" right="$6"
+  local center_width=$((DASHBOARD_CONTENT_WIDTH - 51))
+  dashboard_indent
   printf '%b│%b  %b' "$COLOR_PURPLE" "$COLOR_RESET" "$left_color"
   print_padded_text "$left" 18
   printf '%b %b│%b %b' "$COLOR_RESET" "$COLOR_MUTED" "$COLOR_RESET" "$center_color"
-  print_padded_text "$center" 55
+  print_padded_text "$center" "$center_width"
   printf '%b %b│%b %b' "$COLOR_RESET" "$COLOR_MUTED" "$COLOR_RESET" "$right_color"
   print_padded_text "$right" 27
   printf '%b  %b│%b\n' "$COLOR_RESET" "$COLOR_PURPLE" "$COLOR_RESET"
@@ -255,12 +282,14 @@ dashboard_header_row() {
 
 dashboard_snapshot_row() {
   local icon="$1" label="$2" value="$3" value_color="$4"
+  local value_width=$((DASHBOARD_CONTENT_WIDTH - 34))
+  dashboard_indent
   printf '│  %b' "$COLOR_BLUE$COLOR_BOLD"
   print_padded_text "$icon" 4
   printf '%b' "$COLOR_WHITE"
   print_padded_text "$label" 30
   printf '%b' "$value_color"
-  print_padded_text "$value" 72
+  print_padded_text "$value" "$value_width"
   printf '%b  │\n' "$COLOR_RESET"
 }
 
@@ -299,8 +328,8 @@ draw_interactive_dashboard() {
     "$COLOR_MUTED" "Developed by USAMA ARSHAD"
   dashboard_border '╰' '╯'
   echo
-  printf '%b%*s%b\n' "$COLOR_WHITE$COLOR_BOLD" 86 "Welcome to your all-in-one Odoo 19 deployment workspace." "$COLOR_RESET"
-  printf '%b%*s%b\n' "$COLOR_MUTED" 92 "Install, inspect, maintain, or safely remove your stack from one place." "$COLOR_RESET"
+  dashboard_centered_text "$COLOR_WHITE$COLOR_BOLD" "Welcome to your all-in-one Odoo 19 deployment workspace."
+  dashboard_centered_text "$COLOR_MUTED" "Install, inspect, maintain, or safely remove your stack from one place."
   echo
   dashboard_border '╭' '╮'
   dashboard_line "$COLOR_CYAN$COLOR_BOLD" "▣  SYSTEM SNAPSHOT  ─────────────────────────────────────────────────────────────────────────────────"
@@ -331,7 +360,9 @@ draw_interactive_dashboard() {
 
 draw_interactive_menu_rows() {
   local selected="$1" recommended="$2"
-  local index label icon tag row_color selector line
+  local index label icon tag row_color selector line label_width
+
+  label_width=$((DASHBOARD_CONTENT_WIDTH - 36))
 
   for index in 1 2 3 4 5 6; do
     case "$index" in
@@ -350,13 +381,13 @@ draw_interactive_menu_rows() {
       selector="›"
       row_color="$COLOR_MAGENTA_BG$COLOR_WHITE$COLOR_BOLD"
     fi
-    printf -v line '%s  [%s]  %-3s %-70s %s' "$selector" "$index" "$icon" "$label" "$tag"
+    printf -v line '%s  [%s]  %-3s %-*s %s' "$selector" "$index" "$icon" "$label_width" "$label" "$tag"
     dashboard_line "$row_color" "$line"
   done
 }
 
 interactive_dashboard_supported() {
-  local terminal_columns terminal_rows
+  local terminal_columns terminal_rows viewport_height
   [[ -t 0 && -t 1 && -z "${NO_COLOR:-}" && "${TERM:-dumb}" != "dumb" ]] || return 1
   command -v tput >/dev/null 2>&1 || return 1
   tput clear >/dev/null 2>&1 || return 1
@@ -367,8 +398,35 @@ interactive_dashboard_supported() {
   tput rmcup >/dev/null 2>&1 || return 1
   terminal_columns="$(tput cols 2>/dev/null || printf '0')"
   terminal_rows="$(tput lines 2>/dev/null || printf '0')"
-  [[ "$terminal_columns" =~ ^[0-9]+$ && "$terminal_rows" =~ ^[0-9]+$ ]] &&
-    (( terminal_columns >= 112 && terminal_rows >= 32 ))
+  [[ "$terminal_columns" =~ ^[0-9]+$ && "$terminal_rows" =~ ^[0-9]+$ ]] || return 1
+  (( terminal_columns >= DASHBOARD_MIN_WIDTH && terminal_rows >= DASHBOARD_MIN_HEIGHT )) || return 1
+
+  DASHBOARD_WIDTH="$terminal_columns"
+  (( DASHBOARD_WIDTH > DASHBOARD_MAX_WIDTH )) && DASHBOARD_WIDTH="$DASHBOARD_MAX_WIDTH"
+  DASHBOARD_CONTENT_WIDTH=$((DASHBOARD_WIDTH - 6))
+  DASHBOARD_LEFT=$(((terminal_columns - DASHBOARD_WIDTH) / 2))
+
+  viewport_height="$terminal_rows"
+  (( viewport_height > DASHBOARD_MAX_HEIGHT )) && viewport_height="$DASHBOARD_MAX_HEIGHT"
+  DASHBOARD_TOP=$(((terminal_rows - viewport_height) / 2 + (viewport_height - DASHBOARD_CONTENT_HEIGHT) / 2))
+  DASHBOARD_MENU_ROW=$((DASHBOARD_TOP + 19))
+}
+
+show_dashboard_size_notice() {
+  local terminal_columns terminal_rows
+  [[ -t 0 && -t 1 ]] || return
+  command -v tput >/dev/null 2>&1 || return
+  terminal_columns="$(tput cols 2>/dev/null || printf 'unknown')"
+  terminal_rows="$(tput lines 2>/dev/null || printf 'unknown')"
+  [[ "$terminal_columns" =~ ^[0-9]+$ && "$terminal_rows" =~ ^[0-9]+$ ]] || return
+  if (( terminal_columns < DASHBOARD_MIN_WIDTH || terminal_rows < DASHBOARD_MIN_HEIGHT )); then
+    printf '\n%bTerminal size: %sx%s. Full dashboard requires at least %sx%s.%b\n' \
+      "$COLOR_YELLOW" "$terminal_columns" "$terminal_rows" \
+      "$DASHBOARD_MIN_WIDTH" "$DASHBOARD_MIN_HEIGHT" "$COLOR_RESET"
+    printf 'The dashboard scales up to %sx%s and stays centered on larger terminals.\n' \
+      "$DASHBOARD_MAX_WIDTH" "$DASHBOARD_MAX_HEIGHT"
+    echo "Using the compact menu for this run."
+  fi
 }
 
 INTERACTIVE_ALT_SCREEN="false"
@@ -392,7 +450,7 @@ read_interactive_main_choice() {
   trap 'exit 130' INT TERM HUP
 
   tput clear
-  tput cup 0 0
+  tput cup "$DASHBOARD_TOP" 0
   draw_interactive_dashboard "$selected" "$recommended"
 
   while true; do
@@ -416,9 +474,8 @@ read_interactive_main_choice() {
     esac
 
     if (( selected != previous_selected )); then
-      # The first option row starts at zero-based terminal row 19. Updating
-      # only these rows prevents the dashboard from being printed repeatedly.
-      tput cup 19 0
+      # Update only the option rows at their adaptive screen position.
+      tput cup "$DASHBOARD_MENU_ROW" 0
       draw_interactive_menu_rows "$selected" "$recommended"
     fi
   done
@@ -505,6 +562,7 @@ fi
 if interactive_dashboard_supported; then
   read_interactive_main_choice "$DEFAULT_MAIN_CHOICE"
 else
+  show_dashboard_size_notice
   show_control_center_status
   section "MENU" "What would you like to do?"
   menu_item "1" "Install Odoo Community only"

@@ -44,8 +44,11 @@ chmod +x install-ubuntu.sh
 When run interactively, the Ubuntu script first clears the previous terminal
 output and then opens a keyboard-controlled dashboard before performing package
 maintenance or starting services. Use the Up/Down arrow keys and Enter, press a
-number directly, or press Esc/Ctrl+C to exit. On terminals smaller than 112×30,
-and during redirected or automated runs, it falls back to a clean numbered menu.
+number directly, or press Esc/Ctrl+C to exit. The full dashboard adapts between
+112–132 columns and uses a 32–42 row viewport. It stays centered when the
+terminal is larger. On terminals smaller than 112×32, the script shows the
+required size and falls back to a clean numbered menu. Redirected and automated
+runs also use the compact menu.
 
 ![Ubuntu terminal dashboard](docs/images/ubuntu-terminal-dashboard.png)
 
