@@ -219,6 +219,18 @@ dashboard_line() {
   printf '│  %b%-106s%b  │\n' "$color" "$content" "$COLOR_RESET"
 }
 
+dashboard_header_row() {
+  local left_color="$1" left="$2" center_color="$3" center="$4" right_color="$5" right="$6"
+  printf '%b│%b  %b%-18s%b %b│%b %b%-55s%b %b│%b %b%-27s%b  %b│%b\n' \
+    "$COLOR_PURPLE" "$COLOR_RESET" \
+    "$left_color" "$left" "$COLOR_RESET" \
+    "$COLOR_MUTED" "$COLOR_RESET" \
+    "$center_color" "$center" "$COLOR_RESET" \
+    "$COLOR_MUTED" "$COLOR_RESET" \
+    "$right_color" "$right" "$COLOR_RESET" \
+    "$COLOR_PURPLE" "$COLOR_RESET"
+}
+
 dashboard_snapshot_row() {
   local icon="$1" label="$2" value="$3" value_color="$4"
   printf '│  %b%-4s%b%-30s%b%-72s%b  │\n' \
@@ -249,9 +261,18 @@ draw_interactive_dashboard() {
   fi
 
   dashboard_border '╭' '╮'
-  dashboard_line "$COLOR_PURPLE$COLOR_BOLD" "odoo 19  │  ODOO 19 DEPLOYMENT CONTROL CENTER                                      [ ✓ READY ]"
-  dashboard_line "$COLOR_BLUE" "         │  Community  •  Enterprise  •  PostgreSQL  •  pgAdmin"
-  dashboard_line "$COLOR_MUTED" "         │  Script by TI ASSOCIATES  •  Developed by USAMA ARSHAD"
+  dashboard_header_row \
+    "$COLOR_PURPLE$COLOR_BOLD" "odoo 19" \
+    "$COLOR_WHITE$COLOR_BOLD" "ODOO 19 DEPLOYMENT CONTROL CENTER" \
+    "$COLOR_GREEN$COLOR_BOLD" "      ✓  READY"
+  dashboard_header_row \
+    "$COLOR_PURPLE$COLOR_BOLD" "" \
+    "$COLOR_BLUE" "Community  •  Enterprise  •  PostgreSQL  •  pgAdmin" \
+    "$COLOR_MUTED" "Script by TI ASSOCIATES"
+  dashboard_header_row \
+    "$COLOR_PURPLE$COLOR_BOLD" "" \
+    "$COLOR_BLUE" "" \
+    "$COLOR_MUTED" "Developed by USAMA ARSHAD"
   dashboard_border '╰' '╯'
   echo
   printf '%b%*s%b\n' "$COLOR_WHITE$COLOR_BOLD" 86 "Welcome to your all-in-one Odoo 19 deployment workspace." "$COLOR_RESET"
