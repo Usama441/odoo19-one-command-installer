@@ -4,6 +4,11 @@ set -Eeuo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+if [[ -t 0 && -t 1 && "${TERM:-dumb}" != "dumb" ]] &&
+   command -v clear >/dev/null 2>&1; then
+  clear || true
+fi
+
 if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
   COLOR_PURPLE=$'\033[38;5;97m'
   COLOR_CYAN=$'\033[38;5;37m'

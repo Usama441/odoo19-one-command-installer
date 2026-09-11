@@ -39,8 +39,9 @@ chmod +x install-ubuntu.sh
 ./install-ubuntu.sh
 ```
 
-The Ubuntu installer opens this color terminal menu before performing package
-maintenance or starting services:
+When run interactively, the Ubuntu script first clears the previous terminal
+output and then opens this color menu before performing package maintenance or
+starting services:
 
 ```text
 [MENU] What would you like to do?
