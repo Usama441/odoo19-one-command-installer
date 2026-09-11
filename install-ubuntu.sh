@@ -221,7 +221,7 @@ dashboard_line() {
 
 draw_interactive_dashboard() {
   local selected="$1" recommended="$2"
-  local docker_status enterprise_status installation_status line index label icon tag row_color selector
+  local docker_status enterprise_status installation_status line
 
   if command -v docker >/dev/null 2>&1; then
     docker_status="●  Available"
@@ -239,7 +239,6 @@ draw_interactive_dashboard() {
     installation_status="●  New installation"
   fi
 
-  printf '\033[2J\033[H'
   dashboard_border '╭' '╮'
   dashboard_line "$COLOR_PURPLE$COLOR_BOLD" "odoo 19  │  ODOO 19 DEPLOYMENT CONTROL CENTER                                      [ ✓ READY ]"
   dashboard_line "$COLOR_BLUE" "         │  Community  •  Enterprise  •  PostgreSQL  •  pgAdmin"
@@ -264,6 +263,18 @@ draw_interactive_dashboard() {
   dashboard_border '╭' '╮'
   dashboard_line "$COLOR_PURPLE$COLOR_BOLD" "☷  SELECT AN ACTION                         Use ↑/↓ to move  •  Enter to select  •  ★ Recommended"
 
+  draw_interactive_menu_rows "$selected" "$recommended"
+  dashboard_border '╰' '╯'
+  echo
+  dashboard_border '╭' '╮'
+  dashboard_line "$COLOR_MUTED" "Enter  Select        ↑↓  Navigate        Esc  Exit        Ctrl+C  Exit"
+  dashboard_border '╰' '╯'
+}
+
+draw_interactive_menu_rows() {
+  local selected="$1" recommended="$2"
+  local index label icon tag row_color selector line
+
   for index in 1 2 3 4 5 6; do
     case "$index" in
       1) icon="⇩"; label="Install Odoo Community only" ;;
@@ -284,29 +295,50 @@ draw_interactive_dashboard() {
     printf -v line '%s  [%s]  %-3s %-70s %s' "$selector" "$index" "$icon" "$label" "$tag"
     dashboard_line "$row_color" "$line"
   done
-  dashboard_border '╰' '╯'
-  echo
-  dashboard_border '╭' '╮'
-  dashboard_line "$COLOR_MUTED" "Enter  Select        ↑↓  Navigate        Esc  Exit        Ctrl+C  Exit"
-  dashboard_border '╰' '╯'
 }
 
 interactive_dashboard_supported() {
   local terminal_columns terminal_rows
   [[ -t 0 && -t 1 && -z "${NO_COLOR:-}" && "${TERM:-dumb}" != "dumb" ]] || return 1
   command -v tput >/dev/null 2>&1 || return 1
+  tput clear >/dev/null 2>&1 || return 1
+  tput cup 0 0 >/dev/null 2>&1 || return 1
+  tput civis >/dev/null 2>&1 || return 1
+  tput cnorm >/dev/null 2>&1 || return 1
+  tput smcup >/dev/null 2>&1 || return 1
+  tput rmcup >/dev/null 2>&1 || return 1
   terminal_columns="$(tput cols 2>/dev/null || printf '0')"
   terminal_rows="$(tput lines 2>/dev/null || printf '0')"
   [[ "$terminal_columns" =~ ^[0-9]+$ && "$terminal_rows" =~ ^[0-9]+$ ]] &&
-    (( terminal_columns >= 112 && terminal_rows >= 30 ))
+    (( terminal_columns >= 112 && terminal_rows >= 32 ))
+}
+
+INTERACTIVE_ALT_SCREEN="false"
+
+close_interactive_dashboard() {
+  printf '%b' "$COLOR_RESET"
+  tput cnorm 2>/dev/null || printf '\033[?25h'
+  if [[ "$INTERACTIVE_ALT_SCREEN" == "true" ]]; then
+    tput rmcup 2>/dev/null || true
+    INTERACTIVE_ALT_SCREEN="false"
+  fi
 }
 
 read_interactive_main_choice() {
-  local selected="$1" recommended="$1" key sequence
-  printf '\033[?25l'
-  trap 'printf "\033[?25h"' EXIT
+  local selected="$1" recommended="$1" previous_selected key sequence
+
+  tput smcup
+  INTERACTIVE_ALT_SCREEN="true"
+  tput civis
+  trap 'close_interactive_dashboard' EXIT
+  trap 'exit 130' INT TERM HUP
+
+  tput clear
+  tput cup 0 0
+  draw_interactive_dashboard "$selected" "$recommended"
+
   while true; do
-    draw_interactive_dashboard "$selected" "$recommended"
+    previous_selected="$selected"
     IFS= read -rsn1 key || true
     case "$key" in
       '') MAIN_CHOICE="$selected"; break ;;
@@ -324,10 +356,17 @@ read_interactive_main_choice() {
         esac
         ;;
     esac
+
+    if (( selected != previous_selected )); then
+      # The first option row starts at zero-based terminal row 19. Updating
+      # only these rows prevents the dashboard from being printed repeatedly.
+      tput cup 19 0
+      draw_interactive_menu_rows "$selected" "$recommended"
+    fi
   done
-  printf '\033[?25h'
-  trap - EXIT
-  echo
+
+  close_interactive_dashboard
+  trap - EXIT INT TERM HUP
 }
 
 run_uninstaller() {
