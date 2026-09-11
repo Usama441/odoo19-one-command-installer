@@ -180,14 +180,14 @@ function Test-EnterpriseAddons([string]$Path) {
 }
 
 function Read-EnterpriseSource([string]$SuggestedPath = "") {
+    if ([string]::IsNullOrWhiteSpace($SuggestedPath)) {
+        $SuggestedPath = Join-Path $PSScriptRoot "enterprise-19.0"
+    }
     while ($true) {
-        if (-not [string]::IsNullOrWhiteSpace($SuggestedPath)) {
-            $enteredPath = Read-Host "Enterprise addons folder [$SuggestedPath]"
-            if ([string]::IsNullOrWhiteSpace($enteredPath)) { $enteredPath = $SuggestedPath }
-        } else {
-            Write-Host "Example: C:\Users\YourName\enterprise-19.0"
-            $enteredPath = Read-Host "Enterprise addons folder"
-        }
+        Write-Host "Enterprise path detected from the current installer location:"
+        Write-Host "  $SuggestedPath" -ForegroundColor Green
+        $enteredPath = Read-Host "Enterprise addons folder [$SuggestedPath]"
+        if ([string]::IsNullOrWhiteSpace($enteredPath)) { $enteredPath = $SuggestedPath }
         $enteredPath = $enteredPath.Trim().Trim('"')
         if (-not (Test-EnterpriseAddons $enteredPath)) {
             Write-Warning "That folder does not contain Odoo addon manifests. Please select the folder whose direct subfolders are Enterprise modules."

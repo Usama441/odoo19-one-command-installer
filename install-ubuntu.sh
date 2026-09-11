@@ -319,14 +319,12 @@ has_enterprise_addons() {
 
 read_enterprise_source() {
   local suggested_path="$1" entered_path
+  suggested_path="${suggested_path:-$SCRIPT_DIR/enterprise-19.0}"
   while true; do
-    if [[ -n "$suggested_path" ]]; then
-      read -r -p "Enterprise addons folder [$suggested_path]: " entered_path
-      entered_path="${entered_path:-$suggested_path}"
-    else
-      echo "Example: /home/your-user/enterprise-19.0"
-      read -r -p "Enterprise addons folder: " entered_path
-    fi
+    echo "Enterprise path detected from the current installer location:"
+    echo "  $suggested_path"
+    read -r -p "Enterprise addons folder [$suggested_path]: " entered_path
+    entered_path="${entered_path:-$suggested_path}"
     entered_path="${entered_path#\"}"
     entered_path="${entered_path%\"}"
     if ! has_enterprise_addons "$entered_path"; then

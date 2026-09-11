@@ -137,8 +137,10 @@ Start this installation now? [Y/n]:
 
 When `enterprise-19.0/` is beside the installer, both scripts detect it and show
 its full path. The user normally presses Enter to accept it instead of typing a
-folder path. On a rerun, selecting Community only stops previously running
-Enterprise containers, and disabling pgAdmin stops its existing container.
+folder path. The path is built from the installer's current location, so Linux
+and Windows usernames are detected automatically instead of being hard-coded.
+On a rerun, selecting Community only stops previously running Enterprise
+containers, and disabling pgAdmin stops its existing container.
 
 ## Complete execution flow
 
