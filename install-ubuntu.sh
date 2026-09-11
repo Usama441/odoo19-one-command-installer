@@ -219,9 +219,18 @@ dashboard_line() {
   printf '│  %b%-106s%b  │\n' "$color" "$content" "$COLOR_RESET"
 }
 
+dashboard_snapshot_row() {
+  local icon="$1" label="$2" value="$3" value_color="$4"
+  printf '│  %b%-4s%b%-30s%b%-72s%b  │\n' \
+    "$COLOR_BLUE$COLOR_BOLD" "$icon" \
+    "$COLOR_WHITE" "$label" \
+    "$value_color" "$value" \
+    "$COLOR_RESET"
+}
+
 draw_interactive_dashboard() {
   local selected="$1" recommended="$2"
-  local docker_status enterprise_status installation_status line
+  local docker_status enterprise_status installation_status
 
   if command -v docker >/dev/null 2>&1; then
     docker_status="●  Available"
@@ -250,14 +259,18 @@ draw_interactive_dashboard() {
   echo
   dashboard_border '╭' '╮'
   dashboard_line "$COLOR_CYAN$COLOR_BOLD" "▣  SYSTEM SNAPSHOT  ─────────────────────────────────────────────────────────────────────────────────"
-  printf -v line 'Ubuntu                 %s' "${PRETTY_NAME:-Unknown}"
-  dashboard_line "$COLOR_WHITE" "$line"
-  printf -v line 'Docker CLI             %s' "$docker_status"
-  if [[ "$docker_status" == *Available ]]; then dashboard_line "$COLOR_GREEN" "$line"; else dashboard_line "$COLOR_YELLOW" "$line"; fi
-  printf -v line 'Enterprise addons      %s' "$enterprise_status"
-  if [[ "$enterprise_status" == *Ready ]]; then dashboard_line "$COLOR_GREEN" "$line"; else dashboard_line "$COLOR_YELLOW" "$line"; fi
-  printf -v line 'Installer state        %s' "$installation_status"
-  dashboard_line "$COLOR_GREEN" "$line"
+  dashboard_snapshot_row "⚙" "Ubuntu" "${PRETTY_NAME:-Unknown}" "$COLOR_WHITE"
+  if [[ "$docker_status" == *Available ]]; then
+    dashboard_snapshot_row "▦" "Docker CLI" "$docker_status" "$COLOR_GREEN"
+  else
+    dashboard_snapshot_row "▦" "Docker CLI" "$docker_status" "$COLOR_YELLOW"
+  fi
+  if [[ "$enterprise_status" == *Ready ]]; then
+    dashboard_snapshot_row "◇" "Enterprise addons" "$enterprise_status" "$COLOR_GREEN"
+  else
+    dashboard_snapshot_row "◇" "Enterprise addons" "$enterprise_status" "$COLOR_YELLOW"
+  fi
+  dashboard_snapshot_row "▤" "Installer state" "$installation_status" "$COLOR_GREEN"
   dashboard_border '╰' '╯'
   echo
   dashboard_border '╭' '╮'
