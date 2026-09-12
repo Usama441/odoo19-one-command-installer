@@ -1,5 +1,7 @@
 .env
+.installer-state*
 installation-info.txt
+backups/
 /.agents/
 /.codex/
 __pycache__/

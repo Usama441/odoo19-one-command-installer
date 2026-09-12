@@ -77,6 +77,39 @@ if [[ "${ID}" != "ubuntu" || ( "${VERSION_ID}" != "22.04" && "${VERSION_ID}" != 
   exit 1
 fi
 
+detect_system_specs() {
+  local disk_details
+
+  SYSTEM_CPU_COUNT="$(getconf _NPROCESSORS_ONLN 2>/dev/null || true)"
+  [[ "$SYSTEM_CPU_COUNT" =~ ^[0-9]+$ ]] || SYSTEM_CPU_COUNT="Unknown"
+
+  SYSTEM_RAM_TOTAL="$(
+    awk '/^MemTotal:/ {
+      gib = $2 / 1048576
+      if (gib >= 10) printf "%.0f GiB", gib
+      else printf "%.1f GiB", gib
+      exit
+    }' /proc/meminfo 2>/dev/null || true
+  )"
+  SYSTEM_RAM_TOTAL="${SYSTEM_RAM_TOTAL:-Unknown}"
+  SYSTEM_RAM_MIB="$(awk '/^MemTotal:/ { printf "%.0f", $2 / 1024; exit }' /proc/meminfo 2>/dev/null || true)"
+  [[ "$SYSTEM_RAM_MIB" =~ ^[0-9]+$ ]] || SYSTEM_RAM_MIB="2048"
+
+  disk_details="$(df -hP / 2>/dev/null | awk 'NR == 2 { print $2 "|" $4 }' || true)"
+  SYSTEM_DISK_TOTAL="${disk_details%%|*}"
+  SYSTEM_DISK_FREE="${disk_details#*|}"
+  if [[ -z "$disk_details" || "$disk_details" != *"|"* ]]; then
+    SYSTEM_DISK_TOTAL="Unknown"
+    SYSTEM_DISK_FREE="Unknown"
+  fi
+
+  SYSTEM_ARCHITECTURE="$(dpkg --print-architecture 2>/dev/null || uname -m 2>/dev/null || true)"
+  SYSTEM_ARCHITECTURE="${SYSTEM_ARCHITECTURE:-Unknown}"
+  SYSTEM_SPEC_SUMMARY="${SYSTEM_CPU_COUNT} CPU  •  ${SYSTEM_RAM_TOTAL} RAM  •  ${SYSTEM_DISK_TOTAL} disk (${SYSTEM_DISK_FREE} free)  •  ${SYSTEM_ARCHITECTURE}"
+}
+
+detect_system_specs
+
 APT_INDEX_READY="false"
 
 ask_yes_no() {
@@ -122,6 +155,86 @@ package_installed() {
   dpkg-query -W -f='${Status}' "$1" 2>/dev/null | grep -q 'ok installed'
 }
 
+INSTALLER_STATE_FILE="$SCRIPT_DIR/.installer-state"
+INSTALLER_MANAGED_PACKAGES=()
+INSTALLER_CREATED_DOCKER_SOURCE="false"
+INSTALLER_CREATED_DOCKER_KEY="false"
+INSTALLER_DOCKER_GROUP_USER=""
+
+installer_package_is_supported() {
+  case "$1" in
+    ca-certificates|curl|openssl|rar|sqlite3|docker-ce|docker-ce-cli|containerd.io|docker-buildx-plugin|docker-compose-plugin) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+installer_state_has_package() {
+  local wanted="$1" package
+  for package in "${INSTALLER_MANAGED_PACKAGES[@]}"; do
+    [[ "$package" == "$wanted" ]] && return 0
+  done
+  return 1
+}
+
+load_installer_state() {
+  local key value
+  [[ -f "$INSTALLER_STATE_FILE" ]] || return 0
+
+  while IFS='=' read -r key value; do
+    case "$key" in
+      PACKAGE)
+        if installer_package_is_supported "$value" && ! installer_state_has_package "$value"; then
+          INSTALLER_MANAGED_PACKAGES+=("$value")
+        fi
+        ;;
+      DOCKER_SOURCE_CREATED)
+        [[ "$value" == "true" ]] && INSTALLER_CREATED_DOCKER_SOURCE="true"
+        ;;
+      DOCKER_KEY_CREATED)
+        [[ "$value" == "true" ]] && INSTALLER_CREATED_DOCKER_KEY="true"
+        ;;
+      DOCKER_GROUP_USER)
+        if [[ "$value" =~ ^[A-Za-z_][A-Za-z0-9_-]*[$]?$ ]]; then
+          INSTALLER_DOCKER_GROUP_USER="$value"
+        fi
+        ;;
+    esac
+  done < "$INSTALLER_STATE_FILE"
+}
+
+save_installer_state() {
+  local package temporary_state="${INSTALLER_STATE_FILE}.tmp"
+  (
+    umask 077
+    {
+      for package in "${INSTALLER_MANAGED_PACKAGES[@]}"; do
+        printf 'PACKAGE=%s\n' "$package"
+      done
+      printf 'DOCKER_SOURCE_CREATED=%s\n' "$INSTALLER_CREATED_DOCKER_SOURCE"
+      printf 'DOCKER_KEY_CREATED=%s\n' "$INSTALLER_CREATED_DOCKER_KEY"
+      if [[ -n "$INSTALLER_DOCKER_GROUP_USER" ]]; then
+        printf 'DOCKER_GROUP_USER=%s\n' "$INSTALLER_DOCKER_GROUP_USER"
+      fi
+    } > "$temporary_state"
+  )
+  mv -f "$temporary_state" "$INSTALLER_STATE_FILE"
+  chmod 600 "$INSTALLER_STATE_FILE"
+}
+
+track_installer_packages() {
+  local package changed="false"
+  for package in "$@"; do
+    if installer_package_is_supported "$package" && ! installer_state_has_package "$package"; then
+      INSTALLER_MANAGED_PACKAGES+=("$package")
+      changed="true"
+    fi
+  done
+  [[ "$changed" == "true" ]] && save_installer_state
+  return 0
+}
+
+load_installer_state
+
 refresh_prerequisite_status() {
   if package_installed ca-certificates; then HAS_CA_CERTIFICATES="true"; else HAS_CA_CERTIFICATES="false"; fi
   if command -v curl >/dev/null 2>&1; then HAS_CURL="true"; else HAS_CURL="false"; fi
@@ -156,6 +269,10 @@ show_prerequisite_status() {
 }
 
 setup_docker_repository() {
+  local source_was_missing="false" key_was_missing="false"
+  [[ ! -e /etc/apt/sources.list.d/docker.list ]] && source_was_missing="true"
+  [[ ! -e /etc/apt/keyrings/docker.asc ]] && key_was_missing="true"
+
   install_apt_packages ca-certificates curl
   sudo install -m 0755 -d /etc/apt/keyrings
   sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
@@ -166,6 +283,10 @@ setup_docker_repository() {
   echo "deb [arch=$arch signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $codename stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
   sudo apt-get update
   APT_INDEX_READY="true"
+
+  if [[ "$source_was_missing" == "true" ]]; then INSTALLER_CREATED_DOCKER_SOURCE="true"; fi
+  if [[ "$key_was_missing" == "true" ]]; then INSTALLER_CREATED_DOCKER_KEY="true"; fi
+  save_installer_state
 }
 
 show_control_center_status() {
@@ -191,6 +312,7 @@ show_control_center_status() {
   echo
   printf '%b\n' "${COLOR_BOLD}Quick system snapshot${COLOR_RESET}"
   printf '  %-22s %s\n' "Ubuntu" "${PRETTY_NAME:-Unknown}"
+  printf '  %-22s %s\n' "Hardware" "$SYSTEM_SPEC_SUMMARY"
   printf '  %-22s %s\n' "Docker CLI" "$docker_status"
   printf '  %-22s %s\n' "Enterprise addons" "$enterprise_status"
   printf '  %-22s %s\n' "Installer state" "$installation_status"
@@ -206,14 +328,14 @@ enterprise_addons_ready() {
 
 DASHBOARD_MIN_WIDTH=112
 DASHBOARD_MAX_WIDTH=132
-DASHBOARD_MIN_HEIGHT=32
+DASHBOARD_MIN_HEIGHT=33
 DASHBOARD_MAX_HEIGHT=42
-DASHBOARD_CONTENT_HEIGHT=30
+DASHBOARD_CONTENT_HEIGHT=32
 DASHBOARD_WIDTH="$DASHBOARD_MIN_WIDTH"
 DASHBOARD_CONTENT_WIDTH=$((DASHBOARD_WIDTH - 6))
 DASHBOARD_LEFT=0
 DASHBOARD_TOP=0
-DASHBOARD_MENU_ROW=19
+DASHBOARD_MENU_ROW=20
 TERMINAL_COLUMNS=0
 TERMINAL_ROWS=0
 
@@ -338,6 +460,7 @@ draw_interactive_dashboard() {
   dashboard_border '╭' '╮'
   dashboard_line "$COLOR_CYAN$COLOR_BOLD" "▣  SYSTEM SNAPSHOT  ─────────────────────────────────────────────────────────────────────────────────"
   dashboard_snapshot_row "⚙" "Ubuntu" "${PRETTY_NAME:-Unknown}" "$COLOR_WHITE"
+  dashboard_snapshot_row "◫" "Hardware" "$SYSTEM_SPEC_SUMMARY" "$COLOR_WHITE"
   if [[ "$docker_status" == *Available ]]; then
     dashboard_snapshot_row "▦" "Docker CLI" "$docker_status" "$COLOR_GREEN"
   else
@@ -368,14 +491,15 @@ draw_interactive_menu_rows() {
 
   label_width=$((DASHBOARD_CONTENT_WIDTH - 36))
 
-  for index in 1 2 3 4 5 6; do
+  for index in 1 2 3 4 5 6 7; do
     case "$index" in
       1) icon="⇩"; label="Install Odoo Community only" ;;
       2) icon="⇩"; label="Install Odoo Enterprise only" ;;
       3) icon="⇩"; label="Install both Community and Enterprise" ;;
       4) icon="⚙"; label="Check Ubuntu updates and missing dependencies" ;;
-      5) icon="♲"; label="Uninstall Odoo" ;;
-      6) icon="↩"; label="Exit" ;;
+      5) icon="⇧"; label="Back up databases across this system" ;;
+      6) icon="♲"; label="Uninstall Odoo" ;;
+      7) icon="↩"; label="Exit" ;;
     esac
     tag=""
     if (( index == recommended )); then tag="★ RECOMMENDED"; fi
@@ -421,7 +545,7 @@ configure_dashboard_geometry() {
   viewport_height="$TERMINAL_ROWS"
   (( viewport_height > DASHBOARD_MAX_HEIGHT )) && viewport_height="$DASHBOARD_MAX_HEIGHT"
   DASHBOARD_TOP=$(((TERMINAL_ROWS - viewport_height) / 2 + (viewport_height - DASHBOARD_CONTENT_HEIGHT) / 2))
-  DASHBOARD_MENU_ROW=$((DASHBOARD_TOP + 19))
+  DASHBOARD_MENU_ROW=$((DASHBOARD_TOP + 20))
 }
 
 resize_screen_center_text() {
@@ -479,9 +603,62 @@ draw_resize_window() {
 }
 
 INTERACTIVE_ALT_SCREEN="false"
+INTERACTIVE_STTY_STATE=""
+
+enable_interactive_input_mode() {
+  if [[ -t 0 && -z "$INTERACTIVE_STTY_STATE" ]]; then
+    INTERACTIVE_STTY_STATE="$(stty -g 2>/dev/null || true)"
+    if [[ -n "$INTERACTIVE_STTY_STATE" ]]; then
+      # Keep echo disabled for the whole dashboard session. A touchpad can send
+      # several arrow sequences between individual `read -s` calls otherwise.
+      stty -echo -icanon min 1 time 0 2>/dev/null || true
+    fi
+  fi
+}
+
+read_dashboard_escape_sequence() {
+  local target="$1" first="" character="" escape_data="" index
+
+  IFS= read -rsn1 -t 0.08 first || true
+  case "$first" in
+    '[')
+      escape_data='['
+      while (( ${#escape_data} < 32 )); do
+        character=""
+        IFS= read -rsn1 -t 0.02 character || true
+        [[ -n "$character" ]] || break
+        escape_data+="$character"
+        if [[ "$character" =~ [@-~] ]]; then
+          break
+        fi
+      done
+      # Legacy X10 mouse reports contain three coordinate bytes after CSI M.
+      if [[ "$escape_data" == '[M' ]]; then
+        for index in 1 2 3; do
+          character=""
+          IFS= read -rsn1 -t 0.02 character || true
+          [[ -n "$character" ]] || break
+          escape_data+="$character"
+        done
+      fi
+      ;;
+    'O')
+      character=""
+      IFS= read -rsn1 -t 0.02 character || true
+      escape_data="O$character"
+      ;;
+    *) escape_data="$first" ;;
+  esac
+
+  printf -v "$target" '%s' "$escape_data"
+}
 
 close_interactive_dashboard() {
   printf '%b' "$COLOR_RESET"
+  if [[ -n "$INTERACTIVE_STTY_STATE" ]]; then
+    stty "$INTERACTIVE_STTY_STATE" 2>/dev/null || true
+    INTERACTIVE_STTY_STATE=""
+  fi
   tput cnorm 2>/dev/null || printf '\033[?25h'
   if [[ "$INTERACTIVE_ALT_SCREEN" == "true" ]]; then
     tput rmcup 2>/dev/null || true
@@ -490,17 +667,19 @@ close_interactive_dashboard() {
 }
 
 wait_for_dashboard_size() {
-  local key last_columns=-1 last_rows=-1
+  local key sequence last_columns=-1 last_rows=-1
 
   tput smcup
   INTERACTIVE_ALT_SCREEN="true"
   tput civis
+  enable_interactive_input_mode
   trap 'close_interactive_dashboard' EXIT
   trap 'exit 130' INT TERM HUP
 
   while true; do
     if configure_dashboard_geometry; then
-      close_interactive_dashboard
+      # Keep the input mode active while handing control to the main menu so a
+      # still-running touchpad gesture cannot leak bytes during the transition.
       trap - EXIT INT TERM HUP
       return 0
     fi
@@ -519,10 +698,19 @@ wait_for_dashboard_size() {
     key=""
     IFS= read -rsn1 -t 0.25 key || true
     case "$key" in
-      q|Q|$'\033')
+      q|Q)
         close_interactive_dashboard
         trap - EXIT INT TERM HUP
         return 1
+        ;;
+      $'\033')
+        sequence=""
+        read_dashboard_escape_sequence sequence
+        if [[ -z "$sequence" ]]; then
+          close_interactive_dashboard
+          trap - EXIT INT TERM HUP
+          return 1
+        fi
         ;;
     esac
   done
@@ -531,9 +719,12 @@ wait_for_dashboard_size() {
 read_interactive_main_choice() {
   local selected="$1" recommended="$1" previous_selected key sequence
 
-  tput smcup
-  INTERACTIVE_ALT_SCREEN="true"
+  if [[ "$INTERACTIVE_ALT_SCREEN" != "true" ]]; then
+    tput smcup
+    INTERACTIVE_ALT_SCREEN="true"
+  fi
   tput civis
+  enable_interactive_input_mode
   trap 'close_interactive_dashboard' EXIT
   trap 'exit 130' INT TERM HUP
 
@@ -546,17 +737,17 @@ read_interactive_main_choice() {
     IFS= read -rsn1 key || true
     case "$key" in
       '') MAIN_CHOICE="$selected"; break ;;
-      [1-6]) MAIN_CHOICE="$key"; break ;;
+      [1-7]) MAIN_CHOICE="$key"; break ;;
       k|K) (( selected > 1 )) && selected=$((selected - 1)) ;;
-      j|J) (( selected < 6 )) && selected=$((selected + 1)) ;;
-      q|Q) MAIN_CHOICE="6"; break ;;
+      j|J) (( selected < 7 )) && selected=$((selected + 1)) ;;
+      q|Q) MAIN_CHOICE="7"; break ;;
       $'\033')
         sequence=""
-        IFS= read -rsn2 -t 0.08 sequence || true
+        read_dashboard_escape_sequence sequence
         case "$sequence" in
-          '[A') (( selected > 1 )) && selected=$((selected - 1)) ;;
-          '[B') (( selected < 6 )) && selected=$((selected + 1)) ;;
-          '') MAIN_CHOICE="6"; break ;;
+          '[A'|'OA') (( selected > 1 )) && selected=$((selected - 1)) ;;
+          '[B'|'OB') (( selected < 7 )) && selected=$((selected + 1)) ;;
+          '') MAIN_CHOICE="7"; break ;;
         esac
         ;;
     esac
@@ -572,12 +763,1161 @@ read_interactive_main_choice() {
   trap - EXIT INT TERM HUP
 }
 
+BACKUP_DOCKER_COMMAND=()
+BACKUP_STARTED_CONTAINERS=()
+BACKUP_STARTED_PG_CLUSTERS=()
+BACKUP_STARTED_MYSQL_SERVICES=()
+BACKUP_CATALOG_ENGINES=()
+BACKUP_CATALOG_SOURCE_KINDS=()
+BACKUP_CATALOG_SOURCE_LABELS=()
+BACKUP_CATALOG_SOURCE_REFS=()
+BACKUP_CATALOG_USERS=()
+BACKUP_CATALOG_SECRETS=()
+BACKUP_CATALOG_CLIENTS=()
+BACKUP_CATALOG_DATABASES=()
+BACKUP_CATALOG_SIZES=()
+BACKUP_SELECTED_INDEXES=()
+BACKUP_SQLITE_FILTERED_COUNT=0
+BACKUP_WORK_DIR=""
+BACKUP_SCAN_FILE=""
+BACKUP_ARCHIVE_PATH=""
+BACKUP_ARCHIVE_COMPLETE="false"
+
+backup_list_contains() {
+  local wanted="$1" item
+  shift
+  for item in "$@"; do
+    [[ "$item" == "$wanted" ]] && return 0
+  done
+  return 1
+}
+
+backup_restore_original_state() {
+  local container_id cluster_entry pg_version pg_cluster service
+
+  for container_id in "${BACKUP_STARTED_CONTAINERS[@]}"; do
+    "${BACKUP_DOCKER_COMMAND[@]}" stop --time 30 "$container_id" >/dev/null 2>&1 || true
+  done
+  for cluster_entry in "${BACKUP_STARTED_PG_CLUSTERS[@]}"; do
+    IFS='|' read -r pg_version pg_cluster <<< "$cluster_entry"
+    sudo pg_ctlcluster "$pg_version" "$pg_cluster" stop >/dev/null 2>&1 || true
+  done
+  for service in "${BACKUP_STARTED_MYSQL_SERVICES[@]}"; do
+    sudo systemctl stop "$service" >/dev/null 2>&1 || true
+  done
+  if [[ -n "$BACKUP_SCAN_FILE" && "$BACKUP_SCAN_FILE" == /tmp/odoo19-database-scan.* ]]; then
+    rm -f -- "$BACKUP_SCAN_FILE"
+  fi
+  if [[ -n "$BACKUP_WORK_DIR" &&
+        "$BACKUP_WORK_DIR" == "$SCRIPT_DIR/backups/.backup-work."* &&
+        -d "$BACKUP_WORK_DIR" ]]; then
+    rm -rf -- "$BACKUP_WORK_DIR"
+  fi
+  if [[ "$BACKUP_ARCHIVE_COMPLETE" != "true" &&
+        -n "$BACKUP_ARCHIVE_PATH" &&
+        "$BACKUP_ARCHIVE_PATH" == "$SCRIPT_DIR/backups/system-databases-"*.rar ]]; then
+    rm -f -- "$BACKUP_ARCHIVE_PATH"
+  fi
+  BACKUP_STARTED_CONTAINERS=()
+  BACKUP_STARTED_PG_CLUSTERS=()
+  BACKUP_STARTED_MYSQL_SERVICES=()
+  BACKUP_WORK_DIR=""
+  BACKUP_SCAN_FILE=""
+}
+
+ensure_rar_available() {
+  if command -v rar >/dev/null 2>&1; then return 0; fi
+
+  echo
+  echo "The RAR utility is required to create the requested .rar backup archive."
+  if ! ask_yes_no "Install the Ubuntu rar package now? [Y/n]: " "y"; then
+    return 1
+  fi
+  echo "Installing the RAR utility..."
+  if ! install_apt_packages rar; then
+    echo "The rar package could not be installed. Enable Ubuntu's multiverse repository, then retry."
+    return 1
+  fi
+  if ! command -v rar >/dev/null 2>&1; then
+    echo "The rar command is still unavailable after installation."
+    return 1
+  fi
+  track_installer_packages rar
+}
+
+ensure_sqlite_available() {
+  if command -v sqlite3 >/dev/null 2>&1; then return 0; fi
+
+  echo
+  echo "The sqlite3 utility is required for the selected SQLite database backup."
+  if ! ask_yes_no "Install the Ubuntu sqlite3 package now? [Y/n]: " "y"; then
+    return 1
+  fi
+  install_apt_packages sqlite3
+  command -v sqlite3 >/dev/null 2>&1 || return 1
+  track_installer_packages sqlite3
+}
+
+backup_read_secret() {
+  local target="$1" prompt="$2" secret
+  read -r -s -p "$prompt" secret
+  echo
+  printf -v "$target" '%s' "$secret"
+}
+
+backup_reset_catalog() {
+  BACKUP_CATALOG_ENGINES=()
+  BACKUP_CATALOG_SOURCE_KINDS=()
+  BACKUP_CATALOG_SOURCE_LABELS=()
+  BACKUP_CATALOG_SOURCE_REFS=()
+  BACKUP_CATALOG_USERS=()
+  BACKUP_CATALOG_SECRETS=()
+  BACKUP_CATALOG_CLIENTS=()
+  BACKUP_CATALOG_DATABASES=()
+  BACKUP_CATALOG_SIZES=()
+  BACKUP_SQLITE_FILTERED_COUNT=0
+}
+
+backup_catalog_add() {
+  local engine="$1" source_kind="$2" source_label="$3" source_ref="$4"
+  local user="$5" secret="$6" client="$7" database_name="$8" database_size="$9" index
+
+  [[ -n "$database_name" ]] || return 0
+  for (( index = 0; index < ${#BACKUP_CATALOG_DATABASES[@]}; index++ )); do
+    if [[ "${BACKUP_CATALOG_ENGINES[index]}" == "$engine" &&
+          "${BACKUP_CATALOG_SOURCE_KINDS[index]}" == "$source_kind" &&
+          "${BACKUP_CATALOG_SOURCE_REFS[index]}" == "$source_ref" &&
+          "${BACKUP_CATALOG_DATABASES[index]}" == "$database_name" ]]; then
+      return 0
+    fi
+  done
+
+  BACKUP_CATALOG_ENGINES+=("$engine")
+  BACKUP_CATALOG_SOURCE_KINDS+=("$source_kind")
+  BACKUP_CATALOG_SOURCE_LABELS+=("$source_label")
+  BACKUP_CATALOG_SOURCE_REFS+=("$source_ref")
+  BACKUP_CATALOG_USERS+=("$user")
+  BACKUP_CATALOG_SECRETS+=("$secret")
+  BACKUP_CATALOG_CLIENTS+=("$client")
+  BACKUP_CATALOG_DATABASES+=("$database_name")
+  BACKUP_CATALOG_SIZES+=("${database_size:-unknown}")
+}
+
+backup_append_postgres_rows() {
+  local output="$1" source_kind="$2" source_label="$3" source_ref="$4"
+  local user="$5" secret="$6" client="$7" database_name database_size
+
+  while IFS=$'\t' read -r database_name database_size; do
+    [[ -n "$database_name" ]] || continue
+    backup_catalog_add "PostgreSQL" "$source_kind" "$source_label" "$source_ref" \
+      "$user" "$secret" "$client" "$database_name" "$database_size"
+  done <<< "$output"
+}
+
+backup_append_mysql_rows() {
+  local output="$1" engine="$2" source_kind="$3" source_label="$4" source_ref="$5"
+  local user="$6" secret="$7" client="$8" database_name database_size
+
+  while IFS=$'\t' read -r database_name database_size; do
+    [[ -n "$database_name" ]] || continue
+    backup_catalog_add "$engine" "$source_kind" "$source_label" "$source_ref" \
+      "$user" "$secret" "$client" "$database_name" "$database_size"
+  done <<< "$output"
+}
+
+discover_native_postgresql() {
+  local clusters_output pg_version pg_cluster port status owner data_dir log_file
+  local psql_client pg_dump_client database_output source_label
+  local postgres_sql="SELECT datname, pg_size_pretty(pg_database_size(datname)) FROM pg_database WHERE datallowconn AND NOT datistemplate AND datname <> 'postgres' ORDER BY datname;"
+
+  echo "  • Native PostgreSQL clusters"
+  if ! command -v pg_lsclusters >/dev/null 2>&1; then
+    echo "    Not detected."
+    return 0
+  fi
+  clusters_output="$(pg_lsclusters --no-header 2>/dev/null || true)"
+  if [[ -z "$clusters_output" ]]; then
+    echo "    No PostgreSQL clusters found."
+    return 0
+  fi
+
+  while read -r pg_version pg_cluster port status owner data_dir log_file; do
+    [[ -n "$pg_version" && -n "$pg_cluster" && "$port" =~ ^[0-9]+$ ]] || continue
+    if [[ "$status" != online* ]]; then
+      if [[ -t 0 ]] && ask_yes_no "    Cluster $pg_version/$pg_cluster is stopped. Start it temporarily? [Y/n]: " "y"; then
+        if sudo pg_ctlcluster "$pg_version" "$pg_cluster" start; then
+          BACKUP_STARTED_PG_CLUSTERS+=("$pg_version|$pg_cluster")
+        else
+          echo "    Could not start $pg_version/$pg_cluster; skipping it."
+          continue
+        fi
+      else
+        echo "    Skipping stopped cluster $pg_version/$pg_cluster."
+        continue
+      fi
+    fi
+
+    psql_client="/usr/lib/postgresql/$pg_version/bin/psql"
+    pg_dump_client="/usr/lib/postgresql/$pg_version/bin/pg_dump"
+    [[ -x "$psql_client" ]] || psql_client="$(command -v psql 2>/dev/null || true)"
+    [[ -x "$pg_dump_client" ]] || pg_dump_client="$(command -v pg_dump 2>/dev/null || true)"
+    if [[ -z "$psql_client" || -z "$pg_dump_client" ]]; then
+      echo "    PostgreSQL client tools are missing for $pg_version/$pg_cluster; skipping it."
+      continue
+    fi
+    if ! database_output="$(sudo -u postgres "$psql_client" --no-psqlrc -X -A -t -F $'\t' \
+      -p "$port" -d postgres -c "$postgres_sql" 2>/dev/null)"; then
+      echo "    Cannot access cluster $pg_version/$pg_cluster as postgres; skipping it."
+      continue
+    fi
+    source_label="Native $pg_version/$pg_cluster :$port"
+    backup_append_postgres_rows "$database_output" "native" "$source_label" "$port" \
+      "postgres" "" "$pg_dump_client"
+  done <<< "$clusters_output"
+}
+
+backup_mysql_query_native() {
+  local client="$1" auth_mode="$2" user="$3" secret="$4" sql="$5"
+  case "$auth_mode" in
+    current) "$client" --batch --skip-column-names -e "$sql" ;;
+    sudo) sudo "$client" --batch --skip-column-names -e "$sql" ;;
+    password) MYSQL_PWD="$secret" "$client" -u "$user" --batch --skip-column-names -e "$sql" ;;
+    *) return 1 ;;
+  esac
+}
+
+discover_native_mysql() {
+  local client dump_client engine database_output auth_mode="" auth_user="" auth_secret=""
+  local service="" service_candidate
+  local mysql_sql="SELECT s.schema_name, CONCAT(COALESCE(ROUND(SUM(t.data_length + t.index_length) / 1024 / 1024, 2), 0), ' MiB') FROM information_schema.schemata s LEFT JOIN information_schema.tables t ON t.table_schema = s.schema_name WHERE s.schema_name NOT IN ('information_schema','mysql','performance_schema','sys') GROUP BY s.schema_name ORDER BY s.schema_name;"
+
+  echo "  • Native MySQL/MariaDB server"
+  client="$(command -v mariadb 2>/dev/null || command -v mysql 2>/dev/null || true)"
+  dump_client="$(command -v mariadb-dump 2>/dev/null || command -v mysqldump 2>/dev/null || true)"
+  if [[ -z "$client" || -z "$dump_client" ]]; then
+    echo "    Not detected."
+    return 0
+  fi
+  for service_candidate in mariadb mysql; do
+    if systemctl is-active --quiet "$service_candidate"; then
+      service="$service_candidate"
+      break
+    fi
+  done
+  for service_candidate in mariadb mysql; do
+    [[ -n "$service" ]] && break
+    if systemctl list-unit-files "$service_candidate.service" --no-legend 2>/dev/null | grep -q "^$service_candidate.service"; then
+      service="$service_candidate"
+      break
+    fi
+  done
+  if [[ -n "$service" ]] && ! systemctl is-active --quiet "$service"; then
+    if [[ -t 0 ]] && ask_yes_no "    Native $service is stopped. Start it temporarily? [Y/n]: " "y"; then
+      if sudo systemctl start "$service"; then
+        BACKUP_STARTED_MYSQL_SERVICES+=("$service")
+      else
+        echo "    Could not start $service; skipping it."
+        return 0
+      fi
+    else
+      echo "    Native $service is stopped; skipping it."
+      return 0
+    fi
+  fi
+  if sudo -n true >/dev/null 2>&1 &&
+     database_output="$(backup_mysql_query_native "$client" sudo "" "" "$mysql_sql" 2>/dev/null)"; then
+    auth_mode="sudo"
+    auth_user="root via sudo"
+  elif [[ -t 0 ]] && ask_yes_no "    Try local MySQL/MariaDB administrative access with sudo? [Y/n]: " "y" &&
+       database_output="$(backup_mysql_query_native "$client" sudo "" "" "$mysql_sql" 2>/dev/null)"; then
+    auth_mode="sudo"
+    auth_user="root via sudo"
+  elif database_output="$(backup_mysql_query_native "$client" current "" "" "$mysql_sql" 2>/dev/null)"; then
+    auth_mode="current"
+    auth_user="current login defaults"
+  elif [[ -t 0 ]]; then
+    read -r -p "    MySQL/MariaDB username (blank skips this server): " auth_user
+    if [[ -z "$auth_user" ]]; then
+      echo "    Skipped because credentials were not provided."
+      return 0
+    fi
+    backup_read_secret auth_secret "    Password for $auth_user: "
+    if database_output="$(backup_mysql_query_native "$client" password "$auth_user" "$auth_secret" "$mysql_sql" 2>/dev/null)"; then
+      auth_mode="password"
+    else
+      echo "    Authentication failed; skipping the native MySQL/MariaDB server."
+      return 0
+    fi
+  else
+    echo "    Server detected but authentication is unavailable in non-interactive mode."
+    return 0
+  fi
+
+  if "${client}" --version 2>/dev/null | grep -qi mariadb; then engine="MariaDB"; else engine="MySQL"; fi
+  backup_append_mysql_rows "$database_output" "$engine" "native" "Native $engine" "$auth_mode" \
+    "$auth_user" "$auth_secret" "$dump_client"
+}
+
+backup_docker_env_value() {
+  local container_id="$1" wanted_key="$2" line
+  while IFS= read -r line; do
+    if [[ "$line" == "$wanted_key="* ]]; then
+      printf '%s' "${line#*=}"
+      return 0
+    fi
+  done < <("${BACKUP_DOCKER_COMMAND[@]}" inspect --format '{{range .Config.Env}}{{println .}}{{end}}' "$container_id" 2>/dev/null)
+  return 1
+}
+
+backup_docker_postgres_query() {
+  local container_id="$1" user="$2" secret="$3" sql="$4"
+  if [[ -n "$secret" ]]; then
+    "${BACKUP_DOCKER_COMMAND[@]}" exec -e "PGPASSWORD=$secret" "$container_id" \
+      psql --no-psqlrc -X -A -t -F $'\t' -U "$user" -d postgres -c "$sql"
+  else
+    "${BACKUP_DOCKER_COMMAND[@]}" exec "$container_id" \
+      psql --no-psqlrc -X -A -t -F $'\t' -U "$user" -d postgres -c "$sql"
+  fi
+}
+
+discover_docker_postgresql() {
+  local container_id="$1" container_name="$2" user secret database_output entered_user
+  local postgres_sql="SELECT datname, pg_size_pretty(pg_database_size(datname)) FROM pg_database WHERE datallowconn AND NOT datistemplate AND datname <> 'postgres' ORDER BY datname;"
+
+  user="$(backup_docker_env_value "$container_id" POSTGRES_USER || true)"
+  secret="$(backup_docker_env_value "$container_id" POSTGRES_PASSWORD || true)"
+  user="${user:-postgres}"
+  if ! database_output="$(backup_docker_postgres_query "$container_id" "$user" "$secret" "$postgres_sql" 2>/dev/null)"; then
+    if [[ ! -t 0 ]]; then
+      echo "    $container_name: PostgreSQL authentication failed; skipped."
+      return 0
+    fi
+    echo "    PostgreSQL credentials from container settings did not work for $container_name."
+    read -r -p "    PostgreSQL username [$user] (blank keeps default, S skips): " entered_user
+    [[ "${entered_user,,}" == "s" ]] && return 0
+    user="${entered_user:-$user}"
+    backup_read_secret secret "    Password for $user: "
+    if ! database_output="$(backup_docker_postgres_query "$container_id" "$user" "$secret" "$postgres_sql" 2>/dev/null)"; then
+      echo "    Authentication failed; skipping $container_name."
+      return 0
+    fi
+  fi
+  backup_append_postgres_rows "$database_output" "docker" "Docker: $container_name" "$container_id" \
+    "$user" "$secret" "pg_dump"
+}
+
+backup_docker_mysql_query() {
+  local container_id="$1" client="$2" user="$3" secret="$4" sql="$5"
+  if [[ -n "$secret" ]]; then
+    "${BACKUP_DOCKER_COMMAND[@]}" exec -e "MYSQL_PWD=$secret" "$container_id" \
+      "$client" -u "$user" --batch --skip-column-names -e "$sql"
+  else
+    "${BACKUP_DOCKER_COMMAND[@]}" exec "$container_id" \
+      "$client" -u "$user" --batch --skip-column-names -e "$sql"
+  fi
+}
+
+discover_docker_mysql() {
+  local container_id="$1" container_name="$2" image_name="$3"
+  local client dump_client engine user secret configured_user configured_secret database_output entered_user
+  local mysql_sql="SELECT s.schema_name, CONCAT(COALESCE(ROUND(SUM(t.data_length + t.index_length) / 1024 / 1024, 2), 0), ' MiB') FROM information_schema.schemata s LEFT JOIN information_schema.tables t ON t.table_schema = s.schema_name WHERE s.schema_name NOT IN ('information_schema','mysql','performance_schema','sys') GROUP BY s.schema_name ORDER BY s.schema_name;"
+
+  client="$("${BACKUP_DOCKER_COMMAND[@]}" exec "$container_id" sh -c \
+    'command -v mariadb 2>/dev/null || command -v mysql 2>/dev/null' 2>/dev/null || true)"
+  dump_client="$("${BACKUP_DOCKER_COMMAND[@]}" exec "$container_id" sh -c \
+    'command -v mariadb-dump 2>/dev/null || command -v mysqldump 2>/dev/null' 2>/dev/null || true)"
+  if [[ -z "$client" || -z "$dump_client" ]]; then
+    echo "    $container_name: database client tools not found; skipped."
+    return 0
+  fi
+  if [[ "${image_name,,}" == *mariadb* ]]; then engine="MariaDB"; else engine="MySQL"; fi
+
+  user="root"
+  secret="$(backup_docker_env_value "$container_id" MARIADB_ROOT_PASSWORD || true)"
+  [[ -n "$secret" ]] || secret="$(backup_docker_env_value "$container_id" MYSQL_ROOT_PASSWORD || true)"
+  if ! database_output="$(backup_docker_mysql_query "$container_id" "$client" "$user" "$secret" "$mysql_sql" 2>/dev/null)"; then
+    configured_user="$(backup_docker_env_value "$container_id" MARIADB_USER || true)"
+    [[ -n "$configured_user" ]] || configured_user="$(backup_docker_env_value "$container_id" MYSQL_USER || true)"
+    configured_secret="$(backup_docker_env_value "$container_id" MARIADB_PASSWORD || true)"
+    [[ -n "$configured_secret" ]] || configured_secret="$(backup_docker_env_value "$container_id" MYSQL_PASSWORD || true)"
+    if [[ -n "$configured_user" ]] &&
+       database_output="$(backup_docker_mysql_query "$container_id" "$client" "$configured_user" "$configured_secret" "$mysql_sql" 2>/dev/null)"; then
+      user="$configured_user"
+      secret="$configured_secret"
+    elif [[ -t 0 ]]; then
+      echo "    MySQL/MariaDB credentials from container settings did not work for $container_name."
+      read -r -p "    Database username [root] (blank keeps default, S skips): " entered_user
+      [[ "${entered_user,,}" == "s" ]] && return 0
+      user="${entered_user:-root}"
+      backup_read_secret secret "    Password for $user: "
+      if ! database_output="$(backup_docker_mysql_query "$container_id" "$client" "$user" "$secret" "$mysql_sql" 2>/dev/null)"; then
+        echo "    Authentication failed; skipping $container_name."
+        return 0
+      fi
+    else
+      echo "    $container_name: authentication failed; skipped."
+      return 0
+    fi
+  fi
+  backup_append_mysql_rows "$database_output" "$engine" "docker" "Docker: $container_name" "$container_id" \
+    "$user" "$secret" "$dump_client"
+}
+
+backup_wait_for_started_container() {
+  local container_id="$1" engine="$2" attempt
+  for (( attempt = 1; attempt <= 45; attempt++ )); do
+    case "$engine" in
+      postgresql)
+        "${BACKUP_DOCKER_COMMAND[@]}" exec "$container_id" pg_isready >/dev/null 2>&1 && return 0
+        ;;
+      mysql)
+        "${BACKUP_DOCKER_COMMAND[@]}" exec "$container_id" sh -c \
+          'mysqladmin ping --silent >/dev/null 2>&1 || mariadb-admin ping --silent >/dev/null 2>&1' && return 0
+        ;;
+    esac
+    sleep 1
+  done
+  return 1
+}
+
+discover_docker_databases() {
+  local container_output container_id image_name container_name running_state engine index stopped_count=0
+  local start_stopped="false"
+  local candidate_ids=() candidate_images=() candidate_names=() candidate_states=() candidate_engines=()
+
+  echo "  • Docker PostgreSQL, MySQL and MariaDB containers"
+  if ! command -v docker >/dev/null 2>&1; then
+    echo "    Docker is not installed; continuing with native and file databases."
+    return 0
+  fi
+  BACKUP_DOCKER_COMMAND=(docker)
+  if ! docker info >/dev/null 2>&1; then
+    if sudo docker info >/dev/null 2>&1; then
+      BACKUP_DOCKER_COMMAND=(sudo docker)
+    else
+      echo "    Docker engine is unavailable; Docker databases were skipped."
+      return 0
+    fi
+  fi
+  container_output="$("${BACKUP_DOCKER_COMMAND[@]}" ps -aq 2>/dev/null || true)"
+  [[ -n "$container_output" ]] || { echo "    No containers found."; return 0; }
+
+  while IFS= read -r container_id; do
+    [[ -n "$container_id" ]] || continue
+    image_name="$("${BACKUP_DOCKER_COMMAND[@]}" inspect --format '{{.Config.Image}}' "$container_id" 2>/dev/null || true)"
+    container_name="$("${BACKUP_DOCKER_COMMAND[@]}" inspect --format '{{.Name}}' "$container_id" 2>/dev/null || true)"
+    container_name="${container_name#/}"
+    running_state="$("${BACKUP_DOCKER_COMMAND[@]}" inspect --format '{{.State.Running}}' "$container_id" 2>/dev/null || true)"
+    case "${image_name,,}" in
+      *exporter*|*operator*|*database-backup*|*db-backup*) continue ;;
+    esac
+    case "${image_name,,}" in
+      *postgres*|*postgis*|*timescale*) engine="postgresql" ;;
+      *mysql*|*mariadb*|*percona*) engine="mysql" ;;
+      *) continue ;;
+    esac
+    candidate_ids+=("$container_id")
+    candidate_images+=("$image_name")
+    candidate_names+=("${container_name:-${container_id:0:12}}")
+    candidate_states+=("$running_state")
+    candidate_engines+=("$engine")
+    [[ "$running_state" == "true" ]] || stopped_count=$((stopped_count + 1))
+  done <<< "$container_output"
+
+  if (( ${#candidate_ids[@]} == 0 )); then
+    echo "    No supported database containers found."
+    return 0
+  fi
+  if (( stopped_count > 0 )) && [[ -t 0 ]] &&
+     ask_yes_no "    Start $stopped_count stopped database container(s) temporarily for discovery? [Y/n]: " "y"; then
+    start_stopped="true"
+  fi
+
+  for (( index = 0; index < ${#candidate_ids[@]}; index++ )); do
+    container_id="${candidate_ids[index]}"
+    if [[ "${candidate_states[index]}" != "true" ]]; then
+      if [[ "$start_stopped" != "true" ]]; then
+        echo "    ${candidate_names[index]}: stopped; skipped."
+        continue
+      fi
+      echo "    Starting ${candidate_names[index]} temporarily..."
+      if ! "${BACKUP_DOCKER_COMMAND[@]}" start "$container_id" >/dev/null; then
+        echo "    Could not start ${candidate_names[index]}; skipped."
+        continue
+      fi
+      BACKUP_STARTED_CONTAINERS+=("$container_id")
+      if ! backup_wait_for_started_container "$container_id" "${candidate_engines[index]}"; then
+        echo "    ${candidate_names[index]} did not become ready; skipped."
+        continue
+      fi
+    fi
+    case "${candidate_engines[index]}" in
+      postgresql) discover_docker_postgresql "$container_id" "${candidate_names[index]}" ;;
+      mysql) discover_docker_mysql "$container_id" "${candidate_names[index]}" "${candidate_images[index]}" ;;
+    esac
+  done
+}
+
+discover_sqlite_databases() {
+  local use_sudo="false" sqlite_path header_hex database_size root
+  local search_roots=() find_expression=() home_root
+
+  echo "  • Primary SQLite project/deployment databases"
+  for root in /var/lib /var/www /opt /srv /usr/local /mnt /media /data; do
+    [[ -d "$root" ]] && search_roots+=("$root")
+  done
+  for home_root in /home/* /root; do
+    [[ -d "$home_root" ]] || continue
+    for root in \
+      "$home_root/Projects" "$home_root/projects" \
+      "$home_root/Desktop" "$home_root/Documents" \
+      "$home_root/apps" "$home_root/Apps" \
+      "$home_root/www" "$home_root/workspace" "$home_root/Workspace"; do
+      [[ -d "$root" ]] && search_roots+=("$root")
+    done
+  done
+  (( ${#search_roots[@]} > 0 )) || { echo "    No search roots available."; return 0; }
+
+  BACKUP_SCAN_FILE="$(mktemp /tmp/odoo19-database-scan.XXXXXX)"
+  find_expression=(
+    \( -path "$SCRIPT_DIR/backups" -o -path "$SCRIPT_DIR/backups/*" -o
+       -path '*/.cache/*' -o -path '*/cache/*' -o -path '*/Cache/*' -o
+       -path '*/node_modules/*' -o -path '*/vendor/bundle/*' -o
+       -path '*/.venv/*' -o -path '*/venv/*' -o -path '*/site-packages/*' -o
+       -path '*/__pycache__/*' -o -path '*/tmp/*' -o -path '*/temp/*' -o
+       -path '*/.git/*' -o -path '*/logs/*' -o
+       -path '/var/lib/command-not-found/*' -o -path '/var/lib/PackageKit/*' -o
+       -path '/var/lib/colord/*' -o -path '/var/lib/fwupd/*' -o
+       -path '/var/lib/apt/*' -o -path '/var/lib/dpkg/*' -o
+       -path '/var/lib/snapd/*' \) -prune -o
+    -type f \( -iname '*.sqlite' -o -iname '*.sqlite3' -o -iname '*.db' \)
+    -size +0c -print0
+  )
+  if [[ -t 0 ]] && ask_yes_no "    Use sudo to include protected system locations in the SQLite scan? [Y/n]: " "y"; then
+    use_sudo="true"
+  fi
+  echo "    Searching common application-data locations; this may take some time..."
+  if [[ "$use_sudo" == "true" ]]; then
+    sudo find "${search_roots[@]}" -xdev "${find_expression[@]}" > "$BACKUP_SCAN_FILE" 2>/dev/null || true
+  else
+    find "${search_roots[@]}" -xdev "${find_expression[@]}" > "$BACKUP_SCAN_FILE" 2>/dev/null || true
+  fi
+
+  while IFS= read -r -d '' sqlite_path; do
+    case "${sqlite_path,,}" in
+      */cache.db|*/cache.sqlite|*/cache.sqlite3|*/*_cache.db|*/*-cache.db|\
+      */load_statistics.db|*/first_party_sets.db|*/heavy_ad_intervention_opt_out.db|\
+      */cookies.db|*/history.db|*/favicons.db|*/hsts-storage.sqlite|\
+      */session.db|*/session-store.db|*/segments_database.db|\
+      */test.db|*/test.sqlite|*/test.sqlite3|*/*_test.db|*/*_test.sqlite|*/*_test.sqlite3)
+        BACKUP_SQLITE_FILTERED_COUNT=$((BACKUP_SQLITE_FILTERED_COUNT + 1))
+        continue
+        ;;
+    esac
+    if [[ "$use_sudo" == "true" ]]; then
+      header_hex="$(sudo od -An -tx1 -N16 -- "$sqlite_path" 2>/dev/null | tr -d '[:space:]' || true)"
+      database_size="$(sudo du -h -- "$sqlite_path" 2>/dev/null | awk '{print $1}' || true)"
+    else
+      header_hex="$(od -An -tx1 -N16 -- "$sqlite_path" 2>/dev/null | tr -d '[:space:]' || true)"
+      database_size="$(du -h -- "$sqlite_path" 2>/dev/null | awk '{print $1}' || true)"
+    fi
+    [[ "$header_hex" == "53514c69746520666f726d6174203300" ]] || continue
+    backup_catalog_add "SQLite" "file" "File: $sqlite_path" "$sqlite_path" \
+      "" "" "sqlite3" "$(basename -- "$sqlite_path")" "${database_size:-unknown}"
+  done < "$BACKUP_SCAN_FILE"
+  rm -f -- "$BACKUP_SCAN_FILE"
+  BACKUP_SCAN_FILE=""
+}
+
+show_primary_database_summary() {
+  local index postgresql_count=0 mysql_count=0 sqlite_count=0
+  for (( index = 0; index < ${#BACKUP_CATALOG_DATABASES[@]}; index++ )); do
+    case "${BACKUP_CATALOG_ENGINES[index]}" in
+      PostgreSQL) postgresql_count=$((postgresql_count + 1)) ;;
+      MySQL|MariaDB) mysql_count=$((mysql_count + 1)) ;;
+      SQLite) sqlite_count=$((sqlite_count + 1)) ;;
+    esac
+  done
+  echo
+  echo "Primary database summary:"
+  printf '  %-32s %s\n' "PostgreSQL server databases" "$postgresql_count"
+  printf '  %-32s %s\n' "MySQL/MariaDB server databases" "$mysql_count"
+  printf '  %-32s %s\n' "SQLite project/deployment files" "$sqlite_count"
+  printf '  %-32s %s\n' "Cache/test/system SQLite data" "excluded"
+}
+
+sort_backup_catalog_by_category() {
+  local category index
+  local engines=() source_kinds=() source_labels=() source_refs=()
+  local users=() secrets=() clients=() databases=() sizes=()
+
+  for category in postgresql mysql sqlite; do
+    for (( index = 0; index < ${#BACKUP_CATALOG_DATABASES[@]}; index++ )); do
+      case "$category:${BACKUP_CATALOG_ENGINES[index]}" in
+        postgresql:PostgreSQL|mysql:MySQL|mysql:MariaDB|sqlite:SQLite)
+          engines+=("${BACKUP_CATALOG_ENGINES[index]}")
+          source_kinds+=("${BACKUP_CATALOG_SOURCE_KINDS[index]}")
+          source_labels+=("${BACKUP_CATALOG_SOURCE_LABELS[index]}")
+          source_refs+=("${BACKUP_CATALOG_SOURCE_REFS[index]}")
+          users+=("${BACKUP_CATALOG_USERS[index]}")
+          secrets+=("${BACKUP_CATALOG_SECRETS[index]}")
+          clients+=("${BACKUP_CATALOG_CLIENTS[index]}")
+          databases+=("${BACKUP_CATALOG_DATABASES[index]}")
+          sizes+=("${BACKUP_CATALOG_SIZES[index]}")
+          ;;
+      esac
+    done
+  done
+
+  BACKUP_CATALOG_ENGINES=("${engines[@]}")
+  BACKUP_CATALOG_SOURCE_KINDS=("${source_kinds[@]}")
+  BACKUP_CATALOG_SOURCE_LABELS=("${source_labels[@]}")
+  BACKUP_CATALOG_SOURCE_REFS=("${source_refs[@]}")
+  BACKUP_CATALOG_USERS=("${users[@]}")
+  BACKUP_CATALOG_SECRETS=("${secrets[@]}")
+  BACKUP_CATALOG_CLIENTS=("${clients[@]}")
+  BACKUP_CATALOG_DATABASES=("${databases[@]}")
+  BACKUP_CATALOG_SIZES=("${sizes[@]}")
+}
+
+scan_system_databases() {
+  backup_reset_catalog
+  echo
+  echo "Searching the system for application databases..."
+  echo "Supported engines: PostgreSQL, MySQL, MariaDB and SQLite (native, Docker and files)."
+  echo "Maintenance, template, cache, test and system databases are filtered out."
+  discover_native_postgresql
+  discover_native_mysql
+  discover_docker_databases
+  discover_sqlite_databases
+  sort_backup_catalog_by_category
+  show_primary_database_summary
+
+  if (( ${#BACKUP_CATALOG_DATABASES[@]} == 0 )); then
+    echo
+    echo "No accessible application databases were found."
+    echo "Stopped or password-protected instances that were skipped are shown in the scan output above."
+    return 1
+  fi
+}
+
+select_multiple_backup_databases() {
+  local selection normalized token range_start_text range_end_text range_start range_end selected_index
+  local selection_valid index category category_title category_count
+  BACKUP_SELECTED_INDEXES=()
+
+  echo
+  echo "Primary databases found across the system:"
+  for category in postgresql mysql sqlite; do
+    case "$category" in
+      postgresql) category_title="POSTGRESQL SERVER DATABASES" ;;
+      mysql) category_title="MYSQL / MARIADB SERVER DATABASES" ;;
+      sqlite) category_title="SQLITE PROJECT / DEPLOYMENT DATABASES" ;;
+    esac
+    category_count=0
+    for (( index = 0; index < ${#BACKUP_CATALOG_DATABASES[@]}; index++ )); do
+      case "$category:${BACKUP_CATALOG_ENGINES[index]}" in
+        postgresql:PostgreSQL|mysql:MySQL|mysql:MariaDB|sqlite:SQLite)
+          category_count=$((category_count + 1))
+          ;;
+      esac
+    done
+    (( category_count > 0 )) || continue
+    echo
+    printf '  %b%s (%s)%b\n' "$COLOR_CYAN$COLOR_BOLD" "$category_title" "$category_count" "$COLOR_RESET"
+    printf '  %-5s %-12s %-42s %-28s %s\n' "No." "Engine" "Source" "Database/file" "Size"
+    for (( index = 0; index < ${#BACKUP_CATALOG_DATABASES[@]}; index++ )); do
+      case "$category:${BACKUP_CATALOG_ENGINES[index]}" in
+        postgresql:PostgreSQL|mysql:MySQL|mysql:MariaDB|sqlite:SQLite)
+          printf '  [%2s]  %-12.12s %-42.42s %-28.28s %s\n' "$((index + 1))" \
+            "${BACKUP_CATALOG_ENGINES[index]}" \
+            "${BACKUP_CATALOG_SOURCE_LABELS[index]}" \
+            "${BACKUP_CATALOG_DATABASES[index]}" \
+            "${BACKUP_CATALOG_SIZES[index]}"
+          ;;
+      esac
+    done
+  done
+  echo
+  echo "Select multiple entries with commas/spaces (example: 1,3,4), a range (1-3), or A for all."
+
+  while true; do
+    read -r -p "Database selection [A]: " selection
+    selection="${selection:-A}"
+    case "${selection,,}" in
+      a|all)
+        for (( index = 0; index < ${#BACKUP_CATALOG_DATABASES[@]}; index++ )); do
+          BACKUP_SELECTED_INDEXES+=("$index")
+        done
+        return 0
+        ;;
+      c|cancel) return 1 ;;
+    esac
+
+    normalized="${selection//,/ }"
+    BACKUP_SELECTED_INDEXES=()
+    selection_valid="true"
+    for token in $normalized; do
+      if [[ "$token" =~ ^([0-9]+)-([0-9]+)$ ]]; then
+        range_start_text="${BASH_REMATCH[1]}"
+        range_end_text="${BASH_REMATCH[2]}"
+        if (( ${#range_start_text} > 9 || ${#range_end_text} > 9 )); then
+          selection_valid="false"
+          break
+        fi
+        range_start=$((10#$range_start_text))
+        range_end=$((10#$range_end_text))
+        if (( range_start < 1 || range_end < range_start || range_end > ${#BACKUP_CATALOG_DATABASES[@]} )); then
+          selection_valid="false"
+          break
+        fi
+        for (( selected_index = range_start - 1; selected_index <= range_end - 1; selected_index++ )); do
+          if ! backup_list_contains "$selected_index" "${BACKUP_SELECTED_INDEXES[@]}"; then
+            BACKUP_SELECTED_INDEXES+=("$selected_index")
+          fi
+        done
+      elif [[ "$token" =~ ^[0-9]+$ && ${#token} -le 9 ]]; then
+        selected_index=$((10#$token - 1))
+        if (( selected_index < 0 || selected_index >= ${#BACKUP_CATALOG_DATABASES[@]} )); then
+          selection_valid="false"
+          break
+        fi
+        if ! backup_list_contains "$selected_index" "${BACKUP_SELECTED_INDEXES[@]}"; then
+          BACKUP_SELECTED_INDEXES+=("$selected_index")
+        fi
+      else
+        selection_valid="false"
+        break
+      fi
+    done
+    if [[ "$selection_valid" == "true" && ${#BACKUP_SELECTED_INDEXES[@]} -gt 0 ]]; then
+      return 0
+    fi
+    echo "Invalid selection. Use numbers such as 1,3,4, a range such as 1-3, A for all, or C to cancel."
+  done
+}
+
+backup_has_selected_engine() {
+  local wanted_engine="$1" selected_index
+  for selected_index in "${BACKUP_SELECTED_INDEXES[@]}"; do
+    [[ "${BACKUP_CATALOG_ENGINES[selected_index]}" == "$wanted_engine" ]] && return 0
+  done
+  return 1
+}
+
+backup_postgresql_database() {
+  local source_kind="$1" source_ref="$2" user="$3" secret="$4" client="$5"
+  local database_name="$6" output_file="$7"
+  if [[ "$source_kind" == "native" ]]; then
+    sudo -u postgres "$client" --format=custom --port="$source_ref" --file=- --dbname="$database_name" > "$output_file"
+  elif [[ -n "$secret" ]]; then
+    "${BACKUP_DOCKER_COMMAND[@]}" exec -e "PGPASSWORD=$secret" "$source_ref" \
+      "$client" -U "$user" --format=custom --file=- --dbname="$database_name" > "$output_file"
+  else
+    "${BACKUP_DOCKER_COMMAND[@]}" exec "$source_ref" \
+      "$client" -U "$user" --format=custom --file=- --dbname="$database_name" > "$output_file"
+  fi
+}
+
+backup_mysql_database() {
+  local source_kind="$1" source_ref="$2" user="$3" secret="$4" client="$5"
+  local database_name="$6" output_file="$7"
+  local dump_options=(--single-transaction --quick --routines --events --triggers --databases -- "$database_name")
+
+  if [[ "$source_kind" == "docker" ]]; then
+    if [[ -n "$secret" ]]; then
+      "${BACKUP_DOCKER_COMMAND[@]}" exec -e "MYSQL_PWD=$secret" "$source_ref" \
+        "$client" -u "$user" "${dump_options[@]}" > "$output_file"
+    else
+      "${BACKUP_DOCKER_COMMAND[@]}" exec "$source_ref" \
+        "$client" -u "$user" "${dump_options[@]}" > "$output_file"
+    fi
+  else
+    case "$source_ref" in
+      sudo) sudo "$client" "${dump_options[@]}" > "$output_file" ;;
+      current) "$client" "${dump_options[@]}" > "$output_file" ;;
+      password) MYSQL_PWD="$secret" "$client" -u "$user" "${dump_options[@]}" > "$output_file" ;;
+      *) return 1 ;;
+    esac
+  fi
+}
+
+backup_sqlite_database() {
+  local source_path="$1" destination_dir="$2" output_file
+  output_file="$destination_dir/database.sqlite"
+  rm -f -- "$output_file"
+  if (cd "$destination_dir" && sqlite3 "$source_path" ".backup 'database.sqlite'"); then
+    return 0
+  fi
+  rm -f -- "$output_file"
+  (cd "$destination_dir" && sudo sqlite3 "$source_path" ".backup 'database.sqlite'")
+}
+
+backup_catalog_entry() {
+  local selected_index="$1" output_root="$2" display_number="$3"
+  local engine="${BACKUP_CATALOG_ENGINES[selected_index]}"
+  local source_kind="${BACKUP_CATALOG_SOURCE_KINDS[selected_index]}"
+  local source_label="${BACKUP_CATALOG_SOURCE_LABELS[selected_index]}"
+  local source_ref="${BACKUP_CATALOG_SOURCE_REFS[selected_index]}"
+  local user="${BACKUP_CATALOG_USERS[selected_index]}"
+  local secret="${BACKUP_CATALOG_SECRETS[selected_index]}"
+  local client="${BACKUP_CATALOG_CLIENTS[selected_index]}"
+  local database_name="${BACKUP_CATALOG_DATABASES[selected_index]}"
+  local engine_dir database_dir dump_format dump_file
+
+  engine_dir="${engine,,}"
+  database_dir="$output_root/databases/$engine_dir/database-$(printf '%03d' "$display_number")"
+  mkdir -p "$database_dir"
+  echo "Backing up $engine database: $database_name ($source_label)"
+  case "$engine" in
+    PostgreSQL)
+      dump_file="$database_dir/database.dump"
+      dump_format="PostgreSQL custom-format dump"
+      backup_postgresql_database "$source_kind" "$source_ref" "$user" "$secret" "$client" \
+        "$database_name" "$dump_file"
+      ;;
+    MySQL|MariaDB)
+      dump_file="$database_dir/database.sql"
+      dump_format="$engine SQL dump"
+      backup_mysql_database "$source_kind" "$source_ref" "$user" "$secret" "$client" \
+        "$database_name" "$dump_file"
+      ;;
+    SQLite)
+      dump_file="$database_dir/database.sqlite"
+      dump_format="SQLite online-backup copy"
+      backup_sqlite_database "$source_ref" "$database_dir"
+      ;;
+    *) echo "Unsupported backup engine: $engine"; return 1 ;;
+  esac
+  if [[ ! -s "$dump_file" ]]; then
+    echo "The generated backup is empty for $engine/$database_name."
+    return 1
+  fi
+
+  cat > "$database_dir/backup-info.txt" <<EOF
+Engine: $engine
+Database/file: $database_name
+Source: $source_label
+Created: $(date --iso-8601=seconds)
+Dump format: $dump_format
+EOF
+}
+
+run_backup_manager() (
+  local timestamp archive_path selected_index display_number=0
+
+  umask 077
+  BACKUP_ARCHIVE_COMPLETE="false"
+
+  section "BACKUP" "System-wide database discovery and archive"
+  echo "This scan is not limited to Odoo, Community, Enterprise, or this installer."
+  echo "It discovers accessible application databases from supported engines across Ubuntu and Docker."
+
+  trap 'backup_restore_original_state' EXIT
+  trap 'exit 130' INT TERM HUP
+
+  scan_system_databases
+  if ! select_multiple_backup_databases; then
+    echo "Backup cancelled."
+    return 0
+  fi
+  if ! ensure_rar_available; then
+    echo "Backup cancelled because a RAR archive cannot be created."
+    return 0
+  fi
+  if backup_has_selected_engine SQLite && ! ensure_sqlite_available; then
+    echo "Backup cancelled because sqlite3 is unavailable."
+    return 0
+  fi
+
+  echo
+  echo "Selected databases:"
+  for selected_index in "${BACKUP_SELECTED_INDEXES[@]}"; do
+    printf '  - %-12s %-30s %s (%s)\n' \
+      "${BACKUP_CATALOG_ENGINES[selected_index]}" \
+      "${BACKUP_CATALOG_SOURCE_LABELS[selected_index]}" \
+      "${BACKUP_CATALOG_DATABASES[selected_index]}" \
+      "${BACKUP_CATALOG_SIZES[selected_index]}"
+  done
+  echo "Logical/online dumps will be used; unrelated application services will not be stopped."
+  if ! ask_yes_no "Create one RAR archive containing all selected database backups? [Y/n]: " "y"; then
+    echo "Backup cancelled."
+    return 0
+  fi
+
+  mkdir -p "$SCRIPT_DIR/backups"
+  chmod 700 "$SCRIPT_DIR/backups"
+  BACKUP_WORK_DIR="$(mktemp -d "$SCRIPT_DIR/backups/.backup-work.XXXXXX")"
+  timestamp="$(date +%Y%m%d-%H%M%S)"
+  archive_path="$SCRIPT_DIR/backups/system-databases-${timestamp}.rar"
+  if [[ -e "$archive_path" ]]; then archive_path="${archive_path%.rar}-$$.rar"; fi
+  BACKUP_ARCHIVE_PATH="$archive_path"
+
+  cat > "$BACKUP_WORK_DIR/backup-info.txt" <<EOF
+System database backup bundle
+Created: $(date --iso-8601=seconds)
+Selected databases: ${#BACKUP_SELECTED_INDEXES[@]}
+Engines: PostgreSQL custom dumps, MySQL/MariaDB SQL dumps, and SQLite online-backup copies
+Security: database passwords are used only in memory and are not written into this archive.
+EOF
+
+  for selected_index in "${BACKUP_SELECTED_INDEXES[@]}"; do
+    display_number=$((display_number + 1))
+    backup_catalog_entry "$selected_index" "$BACKUP_WORK_DIR" "$display_number"
+  done
+
+  echo "Creating RAR archive..."
+  rar a -idq -m3 -ep1 -r "$archive_path" "$BACKUP_WORK_DIR/backup-info.txt" "$BACKUP_WORK_DIR/databases"
+  chmod 600 "$archive_path"
+  BACKUP_ARCHIVE_COMPLETE="true"
+
+  backup_restore_original_state
+  trap - EXIT INT TERM HUP
+  echo
+  printf '%b\n' "${COLOR_GREEN}Backup completed successfully.${COLOR_RESET}"
+  printf 'Archive: %s\n' "$archive_path"
+  echo "Permissions: owner read/write only (600). Copy it to secure off-machine storage."
+)
+
+UNINSTALL_DOCKER_COMMAND=()
+UNINSTALL_TARGET_SERVICES=()
+UNINSTALL_TARGET_VOLUMES=()
+UNINSTALL_GENERATED_FILES=()
+UNINSTALL_VERIFIED_VOLUMES=()
+UNINSTALL_SCOPE_NAME=""
+
+uninstall_list_contains() {
+  local wanted="$1" item
+  shift
+  for item in "$@"; do
+    [[ "$item" == "$wanted" ]] && return 0
+  done
+  return 1
+}
+
+audit_uninstall_targets() {
+  local service container_details container_line volume volume_details project_label volume_label mountpoint
+  local discovered_volume file_path package networks network_line project_containers protected_path found_protected="false"
+
+  UNINSTALL_VERIFIED_VOLUMES=()
+  section "UNINSTALL AUDIT" "Read-only discovery before removal"
+  echo "Scope: $UNINSTALL_SCOPE_NAME"
+  echo "Safety boundary: Compose project label 'odoo19-dual', installer state, and known generated paths."
+  echo
+  echo "Containers:"
+  for service in "${UNINSTALL_TARGET_SERVICES[@]}"; do
+    container_details="$(
+      "${UNINSTALL_DOCKER_COMMAND[@]}" ps -a \
+        --filter "label=com.docker.compose.project=odoo19-dual" \
+        --filter "label=com.docker.compose.service=$service" \
+        --format '{{.Names}} | {{.Status}}' 2>/dev/null || true
+    )"
+    if [[ -n "$container_details" ]]; then
+      while IFS= read -r container_line; do
+        printf '  [FOUND] %-18s %s\n' "$service" "$container_line"
+      done <<< "$container_details"
+    else
+      printf '  [NONE]  %s\n' "$service"
+    fi
+  done
+  if [[ "$UNINSTALL_SCOPE_NAME" == "complete installer stack" ]]; then
+    project_containers="$(
+      "${UNINSTALL_DOCKER_COMMAND[@]}" ps -a \
+        --filter "label=com.docker.compose.project=odoo19-dual" \
+        --format '{{.Names}} | service={{.Label "com.docker.compose.service"}} | {{.Status}}' 2>/dev/null || true
+    )"
+    echo "  Complete project-label scan (includes possible orphan containers):"
+    if [[ -n "$project_containers" ]]; then
+      while IFS= read -r container_line; do printf '    [FOUND] %s\n' "$container_line"; done <<< "$project_containers"
+    else
+      echo "    [NONE]"
+    fi
+  fi
+
+  if [[ "$UNINSTALL_SCOPE_NAME" == "complete installer stack" ]]; then
+    while IFS= read -r discovered_volume; do
+      [[ -n "$discovered_volume" ]] || continue
+      if ! uninstall_list_contains "$discovered_volume" "${UNINSTALL_TARGET_VOLUMES[@]}"; then
+        UNINSTALL_TARGET_VOLUMES+=("$discovered_volume")
+      fi
+    done < <(
+      "${UNINSTALL_DOCKER_COMMAND[@]}" volume ls \
+        --filter "label=com.docker.compose.project=odoo19-dual" \
+        --format '{{.Name}}' 2>/dev/null || true
+    )
+  fi
+
+  echo
+  echo "Persistent Docker volumes:"
+  for volume in "${UNINSTALL_TARGET_VOLUMES[@]}"; do
+    volume_details="$(
+      "${UNINSTALL_DOCKER_COMMAND[@]}" volume inspect \
+        --format '{{ index .Labels "com.docker.compose.project" }}|{{ index .Labels "com.docker.compose.volume" }}|{{ .Mountpoint }}' \
+        "$volume" 2>/dev/null || true
+    )"
+    if [[ -z "$volume_details" ]]; then
+      printf '  [NONE]  %s\n' "$volume"
+      continue
+    fi
+    IFS='|' read -r project_label volume_label mountpoint <<< "$volume_details"
+    if [[ "$project_label" != "odoo19-dual" ]]; then
+      printf '  [SKIP]  %s (project ownership label does not match)\n' "$volume"
+      continue
+    fi
+    if [[ "$UNINSTALL_SCOPE_NAME" != "complete installer stack" &&
+          "$volume_label" != "${volume#odoo19-dual_}" ]]; then
+      printf '  [SKIP]  %s (volume ownership label does not match)\n' "$volume"
+      continue
+    fi
+    UNINSTALL_VERIFIED_VOLUMES+=("$volume")
+    printf '  [FOUND] %s\n' "$volume"
+    printf '          mount: %s\n' "${mountpoint:-managed by Docker}"
+  done
+
+  echo
+  echo "Generated host files:"
+  for file_path in "${UNINSTALL_GENERATED_FILES[@]}"; do
+    if [[ -e "$file_path" ]]; then
+      printf '  [FOUND] %s\n' "$file_path"
+    else
+      printf '  [NONE]  %s\n' "$file_path"
+    fi
+  done
+  if [[ "$UNINSTALL_SCOPE_NAME" != "complete installer stack" ]]; then
+    printf '  [KEEP]  %s and %s (shared by remaining services)\n' \
+      "$SCRIPT_DIR/.env" "$SCRIPT_DIR/installation-info.txt"
+  fi
+
+  if [[ "$UNINSTALL_SCOPE_NAME" == "complete installer stack" ]]; then
+    networks="$(
+      "${UNINSTALL_DOCKER_COMMAND[@]}" network ls \
+        --filter "label=com.docker.compose.project=odoo19-dual" \
+        --format '{{.Name}}' 2>/dev/null || true
+    )"
+    echo
+    echo "Project networks:"
+    if [[ -n "$networks" ]]; then
+      while IFS= read -r network_line; do printf '  [FOUND] %s\n' "$network_line"; done <<< "$networks"
+    else
+      echo "  [NONE]"
+    fi
+
+    echo
+    echo "Installer-tracked system setup:"
+    if (( ${#INSTALLER_MANAGED_PACKAGES[@]} > 0 )); then
+      for package in "${INSTALLER_MANAGED_PACKAGES[@]}"; do
+        if package_installed "$package"; then
+          printf '  [FOUND] package %s\n' "$package"
+        else
+          printf '  [NONE]  package %s\n' "$package"
+        fi
+      done
+    else
+      echo "  [KEEP]  no installer-owned package record; system packages are protected"
+    fi
+    if [[ "$INSTALLER_CREATED_DOCKER_SOURCE" == "true" ]]; then
+      if [[ -e /etc/apt/sources.list.d/docker.list ]]; then
+        echo "  [FOUND] /etc/apt/sources.list.d/docker.list (installer-created)"
+      else
+        echo "  [NONE]  tracked Docker APT source is already absent"
+      fi
+    fi
+    if [[ "$INSTALLER_CREATED_DOCKER_KEY" == "true" ]]; then
+      if [[ -e /etc/apt/keyrings/docker.asc ]]; then
+        echo "  [FOUND] /etc/apt/keyrings/docker.asc (installer-created)"
+      else
+        echo "  [NONE]  tracked Docker APT signing key is already absent"
+      fi
+    fi
+    if [[ -n "$INSTALLER_DOCKER_GROUP_USER" ]]; then
+      printf '  [FOUND] tracked Docker group access for %s\n' "$INSTALLER_DOCKER_GROUP_USER"
+    fi
+  fi
+
+  echo
+  echo "Protected source paths (never deleted by this wizard):"
+  for protected_path in \
+    "$SCRIPT_DIR/enterprise-19.0" \
+    "$SCRIPT_DIR/addons/enterprise" \
+    "$SCRIPT_DIR/addons/community" \
+    "$SCRIPT_DIR/addons/enterprise-custom"; do
+    if [[ -e "$protected_path" ]]; then
+      printf '  [KEEP]  %s\n' "$protected_path"
+      found_protected="true"
+    fi
+  done
+  [[ "$found_protected" == "true" ]] || echo "  [NONE]"
+  echo
+  echo "Anything outside this verified inventory is not a deletion target."
+}
+
+remove_installer_managed_dependencies() {
+  local package confirmation
+  local installed_packages=()
+
+  if (( ${#INSTALLER_MANAGED_PACKAGES[@]} == 0 )) &&
+     [[ "$INSTALLER_CREATED_DOCKER_SOURCE" != "true" &&
+        "$INSTALLER_CREATED_DOCKER_KEY" != "true" &&
+        -z "$INSTALLER_DOCKER_GROUP_USER" ]]; then
+    echo "No installer dependency record was found. Docker and Ubuntu packages will be preserved."
+    echo "This prevents the installer from removing software that may have existed before Odoo."
+    return 0
+  fi
+
+  echo
+  printf '%b\n' "${COLOR_YELLOW}Dependency cleanup can affect other Docker-based applications.${COLOR_RESET}"
+  if (( ${#INSTALLER_MANAGED_PACKAGES[@]} > 0 )); then
+    echo "Packages recorded as installed by this installer:"
+    for package in "${INSTALLER_MANAGED_PACKAGES[@]}"; do
+      printf '  - %s\n' "$package"
+    done
+  fi
+  [[ "$INSTALLER_CREATED_DOCKER_SOURCE" == "true" ]] && echo "  - Docker APT source created by this installer"
+  [[ "$INSTALLER_CREATED_DOCKER_KEY" == "true" ]] && echo "  - Docker APT signing key created by this installer"
+  if [[ -n "$INSTALLER_DOCKER_GROUP_USER" ]]; then
+    printf '  - Docker group access added for %s\n' "$INSTALLER_DOCKER_GROUP_USER"
+  fi
+  echo "Only the items listed above will be removed; untracked software is preserved."
+  read -r -p "Type REMOVE DEPENDENCIES to continue: " confirmation
+  if [[ "$confirmation" != "REMOVE DEPENDENCIES" ]]; then
+    echo "Docker and dependency cleanup skipped."
+    return 0
+  fi
+
+  if [[ -n "$INSTALLER_DOCKER_GROUP_USER" ]] && getent group docker >/dev/null 2>&1; then
+    sudo gpasswd -d "$INSTALLER_DOCKER_GROUP_USER" docker >/dev/null 2>&1 || true
+  fi
+
+  for package in "${INSTALLER_MANAGED_PACKAGES[@]}"; do
+    if package_installed "$package"; then installed_packages+=("$package"); fi
+  done
+  if (( ${#installed_packages[@]} > 0 )); then
+    sudo env DEBIAN_FRONTEND=noninteractive apt-get purge -y "${installed_packages[@]}"
+  fi
+  if [[ "$INSTALLER_CREATED_DOCKER_SOURCE" == "true" ]]; then
+    sudo rm -f /etc/apt/sources.list.d/docker.list
+  fi
+  if [[ "$INSTALLER_CREATED_DOCKER_KEY" == "true" ]]; then
+    sudo rm -f /etc/apt/keyrings/docker.asc
+  fi
+
+  INSTALLER_MANAGED_PACKAGES=()
+  INSTALLER_CREATED_DOCKER_SOURCE="false"
+  INSTALLER_CREATED_DOCKER_KEY="false"
+  INSTALLER_DOCKER_GROUP_USER=""
+  rm -f "$INSTALLER_STATE_FILE"
+  printf '%b\n' "${COLOR_GREEN}Installer-tracked Docker components and dependencies were removed.${COLOR_RESET}"
+}
+
 run_uninstaller() {
-  section "UNINSTALL" "Remove this Odoo installation"
-  echo "Docker itself and your source-code folders will not be removed."
+  section "UNINSTALL" "Choose exactly what should be removed"
+  echo "Source-code folders and Enterprise addons are always preserved."
 
   if ! command -v docker >/dev/null 2>&1; then
-    echo "Docker is not installed, so there are no Docker-based Odoo services to remove."
+    echo "Docker is not installed, so there are no Docker-based Odoo containers to remove."
+    if ask_yes_no "Remove any remaining installer-tracked dependencies? [y/N]: " "n"; then
+      remove_installer_managed_dependencies
+    fi
     return
   fi
 
@@ -607,38 +1947,123 @@ run_uninstaller() {
   echo "Current installer-managed containers:"
   "${docker_command[@]}" compose --profile pgadmin ps -a || true
   echo
-  echo "  1) Remove containers but keep databases and filestores (recommended)"
-  echo "  2) Permanently delete containers, databases, filestores, and pgAdmin data"
-  echo "  3) Cancel"
-  local uninstall_choice confirmation
-  read_choice uninstall_choice "Choose an uninstall option [1]: " "1" "1 2 3"
+  echo "What do you want to uninstall?"
+  echo "  1) Community only"
+  echo "  2) Enterprise only"
+  echo "  3) Both Odoo editions (keep pgAdmin)"
+  echo "  4) Complete installer stack (Community, Enterprise, and pgAdmin)"
+  echo "  5) Cancel"
 
-  case "$uninstall_choice" in
-    1)
-      "${docker_command[@]}" compose --profile pgadmin down
-      echo
-      printf '%b\n' "${COLOR_GREEN}Odoo containers were removed. Persistent data was kept.${COLOR_RESET}"
-      echo "Run this installer again whenever you want to recreate the services."
+  local uninstall_scope data_choice confirmation confirmation_text remove_dependencies="false"
+  local services=() volumes=() generated_files=()
+  read_choice uninstall_scope "Choose an uninstall scope [5]: " "5" "1 2 3 4 5 community enterprise both all cancel"
+  case "${uninstall_scope,,}" in
+    1|community)
+      services=(community db-community)
+      volumes=(odoo19-dual_community-db odoo19-dual_community-data)
+      generated_files=("$SCRIPT_DIR/config/community/odoo.conf")
+      UNINSTALL_SCOPE_NAME="Community only"
+      confirmation_text="DELETE COMMUNITY"
       ;;
-    2)
-      printf '%b\n' "${COLOR_YELLOW}WARNING: This permanently deletes all installer-managed Docker data.${COLOR_RESET}"
-      read -r -p "Type DELETE to confirm permanent data removal: " confirmation
-      if [[ "$confirmation" != "DELETE" ]]; then
+    2|enterprise)
+      services=(enterprise db-enterprise)
+      volumes=(odoo19-dual_enterprise-db odoo19-dual_enterprise-data)
+      generated_files=("$SCRIPT_DIR/config/enterprise/odoo.conf")
+      UNINSTALL_SCOPE_NAME="Enterprise only"
+      confirmation_text="DELETE ENTERPRISE"
+      ;;
+    3|both)
+      services=(community db-community enterprise db-enterprise)
+      volumes=(odoo19-dual_community-db odoo19-dual_community-data odoo19-dual_enterprise-db odoo19-dual_enterprise-data)
+      generated_files=("$SCRIPT_DIR/config/community/odoo.conf" "$SCRIPT_DIR/config/enterprise/odoo.conf")
+      UNINSTALL_SCOPE_NAME="both Odoo editions; pgAdmin preserved"
+      confirmation_text="DELETE BOTH"
+      ;;
+    4|all)
+      services=(community db-community enterprise db-enterprise pgadmin)
+      volumes=(odoo19-dual_community-db odoo19-dual_community-data odoo19-dual_enterprise-db odoo19-dual_enterprise-data odoo19-dual_pgadmin-data)
+      generated_files=(
+        "$SCRIPT_DIR/.env"
+        "$SCRIPT_DIR/installation-info.txt"
+        "$SCRIPT_DIR/config/community/odoo.conf"
+        "$SCRIPT_DIR/config/enterprise/odoo.conf"
+        "$SCRIPT_DIR/config/pgadmin/servers.json"
+        "$SCRIPT_DIR/config/pgadmin/pgpass"
+      )
+      UNINSTALL_SCOPE_NAME="complete installer stack"
+      confirmation_text="DELETE ALL"
+      remove_dependencies="true"
+      ;;
+    5|cancel)
+      echo "Uninstall cancelled; nothing was removed."
+      return
+      ;;
+  esac
+
+  UNINSTALL_DOCKER_COMMAND=("${docker_command[@]}")
+  UNINSTALL_TARGET_SERVICES=("${services[@]}")
+  UNINSTALL_TARGET_VOLUMES=("${volumes[@]}")
+  UNINSTALL_GENERATED_FILES=("${generated_files[@]}")
+  audit_uninstall_targets
+
+  echo
+  echo "What should happen to the selected databases and filestores?"
+  echo "  1) Keep data; remove only selected containers (recommended)"
+  echo "  2) Permanently delete selected containers and data"
+  echo "  3) Cancel"
+  read_choice data_choice "Choose a data option [1]: " "1" "1 2 3 keep delete cancel"
+  case "${data_choice,,}" in
+    1|keep) data_choice="keep" ;;
+    2|delete)
+      printf '%b\n' "${COLOR_YELLOW}WARNING: Selected database and filestore volumes will be permanently deleted.${COLOR_RESET}"
+      read -r -p "Type $confirmation_text to confirm: " confirmation
+      if [[ "$confirmation" != "$confirmation_text" ]]; then
         echo "Permanent uninstall cancelled; nothing was removed."
         return
       fi
-      "${docker_command[@]}" compose --profile pgadmin down --volumes
-      rm -f .env installation-info.txt \
-        config/community/odoo.conf config/enterprise/odoo.conf \
-        config/pgadmin/servers.json config/pgadmin/pgpass
-      echo
-      printf '%b\n' "${COLOR_GREEN}Odoo containers and persistent Docker data were removed.${COLOR_RESET}"
-      echo "Enterprise source, copied addons, and custom-addon folders were preserved."
+      data_choice="delete"
       ;;
-    3)
+    3|cancel)
       echo "Uninstall cancelled; nothing was removed."
+      return
       ;;
   esac
+
+  if ! ask_yes_no "Proceed with this verified uninstall plan? [y/N]: " "n"; then
+    echo "Uninstall cancelled; nothing was removed."
+    return
+  fi
+
+  if [[ "${uninstall_scope,,}" == "4" || "${uninstall_scope,,}" == "all" ]]; then
+    "${docker_command[@]}" compose --profile pgadmin down --remove-orphans
+  else
+    "${docker_command[@]}" compose --profile pgadmin stop "${services[@]}" || true
+    "${docker_command[@]}" compose --profile pgadmin rm -f "${services[@]}" || true
+  fi
+  if [[ "$data_choice" == "delete" ]]; then
+    local volume
+    for volume in "${UNINSTALL_VERIFIED_VOLUMES[@]}"; do
+      "${docker_command[@]}" volume rm "$volume"
+    done
+    rm -f "${UNINSTALL_GENERATED_FILES[@]}"
+  fi
+
+  echo
+  if [[ "$data_choice" == "delete" ]]; then
+    printf '%b\n' "${COLOR_GREEN}Verified selected containers, volumes, and generated files were removed.${COLOR_RESET}"
+  else
+    printf '%b\n' "${COLOR_GREEN}Selected containers were removed; databases, filestores, and generated files were preserved.${COLOR_RESET}"
+  fi
+
+  if [[ "$remove_dependencies" == "true" ]]; then
+    echo
+    if ask_yes_no "Also remove Docker and dependencies installed by this installer? [y/N]: " "n"; then
+      remove_installer_managed_dependencies
+    else
+      echo "Docker and Ubuntu dependencies were preserved."
+    fi
+  fi
+  echo "Enterprise source, copied addons, and custom-addon folders were preserved."
 }
 
 if enterprise_addons_ready; then
@@ -661,9 +2086,10 @@ else
   menu_item "2" "Install Odoo Enterprise only"
   menu_item "3" "Install both Community and Enterprise"
   menu_item "4" "Check Ubuntu updates and missing dependencies"
-  menu_item "5" "Uninstall Odoo"
-  menu_item "6" "Exit"
-  read_choice MAIN_CHOICE "Choose an option [$DEFAULT_MAIN_CHOICE]: " "$DEFAULT_MAIN_CHOICE" "1 2 3 4 5 6"
+  menu_item "5" "Back up databases across this system"
+  menu_item "6" "Uninstall Odoo"
+  menu_item "7" "Exit"
+  read_choice MAIN_CHOICE "Choose an option [$DEFAULT_MAIN_CHOICE]: " "$DEFAULT_MAIN_CHOICE" "1 2 3 4 5 6 7"
 fi
 
 INSTALL_ACTION="install"
@@ -674,8 +2100,9 @@ case "$MAIN_CHOICE" in
   2) START_ENTERPRISE="true" ;;
   3) START_COMMUNITY="true"; START_ENTERPRISE="true" ;;
   4) INSTALL_ACTION="dependencies" ;;
-  5) run_uninstaller; exit 0 ;;
-  6) echo "Goodbye."; exit 0 ;;
+  5) run_backup_manager; exit 0 ;;
+  6) run_uninstaller; exit 0 ;;
+  7) echo "Goodbye."; exit 0 ;;
 esac
 
 section "1/6" "Prepare Ubuntu and check requirements"
@@ -759,11 +2186,23 @@ if (( MISSING_COUNT > 0 )); then
     [[ "$INSTALL_CA_CERTIFICATES" == "true" ]] && SUPPORT_PACKAGES+=(ca-certificates)
     [[ "$INSTALL_CURL" == "true" ]] && SUPPORT_PACKAGES+=(curl)
     [[ "$INSTALL_OPENSSL" == "true" ]] && SUPPORT_PACKAGES+=(openssl)
-    if (( ${#SUPPORT_PACKAGES[@]} > 0 )); then install_apt_packages "${SUPPORT_PACKAGES[@]}"; fi
+    if (( ${#SUPPORT_PACKAGES[@]} > 0 )); then
+      install_apt_packages "${SUPPORT_PACKAGES[@]}"
+      track_installer_packages "${SUPPORT_PACKAGES[@]}"
+    fi
   else
-    if [[ "$INSTALL_CA_CERTIFICATES" == "true" ]]; then install_apt_packages ca-certificates; fi
-    if [[ "$INSTALL_CURL" == "true" ]]; then install_apt_packages curl; fi
-    if [[ "$INSTALL_OPENSSL" == "true" ]]; then install_apt_packages openssl; fi
+    if [[ "$INSTALL_CA_CERTIFICATES" == "true" ]]; then
+      install_apt_packages ca-certificates
+      track_installer_packages ca-certificates
+    fi
+    if [[ "$INSTALL_CURL" == "true" ]]; then
+      install_apt_packages curl
+      track_installer_packages curl
+    fi
+    if [[ "$INSTALL_OPENSSL" == "true" ]]; then
+      install_apt_packages openssl
+      track_installer_packages openssl
+    fi
   fi
 
   if [[ "$INSTALL_DOCKER" == "true" || "$INSTALL_COMPOSE" == "true" ]]; then
@@ -772,7 +2211,12 @@ if (( MISSING_COUNT > 0 )); then
   if [[ "$INSTALL_DOCKER" == "true" ]]; then
     echo "Installing Docker Engine..."
     install_apt_packages docker-ce docker-ce-cli containerd.io docker-buildx-plugin
-    sudo usermod -aG docker "$USER"
+    track_installer_packages docker-ce docker-ce-cli containerd.io docker-buildx-plugin
+    if ! id -nG "$USER" | tr ' ' '\n' | grep -Fxq docker; then
+      sudo usermod -aG docker "$USER"
+      INSTALLER_DOCKER_GROUP_USER="$USER"
+      save_installer_state
+    fi
   fi
   if [[ "$INSTALL_COMPOSE" == "true" ]]; then
     echo "Installing the Docker Compose plugin..."
@@ -780,6 +2224,7 @@ if (( MISSING_COUNT > 0 )); then
       echo "Docker Compose could not be installed. Check the Docker repository configuration, then rerun this installer."
       exit 1
     fi
+    track_installer_packages docker-compose-plugin
   fi
 fi
 
@@ -830,10 +2275,244 @@ valid_port() {
   [[ "$1" =~ ^[0-9]{1,5}$ ]] && (( 10#$1 >= 1 && 10#$1 <= 65535 ))
 }
 
+valid_integer_in_range() {
+  local value="$1" minimum="$2" maximum="$3"
+  [[ "$value" =~ ^[0-9]+$ ]] || return 1
+  (( ${#value} <= 18 )) || return 1
+  (( 10#$value >= minimum && 10#$value <= maximum ))
+}
+
+read_integer() {
+  local target="$1" prompt="$2" default_value="$3" minimum="$4" maximum="$5" entered_value
+  while true; do
+    read -r -p "$prompt" entered_value
+    entered_value="${entered_value:-$default_value}"
+    if valid_integer_in_range "$entered_value" "$minimum" "$maximum"; then
+      printf -v "$target" '%s' "$((10#$entered_value))"
+      return
+    fi
+    echo "Please enter a whole number from $minimum to $maximum."
+  done
+}
+
+recommended_workers_for_users() {
+  local expected_users="$1" workers
+  workers=$(((expected_users + 5) / 6))
+  (( workers < 2 )) && workers=2
+  printf '%s' "$workers"
+}
+
+calculate_worker_budget() {
+  local worker_memory_mib="${1:-768}"
+  local detected_cpu selected_services cpu_limit reserved_ram usable_ram ram_limit
+
+  detected_cpu="$SYSTEM_CPU_COUNT"
+  [[ "$detected_cpu" =~ ^[0-9]+$ ]] || detected_cpu=2
+  selected_services=0
+  [[ "$START_COMMUNITY" == "true" ]] && selected_services=$((selected_services + 1))
+  [[ "$START_ENTERPRISE" == "true" ]] && selected_services=$((selected_services + 1))
+  (( selected_services > 0 )) || selected_services=1
+
+  cpu_limit=$((detected_cpu * 2 + 1 - selected_services * ODOO_MAX_CRON_THREADS))
+  (( cpu_limit < selected_services )) && cpu_limit="$selected_services"
+
+  reserved_ram=$((SYSTEM_RAM_MIB / 4))
+  (( reserved_ram < 2048 )) && reserved_ram=2048
+  usable_ram=$((SYSTEM_RAM_MIB - reserved_ram))
+  (( usable_ram < 0 )) && usable_ram=0
+  ram_limit=$((usable_ram / worker_memory_mib))
+  (( ram_limit < selected_services )) && ram_limit="$selected_services"
+
+  PERFORMANCE_CPU_WORKER_LIMIT="$cpu_limit"
+  PERFORMANCE_RAM_WORKER_LIMIT="$ram_limit"
+  if (( cpu_limit < ram_limit )); then
+    PERFORMANCE_WORKER_BUDGET="$cpu_limit"
+    PERFORMANCE_LIMIT_REASON="CPU"
+  else
+    PERFORMANCE_WORKER_BUDGET="$ram_limit"
+    PERFORMANCE_LIMIT_REASON="RAM"
+  fi
+}
+
+fit_recommended_workers_to_budget() {
+  local total_workers
+  while true; do
+    total_workers=$((COMMUNITY_WORKERS + ENTERPRISE_WORKERS))
+    (( total_workers <= PERFORMANCE_WORKER_BUDGET )) && return
+
+    if [[ "$START_ENTERPRISE" == "true" && "$ENTERPRISE_WORKERS" -ge "$COMMUNITY_WORKERS" &&
+          "$ENTERPRISE_WORKERS" -gt 1 ]]; then
+      ENTERPRISE_WORKERS=$((ENTERPRISE_WORKERS - 1))
+    elif [[ "$START_COMMUNITY" == "true" && "$COMMUNITY_WORKERS" -gt 1 ]]; then
+      COMMUNITY_WORKERS=$((COMMUNITY_WORKERS - 1))
+    elif [[ "$START_ENTERPRISE" == "true" && "$ENTERPRISE_WORKERS" -gt 1 ]]; then
+      ENTERPRISE_WORKERS=$((ENTERPRISE_WORKERS - 1))
+    else
+      return
+    fi
+  done
+}
+
+configure_performance_profile() {
+  local performance_choice default_choice=1 community_users_default=12 enterprise_users_default=24
+  local community_workers_default enterprise_workers_default cron_default=1
+  local soft_limit_mib=768 hard_limit_mib=1536 total_workers total_expected_users
+
+  PERFORMANCE_MODE="testing"
+  COMMUNITY_EXPECTED_USERS=0
+  ENTERPRISE_EXPECTED_USERS=0
+  COMMUNITY_WORKERS=0
+  ENTERPRISE_WORKERS=0
+  ODOO_MAX_CRON_THREADS=1
+  ODOO_LIMIT_MEMORY_SOFT=0
+  ODOO_LIMIT_MEMORY_HARD=0
+  ESTIMATED_CONCURRENT_CAPACITY=0
+
+  if [[ "$DEPLOYMENT_MODE" != "production" ]]; then
+    echo
+    echo "Testing profile selected: Odoo will use its lightweight threaded server (workers = 0)."
+    echo "Choose Production on a future run to use the hardware-aware performance advisor."
+    return
+  fi
+
+  if valid_integer_in_range "${SAVED_COMMUNITY_EXPECTED_USERS:-}" 1 10000; then
+    community_users_default="$SAVED_COMMUNITY_EXPECTED_USERS"
+  fi
+  if valid_integer_in_range "${SAVED_ENTERPRISE_EXPECTED_USERS:-}" 1 10000; then
+    enterprise_users_default="$SAVED_ENTERPRISE_EXPECTED_USERS"
+  fi
+
+  section "PERFORMANCE" "Hardware-aware Odoo performance advisor"
+  printf '  %-28s %s\n' "Detected Ubuntu" "${PRETTY_NAME:-Unknown}"
+  printf '  %-28s %s\n' "Detected hardware" "$SYSTEM_SPEC_SUMMARY"
+  echo
+  echo "Enter simultaneous users, not the total number of registered accounts."
+  echo "Odoo's sizing guideline estimates about six simultaneous users per HTTP worker."
+
+  if [[ "$START_COMMUNITY" == "true" ]]; then
+    read_integer COMMUNITY_EXPECTED_USERS \
+      "Expected simultaneous Community users [$community_users_default]: " \
+      "$community_users_default" 1 10000
+  fi
+  if [[ "$START_ENTERPRISE" == "true" ]]; then
+    read_integer ENTERPRISE_EXPECTED_USERS \
+      "Expected simultaneous Enterprise users [$enterprise_users_default]: " \
+      "$enterprise_users_default" 1 10000
+  fi
+
+  ODOO_MAX_CRON_THREADS=1
+  calculate_worker_budget
+  if [[ "$START_COMMUNITY" == "true" ]]; then
+    COMMUNITY_WORKERS="$(recommended_workers_for_users "$COMMUNITY_EXPECTED_USERS")"
+  fi
+  if [[ "$START_ENTERPRISE" == "true" ]]; then
+    ENTERPRISE_WORKERS="$(recommended_workers_for_users "$ENTERPRISE_EXPECTED_USERS")"
+  fi
+  fit_recommended_workers_to_budget
+  community_workers_default="$COMMUNITY_WORKERS"
+  enterprise_workers_default="$ENTERPRISE_WORKERS"
+
+  echo
+  printf '%b\n' "${COLOR_BOLD}Recommended production settings${COLOR_RESET}"
+  printf '  %-28s %s\n' "Safe combined worker budget" "$PERFORMANCE_WORKER_BUDGET ($PERFORMANCE_LIMIT_REASON limit)"
+  if [[ "$START_COMMUNITY" == "true" ]]; then
+    printf '  %-28s %s\n' "Community HTTP workers" "$COMMUNITY_WORKERS (~$((COMMUNITY_WORKERS * 6)) simultaneous users)"
+  fi
+  if [[ "$START_ENTERPRISE" == "true" ]]; then
+    printf '  %-28s %s\n' "Enterprise HTTP workers" "$ENTERPRISE_WORKERS (~$((ENTERPRISE_WORKERS * 6)) simultaneous users)"
+  fi
+  printf '  %-28s %s\n' "Cron threads" "1 per selected edition"
+  printf '  %-28s %s\n' "Memory limits per worker" "768 MiB soft / 1536 MiB hard"
+  echo
+  echo "  1) Apply the automatic recommendation (recommended)"
+  echo "  2) Enter custom worker and memory settings"
+  echo "  3) Use the safe minimum (one worker per selected edition)"
+
+  case "${SAVED_PERFORMANCE_MODE:-}" in
+    custom) default_choice=2 ;;
+    safe) default_choice=3 ;;
+  esac
+  read_choice performance_choice "Choose a performance option [$default_choice]: " "$default_choice" "1 2 3 automatic custom safe"
+
+  case "${performance_choice,,}" in
+    1|automatic)
+      PERFORMANCE_MODE="automatic"
+      ODOO_MAX_CRON_THREADS=1
+      ODOO_LIMIT_MEMORY_SOFT=$((768 * 1024 * 1024))
+      ODOO_LIMIT_MEMORY_HARD=$((1536 * 1024 * 1024))
+      ;;
+    2|custom)
+      PERFORMANCE_MODE="custom"
+      if valid_integer_in_range "${SAVED_COMMUNITY_WORKERS:-}" 1 64; then
+        community_workers_default="$SAVED_COMMUNITY_WORKERS"
+      fi
+      if valid_integer_in_range "${SAVED_ENTERPRISE_WORKERS:-}" 1 64; then
+        enterprise_workers_default="$SAVED_ENTERPRISE_WORKERS"
+      fi
+      if valid_integer_in_range "${SAVED_ODOO_MAX_CRON_THREADS:-}" 1 4; then
+        cron_default="$SAVED_ODOO_MAX_CRON_THREADS"
+      fi
+      if valid_integer_in_range "${SAVED_ODOO_LIMIT_MEMORY_SOFT:-}" 268435456 68719476736; then
+        soft_limit_mib=$((SAVED_ODOO_LIMIT_MEMORY_SOFT / 1024 / 1024))
+      fi
+      if valid_integer_in_range "${SAVED_ODOO_LIMIT_MEMORY_HARD:-}" 536870912 68719476736; then
+        hard_limit_mib=$((SAVED_ODOO_LIMIT_MEMORY_HARD / 1024 / 1024))
+      fi
+
+      read_integer ODOO_MAX_CRON_THREADS "Cron threads per selected edition [$cron_default]: " "$cron_default" 1 4
+      while true; do
+        read_integer soft_limit_mib "Soft memory limit per worker in MiB [$soft_limit_mib]: " "$soft_limit_mib" 256 65536
+        read_integer hard_limit_mib "Hard memory limit per worker in MiB [$hard_limit_mib]: " "$hard_limit_mib" 512 65536
+        if (( hard_limit_mib > soft_limit_mib )); then
+          break
+        fi
+        echo "The hard memory limit must be greater than the soft memory limit."
+      done
+      ODOO_LIMIT_MEMORY_SOFT=$((soft_limit_mib * 1024 * 1024))
+      ODOO_LIMIT_MEMORY_HARD=$((hard_limit_mib * 1024 * 1024))
+      calculate_worker_budget "$soft_limit_mib"
+      printf '  %-28s %s\n' "Custom safe worker budget" \
+        "$PERFORMANCE_WORKER_BUDGET ($PERFORMANCE_LIMIT_REASON limit at ${soft_limit_mib} MiB per worker)"
+      while true; do
+        if [[ "$START_COMMUNITY" == "true" ]]; then
+          read_integer COMMUNITY_WORKERS "Community HTTP workers [$community_workers_default]: " "$community_workers_default" 1 64
+        fi
+        if [[ "$START_ENTERPRISE" == "true" ]]; then
+          read_integer ENTERPRISE_WORKERS "Enterprise HTTP workers [$enterprise_workers_default]: " "$enterprise_workers_default" 1 64
+        fi
+        total_workers=$((COMMUNITY_WORKERS + ENTERPRISE_WORKERS))
+        if (( total_workers <= PERFORMANCE_WORKER_BUDGET )); then
+          break
+        fi
+        printf '%b\n' "${COLOR_YELLOW}The custom total ($total_workers) exceeds the detected safe budget ($PERFORMANCE_WORKER_BUDGET).${COLOR_RESET}"
+        if ask_yes_no "Use this overcommitted worker count anyway? [y/N]: " "n"; then
+          break
+        fi
+        echo "Enter lower worker counts."
+      done
+      ;;
+    3|safe)
+      PERFORMANCE_MODE="safe"
+      [[ "$START_COMMUNITY" == "true" ]] && COMMUNITY_WORKERS=1
+      [[ "$START_ENTERPRISE" == "true" ]] && ENTERPRISE_WORKERS=1
+      ODOO_MAX_CRON_THREADS=1
+      ODOO_LIMIT_MEMORY_SOFT=$((768 * 1024 * 1024))
+      ODOO_LIMIT_MEMORY_HARD=$((1536 * 1024 * 1024))
+      ;;
+  esac
+
+  total_workers=$((COMMUNITY_WORKERS + ENTERPRISE_WORKERS))
+  total_expected_users=$((COMMUNITY_EXPECTED_USERS + ENTERPRISE_EXPECTED_USERS))
+  ESTIMATED_CONCURRENT_CAPACITY=$((total_workers * 6))
+  if (( ESTIMATED_CONCURRENT_CAPACITY < total_expected_users )); then
+    printf '%b\n' "${COLOR_YELLOW}Note: the selected workers provide estimated capacity for $ESTIMATED_CONCURRENT_CAPACITY of $total_expected_users expected simultaneous users.${COLOR_RESET}"
+  fi
+}
+
 section "2/6" "Choose how Odoo should run"
 echo "Select a setup profile:"
 echo "  1) Testing (recommended for evaluation and development)"
-echo "  2) Production (enables two Odoo workers and memory limits)"
+echo "  2) Production (opens the hardware-aware performance advisor)"
 read_choice DEPLOYMENT_CHOICE "Choose a profile [1]: " "1" "1 2 testing production"
 case "${DEPLOYMENT_CHOICE,,}" in
   1|testing) DEPLOYMENT_MODE="testing" ;;
@@ -968,6 +2647,14 @@ PGADMIN_ENABLED="false"
 PGADMIN_PORT="5050"
 PGADMIN_EMAIL="admin@example.com"
 PGADMIN_CREDENTIALS_MISSING="false"
+SAVED_PERFORMANCE_MODE=""
+SAVED_COMMUNITY_EXPECTED_USERS=""
+SAVED_ENTERPRISE_EXPECTED_USERS=""
+SAVED_COMMUNITY_WORKERS=""
+SAVED_ENTERPRISE_WORKERS=""
+SAVED_ODOO_MAX_CRON_THREADS=""
+SAVED_ODOO_LIMIT_MEMORY_SOFT=""
+SAVED_ODOO_LIMIT_MEMORY_HARD=""
 if [[ -f .env ]]; then
   COMMUNITY_DB_PASSWORD="$(get_env_value COMMUNITY_DB_PASSWORD)"
   ENTERPRISE_DB_PASSWORD="$(get_env_value ENTERPRISE_DB_PASSWORD)"
@@ -990,6 +2677,14 @@ if [[ -f .env ]]; then
   SAVED_PGADMIN_PORT="$(get_env_value PGADMIN_PORT)"
   SAVED_PGADMIN_EMAIL="$(get_env_value PGADMIN_EMAIL)"
   SAVED_PGADMIN_PASSWORD="$(get_env_value PGADMIN_PASSWORD)"
+  SAVED_PERFORMANCE_MODE="$(get_env_value PERFORMANCE_MODE)"
+  SAVED_COMMUNITY_EXPECTED_USERS="$(get_env_value COMMUNITY_EXPECTED_USERS)"
+  SAVED_ENTERPRISE_EXPECTED_USERS="$(get_env_value ENTERPRISE_EXPECTED_USERS)"
+  SAVED_COMMUNITY_WORKERS="$(get_env_value COMMUNITY_WORKERS)"
+  SAVED_ENTERPRISE_WORKERS="$(get_env_value ENTERPRISE_WORKERS)"
+  SAVED_ODOO_MAX_CRON_THREADS="$(get_env_value ODOO_MAX_CRON_THREADS)"
+  SAVED_ODOO_LIMIT_MEMORY_SOFT="$(get_env_value ODOO_LIMIT_MEMORY_SOFT)"
+  SAVED_ODOO_LIMIT_MEMORY_HARD="$(get_env_value ODOO_LIMIT_MEMORY_HARD)"
   PGADMIN_IMAGE="${SAVED_PGADMIN_IMAGE:-$PGADMIN_IMAGE}"
   if [[ "$SAVED_PGADMIN_ENABLED" == "true" ]]; then PGADMIN_ENABLED="true"; fi
   PGADMIN_PORT="${SAVED_PGADMIN_PORT:-$PGADMIN_PORT}"
@@ -1007,6 +2702,8 @@ else
   ENTERPRISE_ADMIN_PASSWORD="$(openssl rand -hex 24)"
   PGADMIN_PASSWORD="$(openssl rand -hex 24)"
 fi
+
+configure_performance_profile
 
 section "4/6" "Choose optional pgAdmin"
 echo "pgAdmin is an optional browser-based database manager."
@@ -1073,13 +2770,24 @@ fi
 
 section "5/6" "Review the installation plan"
 printf '  %-24s %s\n' "Profile" "$DEPLOYMENT_MODE"
+printf '  %-24s %s\n' "Performance mode" "$PERFORMANCE_MODE"
 if [[ "$START_COMMUNITY" == "true" ]]; then
   printf '  %-24s %s\n' "Community" "enabled on port $COMMUNITY_PORT"
+  if [[ "$DEPLOYMENT_MODE" == "production" ]]; then
+    printf '  %-24s %s\n' "Community workers" "$COMMUNITY_WORKERS (~$((COMMUNITY_WORKERS * 6)) simultaneous users)"
+  else
+    printf '  %-24s %s\n' "Community server" "threaded testing mode (workers = 0)"
+  fi
 else
   printf '  %-24s %s\n' "Community" "not selected"
 fi
 if [[ "$START_ENTERPRISE" == "true" ]]; then
   printf '  %-24s %s\n' "Enterprise" "enabled on port $ENTERPRISE_PORT"
+  if [[ "$DEPLOYMENT_MODE" == "production" ]]; then
+    printf '  %-24s %s\n' "Enterprise workers" "$ENTERPRISE_WORKERS (~$((ENTERPRISE_WORKERS * 6)) simultaneous users)"
+  else
+    printf '  %-24s %s\n' "Enterprise server" "threaded testing mode (workers = 0)"
+  fi
   if [[ -n "$ENTERPRISE_SOURCE" ]]; then
     printf '  %-24s %s\n' "Enterprise addons" "import from $ENTERPRISE_SOURCE"
   else
@@ -1093,6 +2801,10 @@ if [[ "$PGADMIN_ENABLED" == "true" ]]; then
   printf '  %-24s %s\n' "pgAdmin login" "$PGADMIN_EMAIL"
 else
   printf '  %-24s %s\n' "pgAdmin" "not selected"
+fi
+printf '  %-24s %s\n' "Cron threads" "$ODOO_MAX_CRON_THREADS per selected edition"
+if [[ "$DEPLOYMENT_MODE" == "production" ]]; then
+  printf '  %-24s %s\n' "Worker memory limits" "$((ODOO_LIMIT_MEMORY_SOFT / 1024 / 1024)) MiB soft / $((ODOO_LIMIT_MEMORY_HARD / 1024 / 1024)) MiB hard"
 fi
 printf '  %-24s %s\n' "Automatic restart" "enabled"
 echo
@@ -1123,19 +2835,19 @@ PGADMIN_ENABLED=$PGADMIN_ENABLED
 PGADMIN_PORT=$PGADMIN_PORT
 PGADMIN_EMAIL=$PGADMIN_EMAIL
 PGADMIN_PASSWORD=$PGADMIN_PASSWORD
+PERFORMANCE_MODE=$PERFORMANCE_MODE
+COMMUNITY_EXPECTED_USERS=$COMMUNITY_EXPECTED_USERS
+ENTERPRISE_EXPECTED_USERS=$ENTERPRISE_EXPECTED_USERS
+COMMUNITY_WORKERS=$COMMUNITY_WORKERS
+ENTERPRISE_WORKERS=$ENTERPRISE_WORKERS
+ODOO_MAX_CRON_THREADS=$ODOO_MAX_CRON_THREADS
+ODOO_LIMIT_MEMORY_SOFT=$ODOO_LIMIT_MEMORY_SOFT
+ODOO_LIMIT_MEMORY_HARD=$ODOO_LIMIT_MEMORY_HARD
 EOF
-
-WORKERS="0"
-LIMIT_MEMORY_HARD="0"
-LIMIT_MEMORY_SOFT="0"
-if [[ "$DEPLOYMENT_MODE" == "production" ]]; then
-  WORKERS="2"
-  LIMIT_MEMORY_HARD="2684354560"
-  LIMIT_MEMORY_SOFT="2147483648"
-fi
 
 write_config() {
   local target="$1" db_host="$2" db_password="$3" admin_password="$4" addons_path="$5"
+  local workers="$6" cron_threads="$7" memory_soft="$8" memory_hard="$9"
   cat > "$target" <<EOF
 [options]
 admin_passwd = $admin_password
@@ -1147,14 +2859,18 @@ addons_path = $addons_path
 data_dir = /var/lib/odoo
 list_db = True
 proxy_mode = False
-workers = $WORKERS
-max_cron_threads = 1
-limit_memory_hard = $LIMIT_MEMORY_HARD
-limit_memory_soft = $LIMIT_MEMORY_SOFT
+workers = $workers
+max_cron_threads = $cron_threads
+limit_memory_hard = $memory_hard
+limit_memory_soft = $memory_soft
 EOF
 }
-write_config config/community/odoo.conf db-community "$COMMUNITY_DB_PASSWORD" "$COMMUNITY_ADMIN_PASSWORD" "/usr/lib/python3/dist-packages/odoo/addons,/mnt/extra-addons"
-write_config config/enterprise/odoo.conf db-enterprise "$ENTERPRISE_DB_PASSWORD" "$ENTERPRISE_ADMIN_PASSWORD" "/mnt/enterprise-addons,/usr/lib/python3/dist-packages/odoo/addons,/mnt/extra-addons"
+write_config config/community/odoo.conf db-community "$COMMUNITY_DB_PASSWORD" "$COMMUNITY_ADMIN_PASSWORD" \
+  "/usr/lib/python3/dist-packages/odoo/addons,/mnt/extra-addons" \
+  "$COMMUNITY_WORKERS" "$ODOO_MAX_CRON_THREADS" "$ODOO_LIMIT_MEMORY_SOFT" "$ODOO_LIMIT_MEMORY_HARD"
+write_config config/enterprise/odoo.conf db-enterprise "$ENTERPRISE_DB_PASSWORD" "$ENTERPRISE_ADMIN_PASSWORD" \
+  "/mnt/enterprise-addons,/usr/lib/python3/dist-packages/odoo/addons,/mnt/extra-addons" \
+  "$ENTERPRISE_WORKERS" "$ODOO_MAX_CRON_THREADS" "$ODOO_LIMIT_MEMORY_SOFT" "$ODOO_LIMIT_MEMORY_HARD"
 
 if [[ "$START_COMMUNITY" == "true" && "$START_ENTERPRISE" == "true" ]]; then
   cat > config/pgadmin/servers.json <<'EOF'
@@ -1304,13 +3020,29 @@ umask 077
 {
 cat <<EOF
 Mode: $DEPLOYMENT_MODE
+Performance mode: $PERFORMANCE_MODE
+Detected hardware: $SYSTEM_SPEC_SUMMARY
+Cron threads per selected edition: $ODOO_MAX_CRON_THREADS
 Automatic startup: enabled (Docker at boot; containers restart unless manually stopped)
 EOF
+if [[ "$DEPLOYMENT_MODE" == "production" ]]; then
+cat <<EOF
+Worker memory limits: $((ODOO_LIMIT_MEMORY_SOFT / 1024 / 1024)) MiB soft / $((ODOO_LIMIT_MEMORY_HARD / 1024 / 1024)) MiB hard
+EOF
+fi
 if [[ "$START_COMMUNITY" == "true" ]]; then
 cat <<EOF
 Community: http://$HOST_IP:$COMMUNITY_PORT
 Community Odoo master password: $COMMUNITY_ADMIN_PASSWORD
 EOF
+if [[ "$DEPLOYMENT_MODE" == "production" ]]; then
+cat <<EOF
+Community expected simultaneous users: $COMMUNITY_EXPECTED_USERS
+Community workers: $COMMUNITY_WORKERS (estimated $((COMMUNITY_WORKERS * 6)) simultaneous users)
+EOF
+else
+  echo "Community server: threaded testing mode (workers = 0)"
+fi
 else
   echo "Community: not started"
 fi
@@ -1319,6 +3051,14 @@ cat <<EOF
 Enterprise: http://$HOST_IP:$ENTERPRISE_PORT
 Enterprise Odoo master password: $ENTERPRISE_ADMIN_PASSWORD
 EOF
+if [[ "$DEPLOYMENT_MODE" == "production" ]]; then
+cat <<EOF
+Enterprise expected simultaneous users: $ENTERPRISE_EXPECTED_USERS
+Enterprise workers: $ENTERPRISE_WORKERS (estimated $((ENTERPRISE_WORKERS * 6)) simultaneous users)
+EOF
+else
+  echo "Enterprise server: threaded testing mode (workers = 0)"
+fi
 else
   echo "Enterprise: not started"
 fi

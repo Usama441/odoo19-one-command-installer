@@ -45,8 +45,8 @@ When run interactively, the Ubuntu script first clears the previous terminal
 output and then opens a keyboard-controlled dashboard before performing package
 maintenance or starting services. Use the Up/Down arrow keys and Enter, press a
 number directly, or press Esc/Ctrl+C to exit. The full dashboard adapts between
-112–132 columns and uses a 32–42 row viewport. It stays centered when the
-terminal is larger. On interactive terminals smaller than 112×32, a full-screen
+112–132 columns and uses a 33–42 row viewport. It stays centered when the
+terminal is larger. On interactive terminals smaller than 112×33, a full-screen
 resize guard shows the current and required sizes and waits; resizing the window
 automatically opens the dashboard. Press Q, Esc, or Ctrl+C to exit from that
 screen. Redirected, automated, `NO_COLOR`, and basic-terminal runs use the clean
@@ -64,6 +64,7 @@ numbered menu instead.
 
 Quick system snapshot
   Ubuntu                 Ubuntu 24.04 LTS
+  Hardware               12 CPU • 31 GiB RAM • 98G disk (74G free) • amd64
   Docker CLI             Available
   Enterprise addons      Ready
   Installer state        New installation
@@ -74,8 +75,9 @@ Quick system snapshot
   [2] Install Odoo Enterprise only
   [3] Install both Community and Enterprise
   [4] Check Ubuntu updates and missing dependencies
-  [5] Uninstall Odoo
-  [6] Exit
+  [5] Back up databases across this system
+  [6] Uninstall Odoo
+  [7] Exit
 Choose an option [3]:
 ```
 
@@ -83,10 +85,67 @@ When complete Enterprise addons are available, Both is highlighted as the
 recommended default. Without Enterprise addons, Community becomes the safe
 recommended default instead.
 
-Option 5 has a safe uninstall submenu. Its recommended choice removes containers
-but preserves databases and filestores. Permanent data deletion requires the
-user to select the destructive option and type `DELETE`; Docker and source-code
-folders are never removed.
+Option 5 opens the Ubuntu system-wide database backup wizard. It is not limited
+to Odoo or to databases created by this installer. The read-only discovery pass
+checks native Ubuntu PostgreSQL clusters, native MySQL/MariaDB, every matching
+Docker container regardless of its Compose project, and primary SQLite database
+files in project and deployment locations such as `~/Projects`, `~/Desktop`,
+`/var/lib`, `/var/www`, `/opt`, `/srv`, `/mnt`, and `/data`. Databases are not
+filtered by application name or schema.
+
+The selection list is deliberately limited to primary data and grouped into
+three categories: PostgreSQL server databases, MySQL/MariaDB server databases,
+and SQLite project/deployment databases. PostgreSQL templates and the `postgres`
+maintenance database, MySQL/MariaDB metadata and privilege schemas, browser or
+desktop-application state, caches, dependencies, sessions, and test SQLite files
+are excluded. This prevents hundreds of files such as Chromium, Zoom, Cursor,
+package-manager, and cache databases from overwhelming the backup menu.
+
+Stopped native database services and stopped database containers can be started
+temporarily with the user's permission and are returned to their original state.
+If an instance cannot be queried with local, sudo, or container-configured
+credentials, the wizard requests a username and hidden password; entering no
+username skips that native instance, and `S` skips a Docker instance. Passwords
+remain in memory and are never written into the backup.
+
+All accessible results appear in one combined list with engine, source,
+database/file name, and size. Select several entries with `1,3,4`, a range such
+as `1-3`, or `A` for all. One `.rar` archive then contains PostgreSQL
+custom-format dumps, MySQL/MariaDB SQL dumps, and consistent SQLite online-backup
+copies for the selected entries. Archives are saved under `backups/` with mode
+`600`; this folder is Git-ignored. If `rar` or the SQLite command-line utility is
+required but missing, installation needs user approval and the package is
+recorded as installer-managed.
+
+The scanner currently supports PostgreSQL, MySQL, MariaDB, and SQLite. A truly
+universal database backup format does not exist: MongoDB, Redis, SQL Server,
+Oracle, and other engines require their own discovery, authentication, and dump
+tools and are not yet included in this backup option.
+
+Option 6 has an edition-aware uninstall wizard. It can remove Community only,
+Enterprise only, both Odoo editions while keeping pgAdmin, or the complete
+installer stack. Before presenting any destructive choice, it performs a
+read-only system audit. The audit discovers containers, orphan containers,
+volumes and their mount locations, project networks, generated files, tracked
+packages, Docker repository setup, and protected source folders. Docker resources
+must carry the expected `odoo19-dual` Compose ownership label; a missing or
+mismatched label is reported and skipped instead of being deleted.
+
+For every scope, the recommended choice removes containers but preserves
+databases, filestores, and generated files. Permanent deletion requires a
+scope-specific confirmation such as `DELETE COMMUNITY`, `DELETE ENTERPRISE`,
+`DELETE BOTH`, or `DELETE ALL`, followed by approval of the verified plan. The
+wizard never performs a broad filename-based system deletion: unrelated Odoo or
+Docker installations remain outside its deletion inventory.
+
+After complete-stack removal, the wizard separately asks whether Docker and
+dependencies installed by this installer should also be removed. The private,
+Git-ignored `.installer-state` file records packages, Docker repository files,
+and Docker-group access created by the installer. Only recorded items are shown
+and eligible for removal, followed by the explicit confirmation
+`REMOVE DEPENDENCIES`. If no ownership record exists, system packages are kept.
+Source code, Enterprise source, copied addons, and custom addons are always
+preserved.
 
 If Docker is missing, the script installs Docker Engine and the Compose plugin
 from Docker's official Ubuntu repository after receiving user approval. Before
@@ -158,14 +217,17 @@ how to rerun it.
 
 | Order | Prompt | What it controls |
 |---:|---|---|
-| 1 | `Choose a profile [1]` | `1` selects testing. `2` selects production with two workers and basic memory limits. |
+| 1 | `Choose a profile [1]` | `1` selects the lightweight testing server. `2` selects production and opens the hardware-aware performance advisor. |
 | 2 | `Community web port [8069]` | Asked only when Community or Both was selected in the Ubuntu menu. |
 | 3 | `Enterprise addons folder` | Asked only when Enterprise is selected and complete addons were not detected automatically. |
 | 4 | `Enterprise web port [8070]` | Asked only when Enterprise will start. In Both mode it must differ from the Community port. |
-| 5 | `Add pgAdmin to this installation? [y/N]` | Enables the optional pgAdmin web application. A rerun with pgAdmin enabled instead asks whether to keep it enabled. |
-| 6 | `pgAdmin web port [5050]` | Asked only when pgAdmin is enabled. It must differ from the selected Odoo ports. |
-| 7 | `pgAdmin login email [admin@example.com]` | Asked only on the first pgAdmin setup. Existing pgAdmin data reuses the saved email. |
-| 8 | `Start this installation now? [Y/n]` | Shows after a complete plan summary and provides a final chance to cancel before configuration or Enterprise addons are changed. |
+| 5 | `Expected simultaneous ... users` | Production only. Enter active users expected at the same time, not the total number of accounts. Each selected edition has its own estimate. |
+| 6 | `Choose a performance option [1]` | `1` applies the automatic recommendation, `2` accepts custom worker/cron/memory values, and `3` uses one safe worker per selected edition. |
+| 7 | Custom performance questions | Shown only for option `2`. The installer validates HTTP workers, cron threads, and soft/hard memory limits and warns before accepting an overcommitted worker total. |
+| 8 | `Add pgAdmin to this installation? [y/N]` | Enables the optional pgAdmin web application. A rerun with pgAdmin enabled instead asks whether to keep it enabled. |
+| 9 | `pgAdmin web port [5050]` | Asked only when pgAdmin is enabled. It must differ from the selected Odoo ports. |
+| 10 | `pgAdmin login email [admin@example.com]` | Asked only on the first pgAdmin setup. Existing pgAdmin data reuses the saved email. |
+| 11 | `Start this installation now? [Y/n]` | Shows after a complete plan summary and provides a final chance to cancel before configuration or Enterprise addons are changed. |
 
 Windows still uses its adaptive edition menu inside the guided wizard. The new
 top-level action and uninstall menu are specific to the Ubuntu terminal script.
@@ -175,6 +237,33 @@ and the pgAdmin login password are generated automatically with OpenSSL. The
 master passwords are saved in the Git-ignored `installation-info.txt` file. On
 Ubuntu, that file is created with a restrictive `umask` and mode `600`, so only
 the installing user can read or modify it.
+
+### Production performance advisor
+
+The Ubuntu production profile detects logical CPUs and RAM, asks for expected
+simultaneous users for each selected edition, and suggests Odoo HTTP workers.
+It starts from Odoo's sizing guideline of about six simultaneous users per
+worker, then caps the combined Community and Enterprise recommendation using:
+
+- the theoretical CPU ceiling of `(CPU × 2) + 1`, with CPU reserved for cron;
+- a RAM budget that reserves at least 2 GiB (or 25 percent on larger machines)
+  for Ubuntu, Docker, PostgreSQL, pgAdmin, and filesystem cache; and
+- a conservative 768 MiB RAM allowance per suggested worker.
+
+See Odoo's official [worker and memory sizing guidance](https://www.odoo.com/documentation/19.0/administration/on_premise/deploy.html#builtin-server).
+
+Automatic mode uses one cron thread per selected edition and 768 MiB soft / 1536
+MiB hard memory limits per worker. Custom mode accepts 1–64 workers per selected
+edition, 1–4 cron threads, and custom limits; an explicit extra confirmation is
+required when the requested worker total exceeds the detected safe budget. Safe
+mode uses one worker per selected edition. Testing mode keeps `workers = 0` and
+does not open the production advisor.
+
+The chosen mode, expected-user estimates, workers, cron threads, and limits are
+saved in `.env`, written into each Odoo configuration, shown in the review, and
+recorded in `installation-info.txt`. On reruns, saved values become the custom
+defaults, while automatic mode recalculates against the machine's current
+resources.
 
 Example Community + pgAdmin installation when no Enterprise folder is detected:
 
@@ -199,10 +288,15 @@ running containers, and disabling pgAdmin stops its existing container.
 
 ## Complete execution flow
 
-1. **Validate the platform.** Ubuntu checks for Ubuntu 22.04/24.04 and refuses
-   to run as root. Windows starts through PowerShell from the project folder.
+1. **Validate the platform.** Ubuntu checks for Ubuntu 22.04/24.04, refuses to
+   run as root, and detects the CPU count, total RAM, architecture, and root-disk
+   capacity/free space shown in the system snapshot. Windows starts through
+   PowerShell from the project folder.
 2. **Choose an Ubuntu action.** The first menu offers Community, Enterprise,
-   Both, dependency maintenance, safe uninstall, or exit.
+   Both, dependency maintenance, system-wide database backup, edition-aware safe
+   uninstall, or exit. The backup wizard can create one multi-engine RAR bundle,
+   while uninstall can target one edition, both editions, or the
+   complete stack and optionally remove only installer-tracked dependencies.
 3. **Offer Ubuntu maintenance.** The Ubuntu script asks whether to refresh APT
    metadata and upgrade installed packages. If a reboot becomes necessary, the
    user can stop safely and continue after restarting the machine.
@@ -212,7 +306,8 @@ running containers, and disabling pgAdmin stops its existing container.
    can install it through `winget`, and configures it to start at user sign-in.
 5. **Guide the user through choices.** Numbered menus select testing/production,
    optional pgAdmin, and only the ports relevant to the chosen Odoo editions.
-   A recent Compose version with `--wait` support is required.
+   Production adds the hardware-aware worker, cron, and memory advisor. A recent
+   Compose version with `--wait` support is required.
 6. **Protect existing data.** The script detects installer-created Docker
    volumes. If data volumes exist but `.env` is missing, it stops instead of
    creating new passwords that cannot access the existing data.
@@ -227,8 +322,8 @@ running containers, and disabling pgAdmin stops its existing container.
 9. **Generate or reuse configuration.** On the first run, database, separate
    Community/Enterprise Odoo master, and pgAdmin passwords are generated with
    OpenSSL. On reruns, saved credentials are preserved. `.env` and the Odoo
-   configuration files are then updated with the current ports and environment
-   mode.
+   configuration files are then updated with the current ports, environment
+   mode, and per-edition performance settings.
 10. **Review and confirm.** A summary shows the selected profile, editions, ports,
    pgAdmin choice, and automatic restart state before Odoo configuration or
    Enterprise addons are changed.
@@ -401,11 +496,13 @@ Rerun the installer to pull and start the chosen images.
 Protect `.env` and `installation-info.txt`, and keep encrypted off-machine
 backups. They contain credentials needed to administer or recover the services.
 
-The `production` choice enables two Odoo workers and basic memory limits. It does
-not configure a domain, TLS/HTTPS, reverse proxy, mail delivery, monitoring, or
-automated backups. Before exposing the system to the internet, add those controls,
-restrict Odoo and pgAdmin access with firewall rules, and test database and
-filestore restoration.
+The `production` choice opens the hardware-aware advisor, but its result remains
+a starting point rather than a load-test guarantee. Monitor real CPU, RAM,
+database latency, and custom-module behavior before raising worker counts. The
+installer does not configure a domain, TLS/HTTPS, reverse proxy, mail delivery,
+monitoring, or automated backups. Before exposing the system to the internet,
+add those controls, restrict Odoo and pgAdmin access with firewall rules, and
+test database and filestore restoration.
 
 ## Troubleshooting
 
