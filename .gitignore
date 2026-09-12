@@ -2,7 +2,10 @@
 .installer-state*
 installation-info.txt
 backups/
-docs/images/
+docs/images/*
+!docs/images/installer-flow.svg
+!docs/images/service-architecture.svg
+!docs/images/ubuntu-terminal-dashboard.png
 /.agents/
 /.codex/
 __pycache__/

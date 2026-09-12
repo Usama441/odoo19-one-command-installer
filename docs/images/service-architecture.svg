@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Odoo 19 Docker service architecture</title>
+  <desc id="desc">Browser access to Odoo Community, Odoo Enterprise, and pgAdmin, with isolated PostgreSQL databases and persistent data volumes.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#eff6ff"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="7" stdDeviation="9" flood-color="#0f172a" flood-opacity="0.11"/>
+    </filter>
+    <marker id="arrow-purple" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#714b67"/>
+    </marker>
+    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#336791"/>
+    </marker>
+    <style>
+      text { font-family: Arial, sans-serif; font-style: normal; }
+      .title { font-size: 40px; font-weight: 700; fill: #172033; }
+      .subtitle { font-size: 19px; font-weight: 400; fill: #526076; }
+      .heading { font-size: 24px; font-weight: 700; fill: #172033; }
+      .body { font-size: 17px; font-weight: 400; fill: #475569; }
+      .small { font-size: 15px; font-weight: 500; fill: #64748b; }
+      .white-heading { font-size: 23px; font-weight: 700; fill: white; }
+      .white-body { font-size: 16px; font-weight: 400; fill: #f8fafc; }
+      .label { font-size: 14px; font-weight: 700; fill: #64748b; letter-spacing: 1.3px; }
+      .purple-line { fill: none; stroke: #714b67; stroke-width: 4; marker-end: url(#arrow-purple); }
+      .blue-line { fill: none; stroke: #336791; stroke-width: 4; marker-end: url(#arrow-blue); }
+      .dash-line { fill: none; stroke: #94a3b8; stroke-width: 3; stroke-dasharray: 9 8; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="900" rx="28" fill="#f4f7fb"/>
+  <text class="title" x="80" y="70">Runtime architecture</text>
+  <text class="subtitle" x="80" y="104">One Docker network, isolated application data, and no exposed PostgreSQL ports.</text>
+
+  <g filter="url(#shadow)">
+    <rect x="70" y="180" width="250" height="175" rx="22" fill="#172033"/>
+    <text class="white-heading" x="112" y="232">User browser</text>
+    <text class="white-body" x="105" y="274">8069 → Community</text>
+    <text class="white-body" x="105" y="307">8070 → Enterprise</text>
+    <text class="white-body" x="105" y="340">5050 → pgAdmin</text>
+  </g>
+
+  <text class="label" x="455" y="148">WEB SERVICES</text>
+  <g filter="url(#shadow)">
+    <rect x="420" y="180" width="350" height="175" rx="22" fill="#714b67"/>
+    <text class="white-heading" x="455" y="230">Odoo 19 Community</text>
+    <text class="white-body" x="455" y="270">Community addons</text>
+    <text class="white-body" x="455" y="300">Custom: addons/community</text>
+    <text class="white-body" x="455" y="330">Filestore: community-data</text>
+
+    <rect x="420" y="430" width="350" height="175" rx="22" fill="#714b67"/>
+    <text class="white-heading" x="455" y="480">Odoo 19 Enterprise</text>
+    <text class="white-body" x="455" y="520">Licensed Enterprise addons</text>
+    <text class="white-body" x="455" y="550">Custom: enterprise-custom</text>
+    <text class="white-body" x="455" y="580">Filestore: enterprise-data</text>
+
+    <rect x="420" y="680" width="350" height="145" rx="22" fill="#336791"/>
+    <text class="white-heading" x="455" y="730">pgAdmin 4</text>
+    <text class="white-body" x="455" y="768">Optional web database manager</text>
+    <text class="white-body" x="455" y="798">Persistent settings: pgadmin-data</text>
+  </g>
+
+  <text class="label" x="1050" y="148">INTERNAL DATABASE SERVICES</text>
+  <g filter="url(#shadow)">
+    <rect x="1060" y="200" width="430" height="155" rx="22" fill="#ffffff" stroke="#336791" stroke-width="3"/>
+    <ellipse cx="1120" cy="250" rx="28" ry="12" fill="#336791"/>
+    <path d="M1092 250v38c0 7 13 12 28 12s28-5 28-12v-38" fill="#dbeafe" stroke="#336791" stroke-width="3"/>
+    <text class="heading" x="1170" y="252">db-community</text>
+    <text class="body" x="1170" y="286">PostgreSQL 15 • internal port 5432</text>
+    <text class="small" x="1170" y="318">Persistent volume: community-db</text>
+
+    <rect x="1060" y="450" width="430" height="155" rx="22" fill="#ffffff" stroke="#336791" stroke-width="3"/>
+    <ellipse cx="1120" cy="500" rx="28" ry="12" fill="#336791"/>
+    <path d="M1092 500v38c0 7 13 12 28 12s28-5 28-12v-38" fill="#dbeafe" stroke="#336791" stroke-width="3"/>
+    <text class="heading" x="1170" y="502">db-enterprise</text>
+    <text class="body" x="1170" y="536">PostgreSQL 15 • internal port 5432</text>
+    <text class="small" x="1170" y="568">Persistent volume: enterprise-db</text>
+  </g>
+
+  <path class="purple-line" d="M 320 230 L 406 230"/>
+  <path class="purple-line" d="M 320 285 L 370 285 L 370 515 L 406 515"/>
+  <path class="blue-line" d="M 320 335 L 360 335 L 360 752 L 406 752"/>
+
+  <path class="purple-line" d="M 770 268 L 1046 268"/>
+  <path class="purple-line" d="M 770 518 L 1046 518"/>
+  <path class="blue-line" d="M 770 735 L 900 735 L 900 310 L 1046 310"/>
+  <path class="blue-line" d="M 900 560 L 1046 560"/>
+
+  <path class="dash-line" d="M 1275 355 L 1275 405"/>
+  <text class="small" x="1182" y="392">separate credentials</text>
+
+  <rect x="1010" y="690" width="510" height="135" rx="20" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text class="heading" x="1045" y="735">Isolation guarantees</text>
+  <text class="body" x="1045" y="770">Separate databases • separate filestores • separate passwords</text>
+  <text class="small" x="1045" y="802">PostgreSQL is reachable only inside the Docker network.</text>
+</svg>
