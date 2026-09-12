@@ -46,9 +46,11 @@ output and then opens a keyboard-controlled dashboard before performing package
 maintenance or starting services. Use the Up/Down arrow keys and Enter, press a
 number directly, or press Esc/Ctrl+C to exit. The full dashboard adapts between
 112–132 columns and uses a 32–42 row viewport. It stays centered when the
-terminal is larger. On terminals smaller than 112×32, the script shows the
-required size and falls back to a clean numbered menu. Redirected and automated
-runs also use the compact menu.
+terminal is larger. On interactive terminals smaller than 112×32, a full-screen
+resize guard shows the current and required sizes and waits; resizing the window
+automatically opens the dashboard. Press Q, Esc, or Ctrl+C to exit from that
+screen. Redirected, automated, `NO_COLOR`, and basic-terminal runs use the clean
+numbered menu instead.
 
 ![Ubuntu terminal dashboard](docs/images/ubuntu-terminal-dashboard.png)
 
@@ -168,8 +170,11 @@ how to rerun it.
 Windows still uses its adaptive edition menu inside the guided wizard. The new
 top-level action and uninstall menu are specific to the Ubuntu terminal script.
 
-The PostgreSQL passwords, Odoo master passwords, and pgAdmin login password are
-never requested. The installer generates strong random values automatically.
+PostgreSQL passwords, separate Community and Enterprise Odoo master passwords,
+and the pgAdmin login password are generated automatically with OpenSSL. The
+master passwords are saved in the Git-ignored `installation-info.txt` file. On
+Ubuntu, that file is created with a restrictive `umask` and mode `600`, so only
+the installing user can read or modify it.
 
 Example Community + pgAdmin installation when no Enterprise folder is detected:
 
@@ -219,10 +224,11 @@ running containers, and disabling pgAdmin stops its existing container.
    a server-definition file, and a protected PostgreSQL password file. It
    registers only the Community and/or Enterprise databases selected for this
    run.
-9. **Generate or reuse configuration.** On the first run, random passwords are
-   generated. On reruns, database, Odoo master, and pgAdmin credentials are
-   preserved. `.env` and the Odoo configuration files are then updated with the
-   current ports and environment mode.
+9. **Generate or reuse configuration.** On the first run, database, separate
+   Community/Enterprise Odoo master, and pgAdmin passwords are generated with
+   OpenSSL. On reruns, saved credentials are preserved. `.env` and the Odoo
+   configuration files are then updated with the current ports and environment
+   mode.
 10. **Review and confirm.** A summary shows the selected profile, editions, ports,
    pgAdmin choice, and automatic restart state before Odoo configuration or
    Enterprise addons are changed.

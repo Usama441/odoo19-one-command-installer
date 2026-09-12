@@ -14,6 +14,7 @@ if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
   COLOR_CYAN=$'\033[38;5;37m'
   COLOR_BLUE=$'\033[38;5;81m'
   COLOR_GREEN=$'\033[38;5;34m'
+  COLOR_RED=$'\033[38;5;196m'
   COLOR_YELLOW=$'\033[38;5;214m'
   COLOR_WHITE=$'\033[38;5;255m'
   COLOR_MUTED=$'\033[38;5;110m'
@@ -25,6 +26,7 @@ else
   COLOR_CYAN=""
   COLOR_BLUE=""
   COLOR_GREEN=""
+  COLOR_RED=""
   COLOR_YELLOW=""
   COLOR_WHITE=""
   COLOR_MUTED=""
@@ -212,6 +214,8 @@ DASHBOARD_CONTENT_WIDTH=$((DASHBOARD_WIDTH - 6))
 DASHBOARD_LEFT=0
 DASHBOARD_TOP=0
 DASHBOARD_MENU_ROW=19
+TERMINAL_COLUMNS=0
+TERMINAL_ROWS=0
 
 repeat_character() {
   local character="$1" count="$2" repeated
@@ -386,8 +390,7 @@ draw_interactive_menu_rows() {
   done
 }
 
-interactive_dashboard_supported() {
-  local terminal_columns terminal_rows viewport_height
+interactive_terminal_supported() {
   [[ -t 0 && -t 1 && -z "${NO_COLOR:-}" && "${TERM:-dumb}" != "dumb" ]] || return 1
   command -v tput >/dev/null 2>&1 || return 1
   tput clear >/dev/null 2>&1 || return 1
@@ -396,37 +399,83 @@ interactive_dashboard_supported() {
   tput cnorm >/dev/null 2>&1 || return 1
   tput smcup >/dev/null 2>&1 || return 1
   tput rmcup >/dev/null 2>&1 || return 1
-  terminal_columns="$(tput cols 2>/dev/null || printf '0')"
-  terminal_rows="$(tput lines 2>/dev/null || printf '0')"
-  [[ "$terminal_columns" =~ ^[0-9]+$ && "$terminal_rows" =~ ^[0-9]+$ ]] || return 1
-  (( terminal_columns >= DASHBOARD_MIN_WIDTH && terminal_rows >= DASHBOARD_MIN_HEIGHT )) || return 1
+}
 
-  DASHBOARD_WIDTH="$terminal_columns"
+read_terminal_dimensions() {
+  TERMINAL_COLUMNS="$(tput cols 2>/dev/null || printf '0')"
+  TERMINAL_ROWS="$(tput lines 2>/dev/null || printf '0')"
+  [[ "$TERMINAL_COLUMNS" =~ ^[0-9]+$ && "$TERMINAL_ROWS" =~ ^[0-9]+$ ]] || return 1
+  (( TERMINAL_COLUMNS > 0 && TERMINAL_ROWS > 0 ))
+}
+
+configure_dashboard_geometry() {
+  local viewport_height
+  read_terminal_dimensions || return 1
+  (( TERMINAL_COLUMNS >= DASHBOARD_MIN_WIDTH && TERMINAL_ROWS >= DASHBOARD_MIN_HEIGHT )) || return 1
+
+  DASHBOARD_WIDTH="$TERMINAL_COLUMNS"
   (( DASHBOARD_WIDTH > DASHBOARD_MAX_WIDTH )) && DASHBOARD_WIDTH="$DASHBOARD_MAX_WIDTH"
   DASHBOARD_CONTENT_WIDTH=$((DASHBOARD_WIDTH - 6))
-  DASHBOARD_LEFT=$(((terminal_columns - DASHBOARD_WIDTH) / 2))
+  DASHBOARD_LEFT=$(((TERMINAL_COLUMNS - DASHBOARD_WIDTH) / 2))
 
-  viewport_height="$terminal_rows"
+  viewport_height="$TERMINAL_ROWS"
   (( viewport_height > DASHBOARD_MAX_HEIGHT )) && viewport_height="$DASHBOARD_MAX_HEIGHT"
-  DASHBOARD_TOP=$(((terminal_rows - viewport_height) / 2 + (viewport_height - DASHBOARD_CONTENT_HEIGHT) / 2))
+  DASHBOARD_TOP=$(((TERMINAL_ROWS - viewport_height) / 2 + (viewport_height - DASHBOARD_CONTENT_HEIGHT) / 2))
   DASHBOARD_MENU_ROW=$((DASHBOARD_TOP + 19))
 }
 
-show_dashboard_size_notice() {
-  local terminal_columns terminal_rows
-  [[ -t 0 && -t 1 ]] || return
-  command -v tput >/dev/null 2>&1 || return
-  terminal_columns="$(tput cols 2>/dev/null || printf 'unknown')"
-  terminal_rows="$(tput lines 2>/dev/null || printf 'unknown')"
-  [[ "$terminal_columns" =~ ^[0-9]+$ && "$terminal_rows" =~ ^[0-9]+$ ]] || return
-  if (( terminal_columns < DASHBOARD_MIN_WIDTH || terminal_rows < DASHBOARD_MIN_HEIGHT )); then
-    printf '\n%bTerminal size: %sx%s. Full dashboard requires at least %sx%s.%b\n' \
-      "$COLOR_YELLOW" "$terminal_columns" "$terminal_rows" \
-      "$DASHBOARD_MIN_WIDTH" "$DASHBOARD_MIN_HEIGHT" "$COLOR_RESET"
-    printf 'The dashboard scales up to %sx%s and stays centered on larger terminals.\n' \
-      "$DASHBOARD_MAX_WIDTH" "$DASHBOARD_MAX_HEIGHT"
-    echo "Using the compact menu for this run."
+resize_screen_center_text() {
+  local row="$1" color="$2" content="$3" column
+  column=$(((TERMINAL_COLUMNS - ${#content}) / 2))
+  (( column < 0 )) && column=0
+  tput cup "$row" "$column"
+  printf '%b%s%b' "$color" "$content" "$COLOR_RESET"
+}
+
+draw_resize_window() {
+  local box_left=1 box_top=1 box_width box_bottom row title fill_count center_row hint
+  box_width=$((TERMINAL_COLUMNS - 2))
+  box_bottom=$((TERMINAL_ROWS - 2))
+  title='[ resize window ]'
+  hint='Resize terminal  |  Q/Esc exit'
+
+  tput clear
+  if (( TERMINAL_COLUMNS < 20 || TERMINAL_ROWS < 6 )); then
+    tput cup 0 0
+    printf '%bNeed %sx%s%b' "$COLOR_RED$COLOR_BOLD" "$DASHBOARD_MIN_WIDTH" "$DASHBOARD_MIN_HEIGHT" "$COLOR_RESET"
+    return
   fi
+  if (( TERMINAL_COLUMNS < 40 || TERMINAL_ROWS < 12 )); then
+    resize_screen_center_text 1 "$COLOR_RED$COLOR_BOLD" "TERMINAL TOO SMALL"
+    resize_screen_center_text 3 "$COLOR_WHITE" "Current: ${TERMINAL_COLUMNS}x${TERMINAL_ROWS}"
+    resize_screen_center_text 4 "$COLOR_GREEN" "Required: ${DASHBOARD_MIN_WIDTH}x${DASHBOARD_MIN_HEIGHT}"
+    return
+  fi
+
+  tput cup "$box_top" "$box_left"
+  printf '%b┌─%s' "$COLOR_RED" "$title"
+  fill_count=$((box_width - ${#title} - 3))
+  (( fill_count > 0 )) && repeat_character '─' "$fill_count"
+  printf '┐%b' "$COLOR_RESET"
+
+  for (( row = box_top + 1; row < box_bottom; row++ )); do
+    tput cup "$row" "$box_left"
+    printf '%b│%b' "$COLOR_RED" "$COLOR_RESET"
+    tput cup "$row" "$((box_left + box_width - 1))"
+    printf '%b│%b' "$COLOR_RED" "$COLOR_RESET"
+  done
+
+  tput cup "$box_bottom" "$box_left"
+  printf '%b└' "$COLOR_RED"
+  repeat_character '─' "$((box_width - 2))"
+  printf '┘%b' "$COLOR_RESET"
+
+  center_row=$((TERMINAL_ROWS / 2 - 2))
+  resize_screen_center_text "$center_row" "$COLOR_WHITE$COLOR_BOLD" "Current size:"
+  resize_screen_center_text "$((center_row + 1))" "$COLOR_RED$COLOR_BOLD" "${TERMINAL_COLUMNS}x${TERMINAL_ROWS}"
+  resize_screen_center_text "$((center_row + 3))" "$COLOR_WHITE$COLOR_BOLD" "Need to be at least:"
+  resize_screen_center_text "$((center_row + 4))" "$COLOR_GREEN$COLOR_BOLD" "${DASHBOARD_MIN_WIDTH}x${DASHBOARD_MIN_HEIGHT}"
+  resize_screen_center_text "$((box_bottom - 1))" "$COLOR_MUTED" "$hint"
 }
 
 INTERACTIVE_ALT_SCREEN="false"
@@ -438,6 +487,45 @@ close_interactive_dashboard() {
     tput rmcup 2>/dev/null || true
     INTERACTIVE_ALT_SCREEN="false"
   fi
+}
+
+wait_for_dashboard_size() {
+  local key last_columns=-1 last_rows=-1
+
+  tput smcup
+  INTERACTIVE_ALT_SCREEN="true"
+  tput civis
+  trap 'close_interactive_dashboard' EXIT
+  trap 'exit 130' INT TERM HUP
+
+  while true; do
+    if configure_dashboard_geometry; then
+      close_interactive_dashboard
+      trap - EXIT INT TERM HUP
+      return 0
+    fi
+
+    read_terminal_dimensions || {
+      close_interactive_dashboard
+      trap - EXIT INT TERM HUP
+      return 1
+    }
+    if (( TERMINAL_COLUMNS != last_columns || TERMINAL_ROWS != last_rows )); then
+      draw_resize_window
+      last_columns="$TERMINAL_COLUMNS"
+      last_rows="$TERMINAL_ROWS"
+    fi
+
+    key=""
+    IFS= read -rsn1 -t 0.25 key || true
+    case "$key" in
+      q|Q|$'\033')
+        close_interactive_dashboard
+        trap - EXIT INT TERM HUP
+        return 1
+        ;;
+    esac
+  done
 }
 
 read_interactive_main_choice() {
@@ -559,10 +647,14 @@ else
   DEFAULT_MAIN_CHOICE="1"
 fi
 
-if interactive_dashboard_supported; then
-  read_interactive_main_choice "$DEFAULT_MAIN_CHOICE"
+if interactive_terminal_supported; then
+  if configure_dashboard_geometry || wait_for_dashboard_size; then
+    read_interactive_main_choice "$DEFAULT_MAIN_CHOICE"
+  else
+    echo "Goodbye."
+    exit 0
+  fi
 else
-  show_dashboard_size_notice
   show_control_center_status
   section "MENU" "What would you like to do?"
   menu_item "1" "Install Odoo Community only"
@@ -1204,6 +1296,11 @@ fi
 
 HOST_IP="$(hostname -I 2>/dev/null | awk '{print $1}' || true)"
 HOST_IP="${HOST_IP:-127.0.0.1}"
+if [[ -e installation-info.txt ]]; then
+  chmod 600 installation-info.txt
+fi
+(
+umask 077
 {
 cat <<EOF
 Mode: $DEPLOYMENT_MODE
@@ -1240,6 +1337,7 @@ PostgreSQL image: $POSTGRES_IMAGE
 EOF
 if [[ "$PGADMIN_ENABLED" == "true" ]]; then echo "pgAdmin image: $PGADMIN_IMAGE"; fi
 } > installation-info.txt
+)
 chmod 600 .env installation-info.txt
 
 section "6/6" "Installation complete"
