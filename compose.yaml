@@ -43,7 +43,7 @@ services:
     volumes:
       - community-data:/var/lib/odoo
       - ./config/community:/etc/odoo:ro
-      - ./addons/community:/mnt/extra-addons
+      - "${COMMUNITY_CUSTOM_ADDONS_PATH:-./addons/community}:/mnt/extra-addons"
 
   db-enterprise:
     image: ${POSTGRES_IMAGE:-postgres:15.19}
@@ -76,8 +76,8 @@ services:
     volumes:
       - enterprise-data:/var/lib/odoo
       - ./config/enterprise:/etc/odoo:ro
-      - ./addons/enterprise:/mnt/enterprise-addons:ro
-      - ./addons/enterprise-custom:/mnt/extra-addons
+      - "${ENTERPRISE_ADDONS_PATH:-./addons/enterprise}:/mnt/enterprise-addons:ro"
+      - "${ENTERPRISE_CUSTOM_ADDONS_PATH:-./addons/enterprise-custom}:/mnt/extra-addons"
 
   pgadmin:
     image: ${PGADMIN_IMAGE:-dpage/pgadmin4:9.17}

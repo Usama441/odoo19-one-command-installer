@@ -279,10 +279,11 @@ Start this installation now? [Y/n]:
 ```
 
 When `enterprise-19.0/` is beside the installer, both scripts detect its full
-path. Ubuntu uses it automatically after Enterprise or Both is selected; Windows
-offers it as the recommended edition source. The path is built from the
-installer's current location, so Linux and Windows usernames are detected
-automatically instead of being hard-coded.
+path. Ubuntu copies it into `/opt/odoo/odoo19/enterprise`, matching the verified
+production layout, while Windows keeps using the repository-local addon folders.
+The initially detected source path is built from the installer's current
+location, so Linux and Windows usernames are detected automatically instead of
+being hard-coded.
 On a rerun, selecting only one edition stops the other edition's previously
 running containers, and disabling pgAdmin stops its existing container.
 
@@ -314,7 +315,9 @@ running containers, and disabling pgAdmin stops its existing container.
 7. **Prepare Enterprise.** The installer first detects existing copied addons or
    `enterprise-19.0/` beside the script. Manual path entry is requested only when
    complete Enterprise addons were not detected. The folder must contain addon
-   manifests and `web_enterprise` before it is copied into `addons/enterprise`.
+   manifests and `web_enterprise`. Ubuntu then stores the licensed source under
+   `/opt/odoo/odoo19/enterprise` and prepares the shared custom-module directory
+   `/opt/odoo/odoo19/custom_addons/TI_Associate`.
 8. **Configure pgAdmin.** If selected, the script prepares pgAdmin login data,
    a server-definition file, and a protected PostgreSQL password file. It
    registers only the Community and/or Enterprise databases selected for this
@@ -347,7 +350,10 @@ running containers, and disabling pgAdmin stops its existing container.
 | `pgadmin` | Connects to the selected internal databases | `pgadmin-data` | User enables pgAdmin |
 
 The two PostgreSQL services listen only on Docker's internal network. Only the
-Odoo and pgAdmin web ports are published on the host.
+Odoo and pgAdmin web ports are published on the host. On Ubuntu, Enterprise code
+is bind-mounted read-only from `/opt/odoo/odoo19/enterprise`, while the shared
+custom directory is bind-mounted from
+`/opt/odoo/odoo19/custom_addons/TI_Associate` into both Odoo editions.
 
 ## Automatic startup after a restart
 
@@ -371,6 +377,24 @@ unless it was enabled during installation.
 
 ## Files created or updated
 
+Ubuntu keeps licensed and custom addon code in a stable production-style host
+location outside the Git checkout:
+
+```text
+/opt/odoo/odoo19/
+├── enterprise/                       # Licensed Odoo Enterprise addons
+└── custom_addons/
+    └── TI_Associate/                  # Custom modules shared by both editions
+```
+
+Place each custom module directly inside `TI_Associate/`, so its manifest looks
+like `/opt/odoo/odoo19/custom_addons/TI_Associate/my_module/__manifest__.py`.
+Both Ubuntu Odoo containers mount this directory at `/mnt/extra-addons`.
+Repository-local Community and Enterprise custom modules from an older installer
+run are migrated without replacing an already-present module.
+
+The installer repository continues to hold configuration and credentials:
+
 ```text
 odoo19-one-command-installer/
 ├── .env                              # Image versions, ports, and credentials
@@ -381,15 +405,16 @@ odoo19-one-command-installer/
 │   └── pgadmin/
 │       ├── servers.json              # Automatically registered DB servers
 │       └── pgpass                    # Automatic DB authentication for pgAdmin
-└── addons/
-    ├── community/                    # Community custom addons
-    ├── enterprise/                   # Licensed Odoo Enterprise addons
-    └── enterprise-custom/            # Enterprise custom addons
+└── addons/                            # Windows defaults and Ubuntu migration sources
+    ├── community/
+    ├── enterprise/
+    └── enterprise-custom/
 ```
 
-`.env`, `installation-info.txt`, generated configuration files, and copied
-Enterprise addons are excluded by `.gitignore`. On Ubuntu, secret files are made
-owner-readable only where container compatibility permits.
+`.env`, `installation-info.txt`, generated configuration files, and legacy
+repository-local Enterprise copies are excluded by `.gitignore`. Ubuntu's
+`/opt/odoo/odoo19` source directories live outside the Git repository. Secret
+files are made owner-readable only where container compatibility permits.
 
 ## First browser setup
 
@@ -435,7 +460,7 @@ refreshed when pgAdmin starts; manually added server definitions may be replaced
 | pgAdmin password | Generated | Reused from `.env` |
 | Odoo ports and mode | Selected through guided menus | Asked again and configuration updated |
 | pgAdmin choice and port | Asked; disabled by default | Asked again; previous enabled state and port become defaults |
-| Enterprise addons | Nearby folder is detected automatically or its path is requested | Existing copied addons are reused automatically when Enterprise is selected |
+| Enterprise addons | Nearby folder is detected and copied to `/opt/odoo/odoo19/enterprise` on Ubuntu | Existing persistent addons are reused automatically when Enterprise is selected |
 | Persistent databases and filestores | Created | Kept and reused |
 
 If an existing database or pgAdmin volume is present but its required saved
@@ -450,8 +475,10 @@ those addons.
 
 To add Enterprise after a Community-only installation, place the licensed folder
 beside the installer and name it `enterprise-19.0`, then choose Enterprise or
-Both from the Ubuntu main menu. Existing modules under `addons/enterprise` are
-detected and reused automatically on later runs.
+Both from the Ubuntu main menu. Ubuntu stores and reuses the installed copy under
+`/opt/odoo/odoo19/enterprise`. Add custom modules under
+`/opt/odoo/odoo19/custom_addons/TI_Associate`, restart the relevant container,
+then update the Apps list in Odoo.
 
 ## Useful commands
 
@@ -515,5 +542,6 @@ test database and filestore restoration.
   unique port.
 - **`.env` is missing but Docker volumes remain:** Restore `.env` from the same
   installation backup. Do not invent replacement database passwords.
-- **Enterprise does not start:** Confirm `addons/enterprise` contains the licensed
-  Odoo 19 Enterprise modules, then rerun the installer.
+- **Enterprise does not start:** Confirm
+  `/opt/odoo/odoo19/enterprise/web_enterprise/__manifest__.py` exists and the
+  directory is readable, then rerun the installer.

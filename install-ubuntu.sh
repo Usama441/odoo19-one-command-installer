@@ -2,6 +2,10 @@
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+ODOO_HOST_ROOT="/opt/odoo/odoo19"
+ODOO_HOST_ENTERPRISE_DIR="$ODOO_HOST_ROOT/enterprise"
+ODOO_HOST_CUSTOM_ROOT="$ODOO_HOST_ROOT/custom_addons"
+ODOO_HOST_CUSTOM_ADDONS_DIR="$ODOO_HOST_CUSTOM_ROOT/TI_Associate"
 cd "$SCRIPT_DIR"
 
 if [[ -t 0 && -t 1 && "${TERM:-dumb}" != "dumb" ]] &&
@@ -298,7 +302,8 @@ show_control_center_status() {
   fi
   if [[ -f "$SCRIPT_DIR/enterprise-19.0/web_enterprise/__manifest__.py" ||
         -f "$SCRIPT_DIR/enterprise/web_enterprise/__manifest__.py" ||
-        -f "$SCRIPT_DIR/addons/enterprise/web_enterprise/__manifest__.py" ]]; then
+        -f "$SCRIPT_DIR/addons/enterprise/web_enterprise/__manifest__.py" ||
+        -f "$ODOO_HOST_ENTERPRISE_DIR/web_enterprise/__manifest__.py" ]]; then
     enterprise_status="Ready"
   else
     enterprise_status="Not detected"
@@ -323,7 +328,8 @@ show_control_center_status() {
 enterprise_addons_ready() {
   [[ -f "$SCRIPT_DIR/enterprise-19.0/web_enterprise/__manifest__.py" ||
      -f "$SCRIPT_DIR/enterprise/web_enterprise/__manifest__.py" ||
-     -f "$SCRIPT_DIR/addons/enterprise/web_enterprise/__manifest__.py" ]]
+     -f "$SCRIPT_DIR/addons/enterprise/web_enterprise/__manifest__.py" ||
+     -f "$ODOO_HOST_ENTERPRISE_DIR/web_enterprise/__manifest__.py" ]]
 }
 
 DASHBOARD_MIN_WIDTH=112
@@ -1840,7 +1846,9 @@ audit_uninstall_targets() {
     "$SCRIPT_DIR/enterprise-19.0" \
     "$SCRIPT_DIR/addons/enterprise" \
     "$SCRIPT_DIR/addons/community" \
-    "$SCRIPT_DIR/addons/enterprise-custom"; do
+    "$SCRIPT_DIR/addons/enterprise-custom" \
+    "$ODOO_HOST_ENTERPRISE_DIR" \
+    "$ODOO_HOST_CUSTOM_ROOT"; do
     if [[ -e "$protected_path" ]]; then
       printf '  [KEEP]  %s\n' "$protected_path"
       found_protected="true"
@@ -2556,6 +2564,54 @@ has_enterprise_addons() {
     find "$source" -mindepth 2 -maxdepth 2 -type f -name '__manifest__.py' -print -quit | grep -q .
 }
 
+prepare_persistent_addons_layout() {
+  local directory host_parent primary_group
+  host_parent="$(dirname -- "$ODOO_HOST_ROOT")"
+  primary_group="$(id -gn "$USER")"
+
+  echo "Preparing the persistent Odoo source and custom-addons layout under $ODOO_HOST_ROOT..."
+  for directory in \
+    "$host_parent" \
+    "$ODOO_HOST_ROOT" \
+    "$ODOO_HOST_ENTERPRISE_DIR" \
+    "$ODOO_HOST_CUSTOM_ROOT" \
+    "$ODOO_HOST_CUSTOM_ADDONS_DIR"; do
+    if [[ -e "$directory" && ! -d "$directory" ]]; then
+      echo "$directory exists but is not a directory. Move it aside, then rerun the installer."
+      return 1
+    fi
+    if [[ ! -d "$directory" ]]; then
+      sudo install -d -m 0755 -o "$USER" -g "$primary_group" "$directory"
+    fi
+  done
+
+  for directory in "$ODOO_HOST_ENTERPRISE_DIR" "$ODOO_HOST_CUSTOM_ADDONS_DIR"; do
+    if [[ ! -r "$directory" || ! -w "$directory" || ! -x "$directory" ]]; then
+      echo "Granting $USER access to the installer-managed directory $directory..."
+      sudo chown "$USER:$primary_group" "$directory"
+      sudo chmod 0755 "$directory"
+    fi
+  done
+}
+
+migrate_legacy_custom_addons() {
+  local legacy_directory manifest module_directory module_name target_directory
+  for legacy_directory in "$SCRIPT_DIR/addons/community" "$SCRIPT_DIR/addons/enterprise-custom"; do
+    [[ -d "$legacy_directory" ]] || continue
+    while IFS= read -r -d '' manifest; do
+      module_directory="$(dirname -- "$manifest")"
+      module_name="$(basename -- "$module_directory")"
+      target_directory="$ODOO_HOST_CUSTOM_ADDONS_DIR/$module_name"
+      if [[ -e "$target_directory" ]]; then
+        echo "Keeping existing custom module: $target_directory"
+      else
+        echo "Migrating custom module to persistent storage: $module_name"
+        cp -a "$module_directory" "$ODOO_HOST_CUSTOM_ADDONS_DIR/"
+      fi
+    done < <(find "$legacy_directory" -mindepth 2 -maxdepth 2 -type f -name '__manifest__.py' -print0)
+  done
+}
+
 read_enterprise_source() {
   local suggested_path="$1" entered_path
   suggested_path="${suggested_path:-$SCRIPT_DIR/enterprise-19.0}"
@@ -2582,7 +2638,11 @@ read_enterprise_source() {
 section "3/6" "Prepare the selected Odoo edition"
 ENTERPRISE_SOURCE=""
 BUNDLED_ENTERPRISE_SOURCE=""
-for candidate in "$SCRIPT_DIR/enterprise-19.0" "$SCRIPT_DIR/enterprise"; do
+for candidate in \
+  "$ODOO_HOST_ENTERPRISE_DIR" \
+  "$SCRIPT_DIR/addons/enterprise" \
+  "$SCRIPT_DIR/enterprise-19.0" \
+  "$SCRIPT_DIR/enterprise"; do
   if has_enterprise_addons "$candidate" && [[ -f "$candidate/web_enterprise/__manifest__.py" ]]; then
     BUNDLED_ENTERPRISE_SOURCE="$candidate"
     break
@@ -2590,9 +2650,9 @@ for candidate in "$SCRIPT_DIR/enterprise-19.0" "$SCRIPT_DIR/enterprise"; do
 done
 
 if [[ "$START_ENTERPRISE" == "true" ]]; then
-  if has_enterprise_addons "$SCRIPT_DIR/addons/enterprise" &&
-     [[ -f "$SCRIPT_DIR/addons/enterprise/web_enterprise/__manifest__.py" ]]; then
-    echo "Reusing the complete Enterprise addons already installed in addons/enterprise."
+  if has_enterprise_addons "$ODOO_HOST_ENTERPRISE_DIR" &&
+     [[ -f "$ODOO_HOST_ENTERPRISE_DIR/web_enterprise/__manifest__.py" ]]; then
+    echo "Reusing the complete Enterprise addons already installed in $ODOO_HOST_ENTERPRISE_DIR."
   elif [[ -n "$BUNDLED_ENTERPRISE_SOURCE" ]]; then
     ENTERPRISE_SOURCE="$BUNDLED_ENTERPRISE_SOURCE"
     echo "Complete Enterprise addons were detected automatically:"
@@ -2773,6 +2833,7 @@ printf '  %-24s %s\n' "Profile" "$DEPLOYMENT_MODE"
 printf '  %-24s %s\n' "Performance mode" "$PERFORMANCE_MODE"
 if [[ "$START_COMMUNITY" == "true" ]]; then
   printf '  %-24s %s\n' "Community" "enabled on port $COMMUNITY_PORT"
+  printf '  %-24s %s\n' "Community custom addons" "$ODOO_HOST_CUSTOM_ADDONS_DIR"
   if [[ "$DEPLOYMENT_MODE" == "production" ]]; then
     printf '  %-24s %s\n' "Community workers" "$COMMUNITY_WORKERS (~$((COMMUNITY_WORKERS * 6)) simultaneous users)"
   else
@@ -2783,6 +2844,8 @@ else
 fi
 if [[ "$START_ENTERPRISE" == "true" ]]; then
   printf '  %-24s %s\n' "Enterprise" "enabled on port $ENTERPRISE_PORT"
+  printf '  %-24s %s\n' "Enterprise storage" "$ODOO_HOST_ENTERPRISE_DIR"
+  printf '  %-24s %s\n' "Enterprise custom addons" "$ODOO_HOST_CUSTOM_ADDONS_DIR"
   if [[ "$DEPLOYMENT_MODE" == "production" ]]; then
     printf '  %-24s %s\n' "Enterprise workers" "$ENTERPRISE_WORKERS (~$((ENTERPRISE_WORKERS * 6)) simultaneous users)"
   else
@@ -2813,9 +2876,17 @@ if ! ask_yes_no "Start this installation now? [Y/n]: " "y"; then
   exit 0
 fi
 
-if [[ -n "$ENTERPRISE_SOURCE" && "$(realpath "$ENTERPRISE_SOURCE")" != "$(realpath addons/enterprise)" ]]; then
-  echo "Copying Enterprise addons into this installation. This may take a moment..."
-  cp -a "$ENTERPRISE_SOURCE"/. addons/enterprise/
+prepare_persistent_addons_layout
+migrate_legacy_custom_addons
+
+if [[ -n "$ENTERPRISE_SOURCE" &&
+      "$(realpath "$ENTERPRISE_SOURCE")" != "$(realpath "$ODOO_HOST_ENTERPRISE_DIR")" ]]; then
+  echo "Copying Enterprise addons into $ODOO_HOST_ENTERPRISE_DIR. This may take a moment..."
+  cp -a "$ENTERPRISE_SOURCE"/. "$ODOO_HOST_ENTERPRISE_DIR/"
+fi
+sudo chmod -R u+rwX,go+rX "$ODOO_HOST_CUSTOM_ADDONS_DIR"
+if [[ "$START_ENTERPRISE" == "true" ]]; then
+  sudo chmod -R u+rwX,go+rX "$ODOO_HOST_ENTERPRISE_DIR"
 fi
 
 echo "Generating private configuration and credentials..."
@@ -2843,6 +2914,9 @@ ENTERPRISE_WORKERS=$ENTERPRISE_WORKERS
 ODOO_MAX_CRON_THREADS=$ODOO_MAX_CRON_THREADS
 ODOO_LIMIT_MEMORY_SOFT=$ODOO_LIMIT_MEMORY_SOFT
 ODOO_LIMIT_MEMORY_HARD=$ODOO_LIMIT_MEMORY_HARD
+COMMUNITY_CUSTOM_ADDONS_PATH=$ODOO_HOST_CUSTOM_ADDONS_DIR
+ENTERPRISE_ADDONS_PATH=$ODOO_HOST_ENTERPRISE_DIR
+ENTERPRISE_CUSTOM_ADDONS_PATH=$ODOO_HOST_CUSTOM_ADDONS_DIR
 EOF
 
 write_config() {
@@ -3074,6 +3148,8 @@ fi
 cat <<EOF
 Odoo image: $ODOO_IMAGE
 PostgreSQL image: $POSTGRES_IMAGE
+Enterprise addons path: $ODOO_HOST_ENTERPRISE_DIR
+Shared custom addons path: $ODOO_HOST_CUSTOM_ADDONS_DIR
 EOF
 if [[ "$PGADMIN_ENABLED" == "true" ]]; then echo "pgAdmin image: $PGADMIN_IMAGE"; fi
 } > installation-info.txt
@@ -3094,3 +3170,4 @@ if [[ "$PGADMIN_ENABLED" == "true" ]]; then
   echo "  - Sign in to pgAdmin with the email and password shown above."
 fi
 echo "Credentials are stored in $SCRIPT_DIR/installation-info.txt (owner-readable only)."
+echo "Place custom modules in $ODOO_HOST_CUSTOM_ADDONS_DIR, then update the Apps list in Odoo."
