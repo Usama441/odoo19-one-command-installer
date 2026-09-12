@@ -2,6 +2,7 @@
 .installer-state*
 installation-info.txt
 backups/
+docs/images/
 /.agents/
 /.codex/
 __pycache__/
