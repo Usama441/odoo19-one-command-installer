@@ -127,25 +127,48 @@ Enterprise only, both Odoo editions while keeping pgAdmin, or the complete
 installer stack. Before presenting any destructive choice, it performs a
 read-only system audit. The audit discovers containers, orphan containers,
 volumes and their mount locations, project networks, generated files, tracked
-packages, Docker repository setup, and protected source folders. Docker resources
-must carry the expected `odoo19-dual` Compose ownership label; a missing or
-mismatched label is reported and skipped instead of being deleted.
+packages, Docker repository setup, installed source/addon copies, and source
+folders that must be preserved. Docker resources must carry the expected
+`odoo19-dual` Compose ownership label; a missing or mismatched label is reported
+and skipped instead of being deleted.
 
 For every scope, the recommended choice removes containers but preserves
 databases, filestores, and generated files. Permanent deletion requires a
-scope-specific confirmation such as `DELETE COMMUNITY`, `DELETE ENTERPRISE`,
-`DELETE BOTH`, or `DELETE ALL`, followed by approval of the verified plan. The
-wizard never performs a broad filename-based system deletion: unrelated Odoo or
-Docker installations remain outside its deletion inventory.
+separate data choice. Before the delete confirmation, the wizard offers to scan
+the system databases, lets the user select one or several database names, and
+creates a RAR backup under `backups/`. If backup is cancelled, fails, or finds no
+accessible database, deletion does not continue automatically; the user must
+retry, explicitly approve continuing without a backup, or cancel. Permanent
+deletion then requires a scope-specific confirmation such as
+`DELETE COMMUNITY`, `DELETE ENTERPRISE`, `DELETE BOTH`, or `DELETE ALL`, followed
+by approval of the verified plan. The wizard never performs a broad
+filename-based system deletion: unrelated Odoo or Docker installations remain
+outside its deletion inventory.
 
 After complete-stack removal, the wizard separately asks whether Docker and
-dependencies installed by this installer should also be removed. The private,
-Git-ignored `.installer-state` file records packages, Docker repository files,
-and Docker-group access created by the installer. Only recorded items are shown
-and eligible for removal, followed by the explicit confirmation
-`REMOVE DEPENDENCIES`. If no ownership record exists, system packages are kept.
-Source code, Enterprise source, copied addons, and custom addons are always
-preserved.
+dependencies installed by this installer should also be removed. First it scans
+for containers, volumes, and custom networks outside the `odoo19-dual` project.
+If another Docker workload is found, Docker Engine removal is blocked so another
+application is not broken. The private, Git-ignored `.installer-state` file
+records packages, Docker repository files, and Docker-group access created by
+the installer. Recorded cleanup requires `REMOVE DEPENDENCIES`.
+
+Older installations may not have an ownership record. In that case, the wizard
+lists Docker Engine packages detected from Docker's official Ubuntu repository.
+If no non-Odoo Docker resources exist, those packages and the official Docker
+APT source/key can be removed with the separate confirmation
+`REMOVE DETECTED DOCKER`. Generic untracked Ubuntu packages are never guessed or
+removed.
+
+For Enterprise-only, both-editions, and complete-stack removal, the audit also
+lists eligible installed copies under `/opt/odoo/odoo19`. The user may keep them
+(the default) or permanently remove only the listed Enterprise/custom-addon
+copies by typing `DELETE INSTALLED SOURCE`. The original licensed
+`enterprise-19.0` folder and addon folders inside the Git checkout are always
+preserved, so the installer's only copy of user-supplied source is not erased.
+If Docker has already been removed outside the installer, Option 6 still scans
+for leftover generated configuration and `/opt` addon copies and can delete them
+with the confirmation `DELETE LOCAL ODOO FILES`.
 
 If Docker is missing, the script installs Docker Engine and the Compose plugin
 from Docker's official Ubuntu repository after receiving user approval. Before
