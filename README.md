@@ -57,6 +57,7 @@ numbered menu instead.
 ```text
 ============================================================
              ODOO 19 DEPLOYMENT CONTROL CENTER
+                    Installer v1.0.0
      Community • Enterprise • PostgreSQL • pgAdmin
                   Script by TI ASSOCIATES
               Developed by USAMA ARSHAD

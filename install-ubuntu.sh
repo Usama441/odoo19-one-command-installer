@@ -2,6 +2,7 @@
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+INSTALLER_VERSION="1.0.0"
 ODOO_HOST_ROOT="/opt/odoo/odoo19"
 ODOO_HOST_ENTERPRISE_DIR="$ODOO_HOST_ROOT/enterprise"
 ODOO_HOST_CUSTOM_ROOT="$ODOO_HOST_ROOT/custom_addons"
@@ -41,10 +42,11 @@ fi
 
 print_banner() {
   printf '%b' "$COLOR_PURPLE$COLOR_BOLD"
-  cat <<'EOF'
+  cat <<EOF
 
 ============================================================
              ODOO 19 DEPLOYMENT CONTROL CENTER
+                    Installer v$INSTALLER_VERSION
      Community • Enterprise • PostgreSQL • pgAdmin
                   Script by TI ASSOCIATES
               Developed by USAMA ARSHAD
@@ -448,7 +450,7 @@ draw_interactive_dashboard() {
   dashboard_border '╭' '╮'
   dashboard_header_row \
     "$COLOR_PURPLE$COLOR_BOLD" "odoo 19" \
-    "$COLOR_WHITE$COLOR_BOLD" "ODOO 19 DEPLOYMENT CONTROL CENTER" \
+    "$COLOR_WHITE$COLOR_BOLD" "ODOO 19 DEPLOYMENT CONTROL CENTER  •  v$INSTALLER_VERSION" \
     "$COLOR_GREEN$COLOR_BOLD" "      ✓  READY"
   dashboard_header_row \
     "$COLOR_PURPLE$COLOR_BOLD" "" \
