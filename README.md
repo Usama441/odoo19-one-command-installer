@@ -340,7 +340,8 @@ running containers, and disabling pgAdmin stops its existing container.
    complete Enterprise addons were not detected. The folder must contain addon
    manifests and `web_enterprise`. Ubuntu then stores the licensed source under
    `/opt/odoo/odoo19/enterprise` and prepares the shared custom-module directory
-   `/opt/odoo/odoo19/custom_addons/TI_Associate`.
+   `/opt/odoo/odoo19/custom_addons/<folder-name>`. The folder name is requested
+   in the terminal; spaces are safely converted to underscores.
 8. **Configure pgAdmin.** If selected, the script prepares pgAdmin login data,
    a server-definition file, and a protected PostgreSQL password file. It
    registers only the Community and/or Enterprise databases selected for this
@@ -376,7 +377,7 @@ The two PostgreSQL services listen only on Docker's internal network. Only the
 Odoo and pgAdmin web ports are published on the host. On Ubuntu, Enterprise code
 is bind-mounted read-only from `/opt/odoo/odoo19/enterprise`, while the shared
 custom directory is bind-mounted from
-`/opt/odoo/odoo19/custom_addons/TI_Associate` into both Odoo editions.
+`/opt/odoo/odoo19/custom_addons/<folder-name>` into both Odoo editions.
 
 ## Automatic startup after a restart
 
@@ -407,11 +408,13 @@ location outside the Git checkout:
 /opt/odoo/odoo19/
 ├── enterprise/                       # Licensed Odoo Enterprise addons
 └── custom_addons/
-    └── TI_Associate/                  # Custom modules shared by both editions
+    └── <your-folder-name>/             # Custom modules shared by both editions
 ```
 
-Place each custom module directly inside `TI_Associate/`, so its manifest looks
-like `/opt/odoo/odoo19/custom_addons/TI_Associate/my_module/__manifest__.py`.
+The Ubuntu installer asks for this folder name before creating anything. For
+example, entering `TI Associates` creates `TI_Associates/`. Place each custom
+module directly inside the selected folder, so its manifest looks like
+`/opt/odoo/odoo19/custom_addons/<folder-name>/my_module/__manifest__.py`.
 Both Ubuntu Odoo containers mount this directory at `/mnt/extra-addons`.
 Repository-local Community and Enterprise custom modules from an older installer
 run are migrated without replacing an already-present module.
@@ -482,6 +485,7 @@ refreshed when pgAdmin starts; manually added server definitions may be replaced
 | Odoo master passwords | Generated | Reused from `.env` or existing Odoo config |
 | pgAdmin password | Generated | Reused from `.env` |
 | Odoo ports and mode | Selected through guided menus | Asked again and configuration updated |
+| Custom addons folder | User enters a folder name under `/opt/odoo/odoo19/custom_addons` | Saved name is offered as the default and can be changed |
 | pgAdmin choice and port | Asked; disabled by default | Asked again; previous enabled state and port become defaults |
 | Enterprise addons | Nearby folder is detected and copied to `/opt/odoo/odoo19/enterprise` on Ubuntu | Existing persistent addons are reused automatically when Enterprise is selected |
 | Persistent databases and filestores | Created | Kept and reused |
@@ -500,7 +504,7 @@ To add Enterprise after a Community-only installation, place the licensed folder
 beside the installer and name it `enterprise-19.0`, then choose Enterprise or
 Both from the Ubuntu main menu. Ubuntu stores and reuses the installed copy under
 `/opt/odoo/odoo19/enterprise`. Add custom modules under
-`/opt/odoo/odoo19/custom_addons/TI_Associate`, restart the relevant container,
+`/opt/odoo/odoo19/custom_addons/<folder-name>`, restart the relevant container,
 then update the Apps list in Odoo.
 
 ## Useful commands

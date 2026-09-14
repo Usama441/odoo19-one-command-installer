@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 ODOO_HOST_ROOT="/opt/odoo/odoo19"
 ODOO_HOST_ENTERPRISE_DIR="$ODOO_HOST_ROOT/enterprise"
 ODOO_HOST_CUSTOM_ROOT="$ODOO_HOST_ROOT/custom_addons"
-ODOO_HOST_CUSTOM_ADDONS_DIR="$ODOO_HOST_CUSTOM_ROOT/TI_Associate"
+ODOO_HOST_CUSTOM_ADDONS_DIR=""
 cd "$SCRIPT_DIR"
 
 if [[ -t 0 && -t 1 && "${TERM:-dumb}" != "dumb" ]] &&
@@ -2665,6 +2665,59 @@ valid_port() {
   [[ "$1" =~ ^[0-9]{1,5}$ ]] && (( 10#$1 >= 1 && 10#$1 <= 65535 ))
 }
 
+valid_custom_addons_folder() {
+  local folder_name="$1"
+  [[ "$folder_name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$ ]] &&
+    [[ "$folder_name" != "." && "$folder_name" != ".." ]]
+}
+
+configure_custom_addons_directory() {
+  local saved_path="${1:-}" default_name="" entered_name folder_name
+
+  if [[ "$saved_path" == "$ODOO_HOST_CUSTOM_ROOT/"* ]]; then
+    folder_name="${saved_path#"$ODOO_HOST_CUSTOM_ROOT/"}"
+    if [[ "$folder_name" != */* ]] && valid_custom_addons_folder "$folder_name"; then
+      default_name="$folder_name"
+    fi
+  fi
+
+  echo
+  printf '%b\n' "${COLOR_BOLD}Custom addons workspace${COLOR_RESET}"
+  echo "Choose the folder that will contain your custom Odoo modules."
+  echo "It will be created inside $ODOO_HOST_CUSTOM_ROOT and shared by the selected editions."
+  echo "Use letters, numbers, dots, underscores, or hyphens; spaces become underscores."
+
+  while true; do
+    if [[ -n "$default_name" ]]; then
+      read -r -p "Custom addons folder name [$default_name]: " entered_name
+      entered_name="${entered_name:-$default_name}"
+    else
+      read -r -p "Custom addons folder name (example: TI_Associates): " entered_name
+    fi
+
+    entered_name="${entered_name#"${entered_name%%[![:space:]]*}"}"
+    entered_name="${entered_name%"${entered_name##*[![:space:]]}"}"
+    folder_name="${entered_name//[[:space:]]/_}"
+
+    if [[ -z "$folder_name" ]]; then
+      echo "A folder name is required."
+      continue
+    fi
+    if ! valid_custom_addons_folder "$folder_name"; then
+      echo "Enter 1-64 characters using letters, numbers, dots, underscores, or hyphens."
+      echo "The name must start with a letter or number and cannot contain a path separator."
+      continue
+    fi
+
+    ODOO_HOST_CUSTOM_ADDONS_DIR="$ODOO_HOST_CUSTOM_ROOT/$folder_name"
+    if [[ "$folder_name" != "$entered_name" ]]; then
+      echo "Folder name normalized to: $folder_name"
+    fi
+    printf 'Custom addons will be stored in: %s\n' "$ODOO_HOST_CUSTOM_ADDONS_DIR"
+    return
+  done
+}
+
 valid_integer_in_range() {
   local value="$1" minimum="$2" maximum="$3"
   [[ "$value" =~ ^[0-9]+$ ]] || return 1
@@ -3097,6 +3150,7 @@ SAVED_ENTERPRISE_WORKERS=""
 SAVED_ODOO_MAX_CRON_THREADS=""
 SAVED_ODOO_LIMIT_MEMORY_SOFT=""
 SAVED_ODOO_LIMIT_MEMORY_HARD=""
+SAVED_CUSTOM_ADDONS_PATH=""
 if [[ -f .env ]]; then
   COMMUNITY_DB_PASSWORD="$(get_env_value COMMUNITY_DB_PASSWORD)"
   ENTERPRISE_DB_PASSWORD="$(get_env_value ENTERPRISE_DB_PASSWORD)"
@@ -3127,6 +3181,8 @@ if [[ -f .env ]]; then
   SAVED_ODOO_MAX_CRON_THREADS="$(get_env_value ODOO_MAX_CRON_THREADS)"
   SAVED_ODOO_LIMIT_MEMORY_SOFT="$(get_env_value ODOO_LIMIT_MEMORY_SOFT)"
   SAVED_ODOO_LIMIT_MEMORY_HARD="$(get_env_value ODOO_LIMIT_MEMORY_HARD)"
+  SAVED_CUSTOM_ADDONS_PATH="$(get_env_value COMMUNITY_CUSTOM_ADDONS_PATH)"
+  SAVED_CUSTOM_ADDONS_PATH="${SAVED_CUSTOM_ADDONS_PATH:-$(get_env_value ENTERPRISE_CUSTOM_ADDONS_PATH)}"
   PGADMIN_IMAGE="${SAVED_PGADMIN_IMAGE:-$PGADMIN_IMAGE}"
   if [[ "$SAVED_PGADMIN_ENABLED" == "true" ]]; then PGADMIN_ENABLED="true"; fi
   PGADMIN_PORT="${SAVED_PGADMIN_PORT:-$PGADMIN_PORT}"
@@ -3145,6 +3201,7 @@ else
   PGADMIN_PASSWORD="$(openssl rand -hex 24)"
 fi
 
+configure_custom_addons_directory "$SAVED_CUSTOM_ADDONS_PATH"
 configure_performance_profile
 
 section "4/6" "Choose optional pgAdmin"
