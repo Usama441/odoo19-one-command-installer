@@ -73,14 +73,77 @@ if [[ "${EUID}" -eq 0 ]]; then
   exit 1
 fi
 
+OS_MIN_SUPPORTED="22.04"
+OS_MAX_TESTED="26.04"
+UBUNTU_REPO_CODENAME=""
+
+os_release_key() {
+  [[ "$1" =~ ^([0-9]+)\.([0-9]+) ]] || return 1
+  printf '%d' $((10#${BASH_REMATCH[1]} * 100 + 10#${BASH_REMATCH[2]}))
+}
+
+ubuntu_release_for_codename() {
+  case "$1" in
+    trusty) printf '14.04' ;;
+    xenial) printf '16.04' ;;
+    bionic) printf '18.04' ;;
+    focal) printf '20.04' ;;
+    groovy) printf '20.10' ;;
+    hirsute) printf '21.04' ;;
+    impish) printf '21.10' ;;
+    jammy) printf '22.04' ;;
+    lunar) printf '23.04' ;;
+    mantic) printf '23.10' ;;
+    noble) printf '24.04' ;;
+    oracular) printf '24.10' ;;
+    plucky) printf '25.04' ;;
+    questing) printf '25.10' ;;
+    resolute) printf '26.04' ;;
+    *) return 1 ;;
+  esac
+}
+
 if [[ ! -r /etc/os-release ]]; then
-  echo "Unsupported system: Ubuntu 22.04 or 24.04 is required."
+  echo "Unsupported system: Ubuntu $OS_MIN_SUPPORTED or newer is required."
   exit 1
 fi
 . /etc/os-release
-if [[ "${ID}" != "ubuntu" || ( "${VERSION_ID}" != "22.04" && "${VERSION_ID}" != "24.04" ) ]]; then
+
+if [[ "${ID:-}" != "ubuntu" && " ${ID_LIKE:-} " != *" ubuntu "* ]]; then
   echo "Unsupported system: detected ${PRETTY_NAME:-unknown}."
+  echo "Ubuntu $OS_MIN_SUPPORTED or newer, or an Ubuntu-based distribution, is required."
   exit 1
+fi
+
+# The Docker repository is published per Ubuntu codename, so derivatives must use
+# the Ubuntu codename they inherit rather than their own VERSION_CODENAME.
+UBUNTU_REPO_CODENAME="${UBUNTU_CODENAME:-}"
+if [[ -z "$UBUNTU_REPO_CODENAME" && "${ID:-}" == "ubuntu" ]]; then
+  UBUNTU_REPO_CODENAME="${VERSION_CODENAME:-}"
+fi
+
+# Derivatives ship their own VERSION_ID (Linux Mint 22, Pop!_OS 22.04), so resolve
+# the underlying Ubuntu release from that inherited codename instead.
+DETECTED_UBUNTU_RELEASE=""
+if [[ "${ID:-}" == "ubuntu" ]]; then
+  DETECTED_UBUNTU_RELEASE="${VERSION_ID:-}"
+elif [[ -n "$UBUNTU_REPO_CODENAME" ]]; then
+  DETECTED_UBUNTU_RELEASE="$(ubuntu_release_for_codename "$UBUNTU_REPO_CODENAME" || true)"
+fi
+
+if DETECTED_RELEASE_KEY="$(os_release_key "$DETECTED_UBUNTU_RELEASE")"; then
+  if (( DETECTED_RELEASE_KEY < $(os_release_key "$OS_MIN_SUPPORTED") )); then
+    echo "Unsupported system: detected ${PRETTY_NAME:-unknown}."
+    echo "Ubuntu $OS_MIN_SUPPORTED or newer is required."
+    exit 1
+  fi
+  if (( DETECTED_RELEASE_KEY > $(os_release_key "$OS_MAX_TESTED") )); then
+    echo "Note: ${PRETTY_NAME:-this release} is newer than Ubuntu $OS_MAX_TESTED, the newest release this installer was tested against."
+    echo "The installation will continue; report anything that misbehaves."
+  fi
+else
+  echo "Note: the Ubuntu release behind ${PRETTY_NAME:-this system} could not be determined."
+  echo "The installation will continue, assuming Ubuntu $OS_MIN_SUPPORTED or newer."
 fi
 
 detect_system_specs() {
@@ -285,7 +348,12 @@ setup_docker_repository() {
   sudo chmod a+r /etc/apt/keyrings/docker.asc
   local arch codename
   arch="$(dpkg --print-architecture)"
-  codename="${UBUNTU_CODENAME:-$VERSION_CODENAME}"
+  codename="$UBUNTU_REPO_CODENAME"
+  if [[ -z "$codename" ]]; then
+    echo "The Ubuntu codename could not be determined, so the Docker repository cannot be configured."
+    echo "Install Docker Engine and the Compose plugin manually, then rerun this installer."
+    exit 1
+  fi
   echo "deb [arch=$arch signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $codename stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
   sudo apt-get update
   APT_INDEX_READY="true"

@@ -22,8 +22,9 @@ without exposing PostgreSQL ports to the host network.
 
 ## Requirements
 
-- Ubuntu 22.04 or 24.04 with a normal sudo-enabled user; or Windows 10/11 with
-  PowerShell.
+- Ubuntu 22.04 or newer, or an Ubuntu-based distribution such as Linux Mint or
+  Pop!_OS, with a normal sudo-enabled user; or Windows 10/11 with PowerShell.
+  Releases newer than 26.04 run with a note that they are untested.
 - An internet connection for installing Docker when needed and pulling images.
 - A valid Odoo Enterprise subscription and a local copy of the Odoo 19
   Enterprise addons if Enterprise will be used.
@@ -34,7 +35,7 @@ your sudo password when Ubuntu requests it.
 
 ## Run the installer
 
-### Ubuntu 22.04 / 24.04
+### Ubuntu 22.04 or newer
 
 ```bash
 chmod +x install-ubuntu.sh
@@ -313,7 +314,8 @@ running containers, and disabling pgAdmin stops its existing container.
 
 ## Complete execution flow
 
-1. **Validate the platform.** Ubuntu checks for Ubuntu 22.04/24.04, refuses to
+1. **Validate the platform.** Ubuntu checks for Ubuntu 22.04 or newer (including
+   Ubuntu-based distributions, resolved through their inherited codename), refuses to
    run as root, and detects the CPU count, total RAM, architecture, and root-disk
    capacity/free space shown in the system snapshot. Windows starts through
    PowerShell from the project folder.
