@@ -12,9 +12,9 @@ services.
 
 | Component | When it starts | Default address |
 |---|---|---|
-| Odoo 19 Community + PostgreSQL | Community or Both is selected | `http://SERVER-IP:8069` |
-| Odoo 19 Enterprise + PostgreSQL | Enterprise or Both is selected and licensed addons exist | `http://SERVER-IP:8070` |
-| pgAdmin 4 web application | When the user answers `y` | `http://SERVER-IP:5050` |
+| Odoo 19 Community + PostgreSQL | Community or Both is selected | Ubuntu testing: `http://localhost:8069`; production/Windows: `http://SERVER-IP:8069` |
+| Odoo 19 Enterprise + PostgreSQL | Enterprise or Both is selected and licensed addons exist | Ubuntu testing: `http://localhost:8070`; production/Windows: `http://SERVER-IP:8070` |
+| pgAdmin 4 web application | When the user answers `y` | Ubuntu testing: `http://localhost:5050`; production/Windows: `http://SERVER-IP:5050` |
 
 Community and Enterprise use separate databases, passwords, filestores, ports,
 configuration files, and custom-addon folders. pgAdmin can manage both databases
@@ -26,6 +26,10 @@ without exposing PostgreSQL ports to the host network.
   Pop!_OS, with a normal sudo-enabled user; or Windows 10/11 with PowerShell.
   Releases newer than 26.04 run with a note that they are untested.
 - An internet connection for installing Docker when needed and pulling images.
+- The Ubuntu installer requires native Linux Docker Engine on the same host,
+  accessed through a Unix socket. Docker Desktop and remote/TCP Docker endpoints
+  are rejected for both testing and production profiles. The Windows installer
+  continues to use Docker Desktop.
 - A valid Odoo Enterprise subscription and a local copy of the Odoo 19
   Enterprise addons if Enterprise will be used.
 - Enough free disk space for Docker images, databases, filestores, and backups.
@@ -134,6 +138,15 @@ folders that must be preserved. Docker resources must carry the expected
 `odoo19-dual` Compose ownership label; a missing or mismatched label is reported
 and skipped instead of being deleted.
 
+Ubuntu uninstall pins the selected native Linux Docker Engine endpoint before
+the audit, just as installation does. Docker Desktop and remote contexts are
+rejected so the wizard cannot inspect one daemon and delete local configuration
+belonging to another. The wizard gracefully stops and then forcibly removes only
+containers carrying the verified project/service labels. Container-attached
+anonymous volumes are removed at that point, while named data volumes remain
+controlled by the separate data choice. Complete uninstall also removes project
+networks and checks that no selected container remains.
+
 For every scope, the recommended choice removes containers but preserves
 databases, filestores, and generated files. Permanent deletion requires a
 separate data choice. Before the delete confirmation, the wizard offers to scan
@@ -143,7 +156,14 @@ accessible database, deletion does not continue automatically; the user must
 retry, explicitly approve continuing without a backup, or cancel. Permanent
 deletion then requires a scope-specific confirmation such as
 `DELETE COMMUNITY`, `DELETE ENTERPRISE`, `DELETE BOTH`, or `DELETE ALL`, followed
-by approval of the verified plan. The wizard never performs a broad
+by approval of the verified plan. Approved volumes are force-removed and then
+queried again. Generated `.env` and configuration files are deleted only after
+all selected containers, networks, and volumes pass the final absence checks.
+If Docker created an empty directory where a bind-mounted generated file should
+have existed, the audit identifies it as a directory placeholder and cleanup
+removes it only when empty; unexpected contents are never deleted recursively.
+If Docker CLI access is unavailable, destructive local cleanup is refused until
+Docker can be audited. The wizard never performs a broad
 filename-based system deletion: unrelated Odoo or Docker installations remain
 outside its deletion inventory.
 
@@ -242,7 +262,7 @@ how to rerun it.
 
 | Order | Prompt | What it controls |
 |---:|---|---|
-| 1 | `Choose a profile [1]` | `1` selects the lightweight testing server. `2` selects production and opens the hardware-aware performance advisor. |
+| 1 | `Choose a profile [1]` | `1` selects the lightweight testing server and binds web ports only to `127.0.0.1`. `2` selects production, binds to all host interfaces, and opens the hardware-aware performance advisor. |
 | 2 | `Community web port [8069]` | Asked only when Community or Both was selected in the Ubuntu menu. |
 | 3 | `Enterprise addons folder` | Asked only when Enterprise is selected and complete addons were not detected automatically. |
 | 4 | `Enterprise web port [8070]` | Asked only when Enterprise will start. In Both mode it must differ from the Community port. |
@@ -333,8 +353,10 @@ running containers, and disabling pgAdmin stops its existing container.
    can install it through `winget`, and configures it to start at user sign-in.
 5. **Guide the user through choices.** Numbered menus select testing/production,
    optional pgAdmin, and only the ports relevant to the chosen Odoo editions.
-   Production adds the hardware-aware worker, cron, and memory advisor. A recent
-   Compose version with `--wait` support is required.
+   Testing is reachable only from the same machine through `localhost`.
+   Production binds web ports to all host interfaces and adds the hardware-aware
+   worker, cron, and memory advisor. A recent Compose version with `--wait`
+   support is required.
 6. **Protect existing data.** The script detects installer-created Docker
    volumes. If data volumes exist but `.env` is missing, it stops instead of
    creating new passwords that cannot access the existing data.
@@ -361,8 +383,9 @@ running containers, and disabling pgAdmin stops its existing container.
    selected Odoo editions and optional pgAdmin start. Every created service has
    the `restart: unless-stopped` policy.
 12. **Wait for health.** Docker Compose waits up to 300 seconds for all requested
-   services. On Ubuntu, an already-active UFW firewall receives allow rules for
-   the selected public web ports.
+   services. On Ubuntu production installs, an already-active UFW firewall
+   receives allow rules for the selected public web ports. Testing mode does not
+   add firewall rules because its ports are bound only to localhost.
 13. **Show next steps.** The terminal prints URLs, credentials, and browser setup
    guidance. The access information is also saved to `installation-info.txt`.
 
@@ -563,8 +586,15 @@ test database and filestore restoration.
 
 ## Troubleshooting
 
-- **Docker engine is not ready:** Start Docker/Docker Desktop, wait until it is
-  running, and rerun the installer.
+- **Docker engine is not ready:** On Ubuntu, start the native Docker Engine;
+  on Windows, start Docker Desktop. Then rerun the installer.
+- **Ubuntu rejects Docker Desktop or a remote endpoint:** Review `docker context ls`
+  and any `DOCKER_HOST`/`DOCKER_CONTEXT` overrides. Select the intended local native
+  Engine context explicitly (commonly `docker context use default`, after clearing
+  overrides). The installer never switches contexts automatically. Each daemon has
+  separate containers and volumes; switching does not migrate existing databases.
+  The installer also checks addon bind mounts after pulling images and before
+  starting Odoo services, reporting mount/read errors directly.
 - **A service does not become healthy within five minutes:** Run
   `docker compose --profile pgadmin ps` and inspect the relevant log command
   shown above.

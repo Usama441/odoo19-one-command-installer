@@ -34,7 +34,7 @@ services:
       db-community:
         condition: service_healthy
     ports:
-      - "${COMMUNITY_PORT}:8069"
+      - "${BIND_ADDRESS:-0.0.0.0}:${COMMUNITY_PORT}:8069"
     environment:
       HOST: db-community
       PORT: 5432
@@ -67,7 +67,7 @@ services:
       db-enterprise:
         condition: service_healthy
     ports:
-      - "${ENTERPRISE_PORT}:8069"
+      - "${BIND_ADDRESS:-0.0.0.0}:${ENTERPRISE_PORT}:8069"
     environment:
       HOST: db-enterprise
       PORT: 5432
@@ -84,7 +84,7 @@ services:
     profiles: ["pgadmin"]
     restart: unless-stopped
     ports:
-      - "${PGADMIN_PORT}:80"
+      - "${BIND_ADDRESS:-0.0.0.0}:${PGADMIN_PORT}:80"
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
