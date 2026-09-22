@@ -1,0 +1,14 @@
+# Copy this file to cron/database-query.conf and set the target Odoo database.
+# This file is intentionally ignored by Git so it can contain local settings.
+
+# Which PostgreSQL service should execute database-query.sql: community|enterprise
+DB_CRON_TARGET=enterprise
+
+# The name of the Odoo database to query.  This is not the PostgreSQL "postgres"
+# maintenance database.  Find it in Odoo's database manager or pgAdmin.
+DB_CRON_DATABASE=replace_with_your_odoo_database_name
+
+# Optional: Docker engine socket and PostgreSQL container name. Leave both
+# commented out for the Docker engine selected by your current shell.
+# DB_CRON_DOCKER_HOST=unix:///var/run/docker.sock
+# DB_CRON_CONTAINER=odoo19-dual-db-enterprise-1

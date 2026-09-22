@@ -1,0 +1,6 @@
+-- Copy this file to cron/database-query.sql, then paste the PostgreSQL query
+-- or script that should run on schedule.
+--
+-- The runner stops as soon as PostgreSQL reports an error. Keep the query
+-- read-only when testing the runner.
+SELECT now() AS checked_at;

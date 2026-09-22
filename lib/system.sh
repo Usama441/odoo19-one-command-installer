@@ -247,6 +247,68 @@ resolve_install_docker_endpoint() {
   INSTALL_DOCKER_ENDPOINT="$endpoint"
 }
 
+select_ubuntu_docker_runtime() {
+  local desktop_available="false"
+
+  if command -v docker >/dev/null 2>&1 &&
+     docker context inspect desktop-linux >/dev/null 2>&1; then
+    desktop_available="true"
+  elif command -v docker-desktop >/dev/null 2>&1 ||
+       command -v com.docker.cli >/dev/null 2>&1 ||
+       dpkg-query -W -f='${Status}' docker-desktop 2>/dev/null | grep -q 'ok installed'; then
+    desktop_available="true"
+  fi
+
+  echo
+  echo "Docker runtime for this Ubuntu deployment"
+  echo "  1) Native Docker Engine (supported and recommended)"
+  echo "  2) Docker Desktop (skip native installation and exit)"
+  if [[ "$desktop_available" == "true" ]]; then
+    echo "Docker Desktop was detected. Its containers and volumes are separate from native Docker Engine."
+  fi
+  echo "This Ubuntu installer deploys Odoo only with Native Docker Engine."
+  read_choice DOCKER_RUNTIME_CHOICE "Choose a runtime [1]: " "1" "1 2 native desktop"
+
+  case "${DOCKER_RUNTIME_CHOICE,,}" in
+    1|native)
+      INSTALLER_DOCKER_RUNTIME="native"
+      ;;
+    2|desktop)
+      echo "Docker Desktop was selected. Native Docker Engine will not be installed or used."
+      echo "This Ubuntu installer cannot continue with Docker Desktop because it requires native host bind mounts."
+      echo "Use Docker Desktop separately, or rerun this installer and select Native Docker Engine."
+      exit 0
+      ;;
+  esac
+}
+
+activate_native_docker_context() {
+  local endpoint
+
+  if ! command -v docker >/dev/null 2>&1; then
+    echo "Docker CLI is unavailable; Native Docker Engine cannot be selected."
+    return 1
+  fi
+
+  endpoint="$(env -u DOCKER_HOST -u DOCKER_CONTEXT docker context inspect default --format '{{.Endpoints.docker.Host}}' 2>/dev/null || true)"
+  if [[ "$endpoint" != unix:///var/run/docker.sock ]]; then
+    echo "The default Docker context does not point to the local Native Docker Engine."
+    echo "Expected unix:///var/run/docker.sock, got ${endpoint:-an unavailable endpoint}."
+    return 1
+  fi
+
+  if ! env -u DOCKER_HOST -u DOCKER_CONTEXT docker context use default >/dev/null; then
+    echo "Could not make the Native Docker Engine the default Docker context."
+    return 1
+  fi
+
+  INSTALL_DOCKER_ENDPOINT="$endpoint"
+  echo "Native Docker Engine is now the default Docker context."
+  if [[ -n "${DOCKER_HOST:-}" || -n "${DOCKER_CONTEXT:-}" ]]; then
+    echo "This shell has a Docker endpoint override; the installer will still pin native Docker directly."
+  fi
+}
+
 verify_install_docker_engine() {
   local identity
   identity="$("${DOCKER[@]}" info --format '{{.OSType}}|{{.OperatingSystem}}|{{.Name}}')" || return 1

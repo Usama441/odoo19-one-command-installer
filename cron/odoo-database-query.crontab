@@ -1,0 +1,4 @@
+# Install into your user's crontab after replacing __PROJECT_DIR__ with this
+# repository's absolute path. Runs on the 25th of every month at 12:00 AM and
+# appends output to a log.
+0 0 25 * * __PROJECT_DIR__/cron/run-database-query.sh >> __PROJECT_DIR__/logs/database-query.log 2>&1

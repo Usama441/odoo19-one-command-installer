@@ -26,10 +26,11 @@ without exposing PostgreSQL ports to the host network.
   Pop!_OS, with a normal sudo-enabled user; or Windows 10/11 with PowerShell.
   Releases newer than 26.04 run with a note that they are untested.
 - An internet connection for installing Docker when needed and pulling images.
-- The Ubuntu installer requires native Linux Docker Engine on the same host,
-  accessed through a Unix socket. Docker Desktop and remote/TCP Docker endpoints
-  are rejected for both testing and production profiles. The Windows installer
-  continues to use Docker Desktop.
+- The Ubuntu installer asks which Docker runtime to use before installing
+  dependencies. It supports Native Linux Docker Engine on the same host and
+  makes its `default` context active. Selecting Docker Desktop skips native
+  installation and exits cleanly, because Docker Desktop is not supported for
+  this Ubuntu deployment. The Windows installer continues to use Docker Desktop.
 - A valid Odoo Enterprise subscription and a local copy of the Odoo 19
   Enterprise addons if Enterprise will be used.
 - Enough free disk space for Docker images, databases, filestores, and backups.
@@ -62,7 +63,7 @@ numbered menu instead.
 ```text
 ============================================================
              ODOO 19 DEPLOYMENT CONTROL CENTER
-                    Installer v1.0.0
+                    Installer v1.1.0
      Community • Enterprise • PostgreSQL • pgAdmin
                   Script by TI ASSOCIATES
               Developed by USAMA ARSHAD
@@ -192,9 +193,12 @@ If Docker has already been removed outside the installer, Option 6 still scans
 for leftover generated configuration and `/opt` addon copies and can delete them
 with the confirmation `DELETE LOCAL ODOO FILES`.
 
-If Docker is missing, the script installs Docker Engine and the Compose plugin
-from Docker's official Ubuntu repository after receiving user approval. Before
-the Odoo questions, it can update the APT package lists and upgrade currently
+Before installing Docker dependencies, the Ubuntu script asks the user to
+choose a runtime. Selecting Native Docker Engine installs any missing Engine and
+Compose packages from Docker's official Ubuntu repository after approval and
+makes the `default` native context active. Selecting Docker Desktop skips native
+installation and exits; it does not remove an existing Docker Desktop install.
+The installer can then update the APT package lists and upgrade currently
 installed Ubuntu packages, then displays which prerequisites are installed or
 missing. Missing items can be installed in bulk, approved one by one, or left
 unchanged by cancelling. This package upgrade does not perform a major Ubuntu
@@ -588,13 +592,14 @@ test database and filestore restoration.
 
 - **Docker engine is not ready:** On Ubuntu, start the native Docker Engine;
   on Windows, start Docker Desktop. Then rerun the installer.
-- **Ubuntu rejects Docker Desktop or a remote endpoint:** Review `docker context ls`
-  and any `DOCKER_HOST`/`DOCKER_CONTEXT` overrides. Select the intended local native
-  Engine context explicitly (commonly `docker context use default`, after clearing
-  overrides). The installer never switches contexts automatically. Each daemon has
-  separate containers and volumes; switching does not migrate existing databases.
-  The installer also checks addon bind mounts after pulling images and before
-  starting Odoo services, reporting mount/read errors directly.
+- **Docker Desktop or a remote endpoint is selected on Ubuntu:** Select Native
+  Docker Engine when prompted. The installer switches the saved Docker context to
+  `default` and pins its commands to the local native socket. `DOCKER_HOST` and
+  `DOCKER_CONTEXT` environment overrides still take precedence in a new shell and
+  should be cleared. Each daemon has separate containers and volumes; switching
+  does not migrate existing databases. The installer also checks addon bind mounts
+  after pulling images and before starting Odoo services, reporting mount/read
+  errors directly.
 - **A service does not become healthy within five minutes:** Run
   `docker compose --profile pgadmin ps` and inspect the relevant log command
   shown above.

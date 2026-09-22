@@ -21,6 +21,8 @@ step_prepare_prerequisites() {
     echo "Skipping the optional Ubuntu package upgrade."
   fi
 
+  select_ubuntu_docker_runtime
+
   refresh_prerequisite_status
   show_prerequisite_status
 
@@ -147,7 +149,7 @@ step_prepare_prerequisites() {
     exit 1
   fi
 
-  resolve_install_docker_endpoint || exit 1
+  activate_native_docker_context || exit 1
 
   if systemctl cat docker.service >/dev/null 2>&1; then
     echo "Enabling Docker to start automatically at boot..."

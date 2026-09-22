@@ -8,6 +8,8 @@ docs/images/*
 !docs/images/ubuntu-terminal-dashboard.png
 /.agents/
 /.codex/
+cron/database-query.conf
+cron/database-query.sql
 __pycache__/
 *.py[cod]
 config/*/odoo.conf

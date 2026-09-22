@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-INSTALLER_VERSION="1.0.0"
+INSTALLER_VERSION="1.1.0"
 ODOO_HOST_ROOT="/opt/odoo/odoo19"
 ODOO_HOST_ENTERPRISE_DIR="$ODOO_HOST_ROOT/enterprise"
 ODOO_HOST_CUSTOM_ROOT="$ODOO_HOST_ROOT/custom_addons"
