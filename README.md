@@ -171,8 +171,14 @@ outside its deletion inventory.
 After complete-stack removal, the wizard separately asks whether Docker and
 dependencies installed by this installer should also be removed. First it scans
 for containers, volumes, and custom networks outside the `odoo19-dual` project.
-If another Docker workload is found, Docker Engine removal is blocked so another
-application is not broken. The private, Git-ignored `.installer-state` file
+If another Docker workload is found, it is listed and the wizard offers to delete
+those containers, volumes, networks, and all unused images (typed confirmation
+`DELETE OTHER DOCKER DATA`). Keeping them (the default) blocks Docker Engine
+removal so the other application is not broken. When Docker Engine is purged,
+`/var/lib/docker`, `/var/lib/containerd`, and orphaned helper packages are also
+removed. Complete-stack removal additionally deletes the Odoo, PostgreSQL, and
+pgAdmin images, the scheduled database query crontab entry, and its local
+`cron/database-query.conf`, `cron/database-query.sql`, and log file. The private, Git-ignored `.installer-state` file
 records packages, Docker repository files, and Docker-group access created by
 the installer. Recorded cleanup requires `REMOVE DEPENDENCIES`.
 

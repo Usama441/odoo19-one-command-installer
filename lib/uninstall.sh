@@ -48,6 +48,112 @@ discover_foreign_docker_resources() {
   )
 }
 
+remove_foreign_docker_resources() {
+  local foreign_choice confirmation resource kind name removal_failed="false"
+
+  echo
+  printf '%b\n' "${COLOR_YELLOW}These resources do not belong to this Odoo installer. Deleting them permanently destroys their data.${COLOR_RESET}"
+  echo "  1) Delete these non-Odoo containers, volumes, networks, and all unused images, then continue Docker removal"
+  echo "  2) Keep them and keep Docker Engine installed"
+  read_choice foreign_choice "Choose an option [2]: " "2" "1 2 delete keep"
+  case "$foreign_choice" in
+    1|delete) ;;
+    *) return 1 ;;
+  esac
+  read -r -p "Type DELETE OTHER DOCKER DATA to confirm: " confirmation
+  if [[ "$confirmation" != "DELETE OTHER DOCKER DATA" ]]; then
+    echo "Non-Odoo Docker resources were preserved."
+    return 1
+  fi
+
+  # Containers first so their volumes and networks are no longer in use.
+  for kind in container volume network; do
+    for resource in "${UNINSTALL_FOREIGN_DOCKER_RESOURCES[@]}"; do
+      [[ "${resource%%: *}" == "$kind" ]] || continue
+      name="${resource#*: }"
+      case "$kind" in
+        container) set -- rm -f -v "$name" ;;
+        volume) set -- volume rm -f "$name" ;;
+        network) set -- network rm "$name" ;;
+      esac
+      if "${UNINSTALL_DOCKER_COMMAND[@]}" "$@" >/dev/null; then
+        printf '  removed %s\n' "$resource"
+      else
+        removal_failed="true"
+      fi
+    done
+  done
+  "${UNINSTALL_DOCKER_COMMAND[@]}" image prune -af >/dev/null 2>&1 || true
+  "${UNINSTALL_DOCKER_COMMAND[@]}" builder prune -af >/dev/null 2>&1 || true
+
+  discover_foreign_docker_resources
+  if (( ${#UNINSTALL_FOREIGN_DOCKER_RESOURCES[@]} > 0 )); then
+    echo "The following non-Odoo Docker resources still exist:"
+    printf '  - %s\n' "${UNINSTALL_FOREIGN_DOCKER_RESOURCES[@]}"
+    return 1
+  fi
+  [[ "$removal_failed" == "false" ]] || echo "Some removals reported errors, but the final scan found no remaining resources."
+  printf '%b\n' "${COLOR_GREEN}Non-Odoo Docker resources were removed.${COLOR_RESET}"
+}
+
+discover_odoo_images() {
+  local key default_image env_image image
+  local env_file="$SCRIPT_DIR/.env"
+
+  UNINSTALL_TARGET_IMAGES=()
+  for key in ODOO_IMAGE POSTGRES_IMAGE PGADMIN_IMAGE; do
+    case "$key" in
+      ODOO_IMAGE) default_image="odoo:19.0-20260908" ;;
+      POSTGRES_IMAGE) default_image="postgres:15.19" ;;
+      PGADMIN_IMAGE) default_image="dpage/pgadmin4:9.17" ;;
+    esac
+    env_image=""
+    if [[ -f "$env_file" ]]; then
+      env_image="$(awk -v key="$key" 'index($0, key "=") == 1 { value = substr($0, length(key) + 2); sub(/\r$/, "", value); print value; exit }' "$env_file")"
+    fi
+    for image in "$env_image" "$default_image"; do
+      [[ -n "$image" ]] || continue
+      uninstall_list_contains "$image" "${UNINSTALL_TARGET_IMAGES[@]}" && continue
+      if "${UNINSTALL_DOCKER_COMMAND[@]}" image inspect "$image" >/dev/null 2>&1; then
+        UNINSTALL_TARGET_IMAGES+=("$image")
+      fi
+    done
+  done
+}
+
+remove_odoo_images() {
+  local image
+
+  for image in "${UNINSTALL_TARGET_IMAGES[@]}"; do
+    # No -f: an image still used by another container is kept.
+    if ! "${UNINSTALL_DOCKER_COMMAND[@]}" image rm "$image" >/dev/null 2>&1; then
+      printf 'Kept image %s because it is still in use.\n' "$image"
+    fi
+  done
+}
+
+odoo_cron_runner_path() {
+  printf '%s\n' "$SCRIPT_DIR/cron/run-database-query.sh"
+}
+
+odoo_cron_entries_present() {
+  command -v crontab >/dev/null 2>&1 || return 1
+  crontab -l 2>/dev/null | grep -Fq "$(odoo_cron_runner_path)"
+}
+
+remove_odoo_cron_entries() {
+  local runner current
+
+  odoo_cron_entries_present || return 0
+  runner="$(odoo_cron_runner_path)"
+  current="$(crontab -l 2>/dev/null)"
+  if { grep -Fv "$runner" <<< "$current" || true; } | crontab -; then
+    echo "Removed the scheduled database query from the user crontab."
+  else
+    echo "Failed to update the user crontab; remove the database query entry manually."
+  fi
+}
+
 verify_installed_source_targets() {
   local source_path resolved_path
 
@@ -207,6 +313,23 @@ audit_uninstall_targets() {
       printf '  [FOUND] tracked Docker group access for %s\n' "$INSTALLER_DOCKER_GROUP_USER"
     fi
 
+    discover_odoo_images
+    echo
+    echo "Odoo stack Docker images:"
+    if (( ${#UNINSTALL_TARGET_IMAGES[@]} > 0 )); then
+      printf '  [FOUND] %s\n' "${UNINSTALL_TARGET_IMAGES[@]}"
+    else
+      echo "  [NONE]"
+    fi
+
+    echo
+    echo "Scheduled database query (user crontab):"
+    if odoo_cron_entries_present; then
+      printf '  [FOUND] entry running %s\n' "$(odoo_cron_runner_path)"
+    else
+      echo "  [NONE]"
+    fi
+
     discover_foreign_docker_resources
     echo
     echo "Docker resources outside this Odoo installer:"
@@ -214,7 +337,7 @@ audit_uninstall_targets() {
       for foreign_resource in "${UNINSTALL_FOREIGN_DOCKER_RESOURCES[@]}"; do
         printf '  [KEEP]  %s\n' "$foreign_resource"
       done
-      echo "  Docker Engine removal will be blocked to protect these resources."
+      echo "  If Docker removal is chosen, you will be asked whether to delete these first."
     else
       echo "  [NONE]  no non-Odoo containers, volumes, or custom networks were found"
     fi
@@ -331,14 +454,17 @@ remove_installer_managed_dependencies() {
           "$INSTALLER_CREATED_DOCKER_KEY" == "true" ||
           -n "$INSTALLER_DOCKER_GROUP_USER" ]]; }; then
     echo
-    echo "Docker Engine will NOT be removed because non-Odoo Docker resources were found:"
+    echo "Docker Engine removal would also destroy these non-Odoo Docker resources:"
     for package in "${UNINSTALL_FOREIGN_DOCKER_RESOURCES[@]}"; do
       printf '  - %s\n' "$package"
     done
-    echo "Remove or migrate those workloads first, then rerun complete uninstall."
-    echo "No Docker packages, repository files, or group access were changed."
-    return 0
-  elif [[ "$has_tracked_state" == "false" ]]; then
+    if ! remove_foreign_docker_resources; then
+      echo "Docker Engine will NOT be removed. Remove or migrate those workloads, then rerun complete uninstall."
+      echo "No Docker packages, repository files, or group access were changed."
+      return 0
+    fi
+  fi
+  if [[ "$has_tracked_state" == "false" ]]; then
     echo "Ownership cannot be proven, but no non-Odoo Docker resources were detected."
     read -r -p "Type REMOVE DETECTED DOCKER to remove the listed Docker components: " confirmation
     if [[ "$confirmation" == "REMOVE DETECTED DOCKER" ]]; then
@@ -394,6 +520,12 @@ remove_installer_managed_dependencies() {
   fi
   if (( ${#installed_packages[@]} > 0 )); then
     sudo env DEBIAN_FRONTEND=noninteractive apt-get purge -y "${installed_packages[@]}"
+    # Purge keeps Docker's data directories and pulled-in helper packages.
+    # The foreign-resource check above guarantees nothing else lives there.
+    if uninstall_list_contains docker-ce "${installed_packages[@]}"; then
+      sudo env DEBIAN_FRONTEND=noninteractive apt-get autoremove --purge -y
+      sudo rm -rf /var/lib/docker /var/lib/containerd
+    fi
   fi
   if [[ "$INSTALLER_CREATED_DOCKER_SOURCE" == "true" ]]; then
     sudo rm -f /etc/apt/sources.list.d/docker.list
@@ -767,6 +899,9 @@ run_uninstaller() {
         "$SCRIPT_DIR/config/enterprise/odoo.conf"
         "$SCRIPT_DIR/config/pgadmin/servers.json"
         "$SCRIPT_DIR/config/pgadmin/pgpass"
+        "$SCRIPT_DIR/cron/database-query.conf"
+        "$SCRIPT_DIR/cron/database-query.sql"
+        "$SCRIPT_DIR/logs/database-query.log"
       )
       UNINSTALL_SCOPE_NAME="complete installer stack"
       confirmation_text="DELETE ALL"
@@ -854,6 +989,8 @@ run_uninstaller() {
       echo "Uninstall stopped. Generated files were preserved because network removal was incomplete."
       return 1
     fi
+    remove_odoo_cron_entries
+    remove_odoo_images
   fi
   if [[ "$data_choice" == "delete" ]]; then
     if ! remove_verified_uninstall_volumes; then
@@ -864,6 +1001,7 @@ run_uninstaller() {
       echo "Uninstall stopped because generated-file cleanup was incomplete."
       return 1
     fi
+    rmdir "$SCRIPT_DIR/logs" 2>/dev/null || true
   fi
   if [[ "$remove_installed_sources" == "true" ]]; then
     remove_verified_installed_sources
