@@ -62,6 +62,12 @@ $odooImagesByVersion = @{
     "19.0" = "odoo:19.0-20260908"
     "20.0" = "odoo:20.0-20260926"
 }
+# Odoo 20 requires PostgreSQL 16 or newer (it uses any_value()).
+$postgresImagesByVersion = @{
+    "19.0" = "postgres:15.19"
+    "20.0" = "postgres:17.6"
+}
+$minPostgresMajorByVersion = @{ "19.0" = 13; "20.0" = 16 }
 
 # The version an existing .env was installed with. Files written before
 # ODOO_VERSION was recorded fall back to the image tag, then to 19.0.
@@ -436,7 +442,7 @@ function Get-ConfigValue([string]$path, [string]$key) {
 }
 
 $odooImage = $odooImagesByVersion[$odooVersion]
-$postgresImage = "postgres:15.19"
+$postgresImage = $postgresImagesByVersion[$odooVersion]
 $pgAdminImage = "dpage/pgadmin4:9.17"
 $pgAdminEnabled = $false
 $pgAdminPort = "5050"
@@ -458,7 +464,22 @@ if (Test-Path -LiteralPath ".env" -PathType Leaf) {
     $savedPostgresImage = Get-EnvValue "POSTGRES_IMAGE"
     # A saved image only applies to the version it was installed with.
     if ((-not [string]::IsNullOrWhiteSpace($savedOdooImage)) -and (-not $odooVersionChanged)) { $odooImage = $savedOdooImage }
-    if (-not [string]::IsNullOrWhiteSpace($savedPostgresImage)) { $postgresImage = $savedPostgresImage }
+    # A saved PostgreSQL image is kept only when it is new enough for the
+    # selected Odoo version; existing volumes cannot move to a newer major.
+    if (-not [string]::IsNullOrWhiteSpace($savedPostgresImage)) {
+        if (($savedPostgresImage -match ':(\d+)') -and ([int]$Matches[1] -lt $minPostgresMajorByVersion[$odooVersion])) {
+            $savedPostgresMajor = $Matches[1]
+            if ($communityDbVolumeExists -or $enterpriseDbVolumeExists) {
+                Write-Warning "Odoo $odooVersion needs PostgreSQL $($minPostgresMajorByVersion[$odooVersion]) or newer, but this installation uses $savedPostgresImage."
+                Write-Host "The existing database volumes were created by PostgreSQL $savedPostgresMajor and cannot be opened by a newer major version."
+                Write-Host "Back up any databases you need, remove the odoo19-dual database volumes, then run the installer again."
+                exit 1
+            }
+            Write-Host "Upgrading PostgreSQL from $savedPostgresImage to $postgresImage for Odoo $odooVersion (no databases exist yet)."
+        } else {
+            $postgresImage = $savedPostgresImage
+        }
+    }
     $savedPgAdminImage = Get-EnvValue "PGADMIN_IMAGE"
     $savedPgAdminEnabled = Get-EnvValue "PGADMIN_ENABLED"
     $savedPgAdminPort = Get-EnvValue "PGADMIN_PORT"
@@ -606,6 +627,7 @@ db_user = odoo
 db_password = $dbPassword
 addons_path = $addonsPath
 data_dir = /var/lib/odoo
+http_interface = 0.0.0.0
 list_db = True
 proxy_mode = False
 workers = $workers

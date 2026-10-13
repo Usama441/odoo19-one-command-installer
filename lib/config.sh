@@ -73,10 +73,35 @@ odoo_image_for_version() {
   esac
 }
 
+# Pinned PostgreSQL image for each Odoo release. Odoo 20 requires
+# PostgreSQL 16 or newer (it uses any_value()); Odoo 19 stays on 15.
+postgres_image_for_version() {
+  case "$1" in
+    19.0) echo "postgres:15.19" ;;
+    20.0) echo "postgres:17.6" ;;
+    *) return 1 ;;
+  esac
+}
+
+# Oldest PostgreSQL major version each Odoo release can run on.
+min_postgres_major_for_version() {
+  case "$1" in
+    20.0) echo 16 ;;
+    *) echo 13 ;;
+  esac
+}
+
+# Major version from a postgres image tag such as postgres:15.19; empty when
+# the tag does not start with a number.
+postgres_image_major() {
+  [[ "$1" =~ :([0-9]+) ]] && echo "${BASH_REMATCH[1]}"
+}
+
 set_odoo_version() {
   ODOO_VERSION="$1"
   ODOO_MAJOR_VERSION="${ODOO_VERSION%%.*}"
   DEFAULT_ODOO_IMAGE="$(odoo_image_for_version "$ODOO_VERSION")"
+  DEFAULT_POSTGRES_IMAGE="$(postgres_image_for_version "$ODOO_VERSION")"
   ODOO_HOST_ROOT="/opt/odoo/odoo$ODOO_MAJOR_VERSION"
   ODOO_HOST_ENTERPRISE_DIR="$ODOO_HOST_ROOT/enterprise"
   ODOO_HOST_CUSTOM_ROOT="$ODOO_HOST_ROOT/custom_addons"
@@ -143,6 +168,30 @@ verify_odoo_version_change() {
     exit 1
   fi
   echo "Switching the existing configuration from Odoo $installed_version to Odoo $ODOO_VERSION (no databases exist yet)."
+}
+
+# Keeps a saved PostgreSQL image only when it is new enough for the selected
+# Odoo version. Existing database volumes cannot simply move to a newer
+# PostgreSQL major version, so an outdated image with data present stops here.
+verify_saved_postgres_image() {
+  local saved_major min_major
+  min_major="$(min_postgres_major_for_version "$ODOO_VERSION")"
+  if [[ -z "$POSTGRES_IMAGE" ]]; then
+    POSTGRES_IMAGE="$DEFAULT_POSTGRES_IMAGE"
+    return
+  fi
+  saved_major="$(postgres_image_major "$POSTGRES_IMAGE")"
+  if [[ -z "$saved_major" ]] || (( saved_major >= min_major )); then return; fi
+  if [[ "$COMMUNITY_DB_VOLUME_EXISTS" == "true" || "$ENTERPRISE_DB_VOLUME_EXISTS" == "true" ]]; then
+    echo
+    printf '%b\n' "${COLOR_YELLOW}Odoo $ODOO_VERSION needs PostgreSQL $min_major or newer, but this installation uses $POSTGRES_IMAGE.${COLOR_RESET}"
+    echo "The existing database volumes were created by PostgreSQL $saved_major and cannot be opened by a newer major version."
+    echo "Back up any databases you need (menu option 5), uninstall with database deletion (option 6),"
+    echo "then run the installer again; it will use $DEFAULT_POSTGRES_IMAGE."
+    exit 1
+  fi
+  echo "Upgrading PostgreSQL from $POSTGRES_IMAGE to $DEFAULT_POSTGRES_IMAGE for Odoo $ODOO_VERSION (no databases exist yet)."
+  POSTGRES_IMAGE="$DEFAULT_POSTGRES_IMAGE"
 }
 
 # Bundled licensed Enterprise source for the selected version, checked in
@@ -576,6 +625,9 @@ get_config_value() {
   ' "$path"
 }
 
+# http_interface = 0.0.0.0 is required inside the container: Odoo 20 defaults
+# to 127.0.0.1, which Docker's port publishing cannot reach. Host exposure is
+# still limited by BIND_ADDRESS in compose.yaml.
 write_config() {
   local target="$1" db_host="$2" db_password="$3" admin_password="$4" addons_path="$5"
   local workers="$6" cron_threads="$7" memory_soft="$8" memory_hard="$9"
@@ -588,6 +640,7 @@ db_user = odoo
 db_password = $db_password
 addons_path = $addons_path
 data_dir = /var/lib/odoo
+http_interface = 0.0.0.0
 list_db = True
 proxy_mode = False
 workers = $workers

@@ -64,7 +64,7 @@ numbered menu instead.
 ```text
 ============================================================
                ODOO DEPLOYMENT CONTROL CENTER
-                    Installer v1.2.0
+                    Installer v1.3.0
      Community • Enterprise • PostgreSQL • pgAdmin
                   Script by TI ASSOCIATES
               Developed by USAMA ARSHAD
@@ -592,7 +592,10 @@ different software:
 
 - Odoo 19: `odoo:19.0-20260908`
 - Odoo 20: `odoo:20.0-20260926`
-- PostgreSQL: `postgres:15.19`
+- PostgreSQL for Odoo 19: `postgres:15.19`
+- PostgreSQL for Odoo 20: `postgres:17.6` (Odoo 20 requires PostgreSQL 16 or
+  newer; an installation still on an older PostgreSQL with existing databases
+  is stopped with instructions instead of starting a broken stack)
 - pgAdmin: `dpage/pgadmin4:9.17`
 
 Before upgrading, back up both PostgreSQL databases and both Odoo filestores,
@@ -638,6 +641,16 @@ test database and filestore restoration.
   unique port.
 - **`.env` is missing but Docker volumes remain:** Restore `.env` from the same
   installation backup. Do not invent replacement database passwords.
+- **Odoo containers are healthy but the port refuses connections:** Odoo 20
+  listens only on `127.0.0.1` inside its container unless told otherwise.
+  Installer v1.3.0 writes `http_interface = 0.0.0.0` into each generated
+  `odoo.conf`; for an older installation add that line under `data_dir` in
+  `config/community/odoo.conf` and `config/enterprise/odoo.conf`, then restart
+  the Odoo containers. Host exposure is still limited by `BIND_ADDRESS`.
+- **`Could not create database` with `function any_value(integer) does not
+  exist`:** Odoo 20 is running on PostgreSQL 15. Odoo 20 needs PostgreSQL 16 or
+  newer. Back up any databases you need, remove the `odoo19-dual` database
+  volumes, and rerun installer v1.3.0, which uses `postgres:17.6` for Odoo 20.
 - **Enterprise does not start:** Confirm
   `/opt/odoo/odoo<major>/enterprise/web_enterprise/__manifest__.py` exists
   (for example `/opt/odoo/odoo20/enterprise` for Odoo 20) and the directory is

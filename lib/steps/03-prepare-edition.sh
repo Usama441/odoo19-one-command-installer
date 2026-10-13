@@ -52,7 +52,7 @@ step_prepare_edition() {
   fi
 
   ODOO_IMAGE="$DEFAULT_ODOO_IMAGE"
-  POSTGRES_IMAGE="postgres:15.19"
+  POSTGRES_IMAGE="$DEFAULT_POSTGRES_IMAGE"
   PGADMIN_IMAGE="dpage/pgadmin4:9.17"
   PGADMIN_ENABLED="false"
   PGADMIN_PORT="5050"
@@ -86,7 +86,7 @@ step_prepare_edition() {
     if [[ -z "$ODOO_IMAGE" || "$(detect_installed_odoo_version)" != "$ODOO_VERSION" ]]; then
       ODOO_IMAGE="$DEFAULT_ODOO_IMAGE"
     fi
-    POSTGRES_IMAGE="${POSTGRES_IMAGE:-postgres:15.19}"
+    verify_saved_postgres_image
     SAVED_PGADMIN_IMAGE="$(get_env_value PGADMIN_IMAGE)"
     SAVED_PGADMIN_ENABLED="$(get_env_value PGADMIN_ENABLED)"
     SAVED_PGADMIN_PORT="$(get_env_value PGADMIN_PORT)"

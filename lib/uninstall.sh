@@ -110,7 +110,12 @@ discover_odoo_images() {
           default_images+=("$(odoo_image_for_version "$version")")
         done
         ;;
-      POSTGRES_IMAGE) default_images=("postgres:15.19") ;;
+      POSTGRES_IMAGE)
+        default_images=()
+        for version in "${SUPPORTED_ODOO_VERSIONS[@]}"; do
+          default_images+=("$(postgres_image_for_version "$version")")
+        done
+        ;;
       PGADMIN_IMAGE) default_images=("dpage/pgadmin4:9.17") ;;
     esac
     env_image=""
