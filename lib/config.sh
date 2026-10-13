@@ -73,12 +73,14 @@ odoo_image_for_version() {
   esac
 }
 
-# Pinned PostgreSQL image for each Odoo release. Odoo 20 requires
-# PostgreSQL 16 or newer (it uses any_value()); Odoo 19 stays on 15.
+# Pinned PostgreSQL image for each Odoo release. The pgvector images are the
+# official PostgreSQL server plus the `vector` extension that Odoo's AI apps
+# need for RAG. Odoo 20 requires PostgreSQL 16 or newer (it uses
+# any_value()); Odoo 19 stays on 15.
 postgres_image_for_version() {
   case "$1" in
-    19.0) echo "postgres:15.19" ;;
-    20.0) echo "postgres:17.6" ;;
+    19.0) echo "pgvector/pgvector:0.8.7-pg15" ;;
+    20.0) echo "pgvector/pgvector:0.8.7-pg17" ;;
     *) return 1 ;;
   esac
 }
@@ -91,10 +93,14 @@ min_postgres_major_for_version() {
   esac
 }
 
-# Major version from a postgres image tag such as postgres:15.19; empty when
-# the tag does not start with a number.
+# PostgreSQL major version from an image tag such as postgres:15.19 or
+# pgvector/pgvector:0.8.7-pg17; empty when the tag does not say.
 postgres_image_major() {
-  [[ "$1" =~ :([0-9]+) ]] && echo "${BASH_REMATCH[1]}"
+  if [[ "$1" =~ -pg([0-9]+) ]]; then
+    echo "${BASH_REMATCH[1]}"
+  elif [[ "$1" =~ ^postgres:([0-9]+) ]]; then
+    echo "${BASH_REMATCH[1]}"
+  fi
 }
 
 set_odoo_version() {
@@ -181,6 +187,15 @@ verify_saved_postgres_image() {
     return
   fi
   saved_major="$(postgres_image_major "$POSTGRES_IMAGE")"
+  # Same major version: the pinned image reads the existing data unchanged
+  # and adds pgvector, so switch to it.
+  if [[ -n "$saved_major" && "$saved_major" == "$(postgres_image_major "$DEFAULT_POSTGRES_IMAGE")" ]]; then
+    if [[ "$POSTGRES_IMAGE" != "$DEFAULT_POSTGRES_IMAGE" ]]; then
+      echo "Switching PostgreSQL from $POSTGRES_IMAGE to $DEFAULT_POSTGRES_IMAGE (same PostgreSQL $saved_major data, adds the pgvector extension)."
+      POSTGRES_IMAGE="$DEFAULT_POSTGRES_IMAGE"
+    fi
+    return
+  fi
   if [[ -z "$saved_major" ]] || (( saved_major >= min_major )); then return; fi
   if [[ "$COMMUNITY_DB_VOLUME_EXISTS" == "true" || "$ENTERPRISE_DB_VOLUME_EXISTS" == "true" ]]; then
     echo

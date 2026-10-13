@@ -62,10 +62,16 @@ $odooImagesByVersion = @{
     "19.0" = "odoo:19.0-20260908"
     "20.0" = "odoo:20.0-20260926"
 }
+# PostgreSQL plus the pgvector extension that Odoo's AI apps need for RAG.
 # Odoo 20 requires PostgreSQL 16 or newer (it uses any_value()).
 $postgresImagesByVersion = @{
-    "19.0" = "postgres:15.19"
-    "20.0" = "postgres:17.6"
+    "19.0" = "pgvector/pgvector:0.8.7-pg15"
+    "20.0" = "pgvector/pgvector:0.8.7-pg17"
+}
+function Get-PostgresImageMajor([string]$Image) {
+    if ($Image -match '-pg(\d+)') { return [int]$Matches[1] }
+    if ($Image -match '^postgres:(\d+)') { return [int]$Matches[1] }
+    return $null
 }
 $minPostgresMajorByVersion = @{ "19.0" = 13; "20.0" = 16 }
 
@@ -467,8 +473,14 @@ if (Test-Path -LiteralPath ".env" -PathType Leaf) {
     # A saved PostgreSQL image is kept only when it is new enough for the
     # selected Odoo version; existing volumes cannot move to a newer major.
     if (-not [string]::IsNullOrWhiteSpace($savedPostgresImage)) {
-        if (($savedPostgresImage -match ':(\d+)') -and ([int]$Matches[1] -lt $minPostgresMajorByVersion[$odooVersion])) {
-            $savedPostgresMajor = $Matches[1]
+        $savedPostgresMajor = Get-PostgresImageMajor $savedPostgresImage
+        if (($null -ne $savedPostgresMajor) -and ($savedPostgresMajor -eq (Get-PostgresImageMajor $postgresImage))) {
+            # Same major version: the pinned image reads the existing data
+            # unchanged and adds pgvector.
+            if ($savedPostgresImage -ne $postgresImage) {
+                Write-Host "Switching PostgreSQL from $savedPostgresImage to $postgresImage (same PostgreSQL $savedPostgresMajor data, adds the pgvector extension)."
+            }
+        } elseif (($null -ne $savedPostgresMajor) -and ($savedPostgresMajor -lt $minPostgresMajorByVersion[$odooVersion])) {
             if ($communityDbVolumeExists -or $enterpriseDbVolumeExists) {
                 Write-Warning "Odoo $odooVersion needs PostgreSQL $($minPostgresMajorByVersion[$odooVersion]) or newer, but this installation uses $savedPostgresImage."
                 Write-Host "The existing database volumes were created by PostgreSQL $savedPostgresMajor and cannot be opened by a newer major version."

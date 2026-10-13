@@ -64,7 +64,7 @@ numbered menu instead.
 ```text
 ============================================================
                ODOO DEPLOYMENT CONTROL CENTER
-                    Installer v1.3.0
+                    Installer v1.3.1
      Community • Enterprise • PostgreSQL • pgAdmin
                   Script by TI ASSOCIATES
               Developed by USAMA ARSHAD
@@ -592,10 +592,17 @@ different software:
 
 - Odoo 19: `odoo:19.0-20260908`
 - Odoo 20: `odoo:20.0-20260926`
-- PostgreSQL for Odoo 19: `postgres:15.19`
-- PostgreSQL for Odoo 20: `postgres:17.6` (Odoo 20 requires PostgreSQL 16 or
-  newer; an installation still on an older PostgreSQL with existing databases
-  is stopped with instructions instead of starting a broken stack)
+- PostgreSQL for Odoo 19: `pgvector/pgvector:0.8.7-pg15`
+- PostgreSQL for Odoo 20: `pgvector/pgvector:0.8.7-pg17` (Odoo 20 requires
+  PostgreSQL 16 or newer; an installation still on an older PostgreSQL with
+  existing databases is stopped with instructions instead of starting a broken
+  stack)
+
+The PostgreSQL images are the official `pgvector/pgvector` builds: the standard
+PostgreSQL server plus the `vector` extension that Odoo's AI apps need for RAG.
+On a rerun, an existing `postgres:<major>` image is switched to the pgvector
+image of the same major version automatically, which reads the existing data
+without migration.
 - pgAdmin: `dpage/pgadmin4:9.17`
 
 Before upgrading, back up both PostgreSQL databases and both Odoo filestores,
@@ -643,14 +650,18 @@ test database and filestore restoration.
   installation backup. Do not invent replacement database passwords.
 - **Odoo containers are healthy but the port refuses connections:** Odoo 20
   listens only on `127.0.0.1` inside its container unless told otherwise.
-  Installer v1.3.0 writes `http_interface = 0.0.0.0` into each generated
+  Installer v1.3.0 and newer write `http_interface = 0.0.0.0` into each generated
   `odoo.conf`; for an older installation add that line under `data_dir` in
   `config/community/odoo.conf` and `config/enterprise/odoo.conf`, then restart
   the Odoo containers. Host exposure is still limited by `BIND_ADDRESS`.
 - **`Could not create database` with `function any_value(integer) does not
   exist`:** Odoo 20 is running on PostgreSQL 15. Odoo 20 needs PostgreSQL 16 or
   newer. Back up any databases you need, remove the `odoo19-dual` database
-  volumes, and rerun installer v1.3.0, which uses `postgres:17.6` for Odoo 20.
+  volumes, and rerun the installer, which uses PostgreSQL 17 for Odoo 20.
+- **`PostgreSQL extension 'vector' is required to enable RAG for AI agents`:**
+  the database container runs plain PostgreSQL without pgvector. Rerun
+  installer v1.3.1 or newer; it switches to the `pgvector/pgvector` image of
+  the same PostgreSQL major version and keeps the existing databases.
 - **Enterprise does not start:** Confirm
   `/opt/odoo/odoo<major>/enterprise/web_enterprise/__manifest__.py` exists
   (for example `/opt/odoo/odoo20/enterprise` for Odoo 20) and the directory is
