@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-INSTALLER_VERSION="1.1.0"
+INSTALLER_VERSION="1.2.0"
 # Odoo releases offered by the installer, oldest first. Each needs a pinned
 # image in odoo_image_for_version (lib/config.sh).
 SUPPORTED_ODOO_VERSIONS=(19.0 20.0)

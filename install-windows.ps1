@@ -48,9 +48,60 @@ function Read-Port([string]$Prompt, [int]$Default, [int[]]$Forbidden = @()) {
     }
 }
 
+function Get-EnvValue([string]$key) {
+    if (-not (Test-Path -LiteralPath ".env" -PathType Leaf)) { return $null }
+    $prefix = "$key="
+    $line = Get-Content -LiteralPath ".env" | Where-Object { $_.StartsWith($prefix) } | Select-Object -First 1
+    if ($null -eq $line) { return $null }
+    return $line.Substring($prefix.Length)
+}
+
+# Odoo releases offered by the installer, oldest first, each with a pinned image.
+$supportedOdooVersions = @("19.0", "20.0")
+$odooImagesByVersion = @{
+    "19.0" = "odoo:19.0-20260908"
+    "20.0" = "odoo:20.0-20260926"
+}
+
+# The version an existing .env was installed with. Files written before
+# ODOO_VERSION was recorded fall back to the image tag, then to 19.0.
+function Get-InstalledOdooVersion {
+    if (-not (Test-Path -LiteralPath ".env" -PathType Leaf)) { return "" }
+    $version = Get-EnvValue "ODOO_VERSION"
+    if ([string]::IsNullOrWhiteSpace($version)) {
+        $savedImage = Get-EnvValue "ODOO_IMAGE"
+        if ($savedImage -match ':(\d+\.0)') { $version = $Matches[1] }
+    }
+    if ($odooImagesByVersion.ContainsKey("$version")) { return $version }
+    return "19.0"
+}
+
+# Extracts enterprise-<version>.zip into enterprise-<version>\ beside the
+# installer. A staging folder keeps an interrupted extraction from looking
+# like a complete source folder.
+function Expand-EnterpriseArchive([string]$Archive, [string]$Version) {
+    $topFolder = "enterprise-$Version"
+    $target = Join-Path $PSScriptRoot $topFolder
+    $staging = Join-Path $PSScriptRoot (".enterprise-extract-" + [guid]::NewGuid().ToString("N"))
+    Write-Host "Extracting $(Split-Path -Leaf $Archive). This may take several minutes..."
+    try {
+        Expand-Archive -LiteralPath $Archive -DestinationPath $staging -Force
+        if (-not (Test-Path -LiteralPath (Join-Path $staging "$topFolder\web_enterprise\__manifest__.py") -PathType Leaf)) {
+            throw "$(Split-Path -Leaf $Archive) does not contain $topFolder\web_enterprise."
+        }
+        Move-Item -LiteralPath (Join-Path $staging $topFolder) -Destination $target
+    } finally {
+        if (Test-Path -LiteralPath $staging) { Remove-Item -LiteralPath $staging -Recurse -Force }
+    }
+    Write-Host "Extracted Enterprise addons to $target"
+    return $target
+}
+
+$supportedVersionsLabel = ($supportedOdooVersions | ForEach-Object { $_.Split(".")[0] }) -join " & "
+
 Write-Host ""
 Write-Host "============================================================" -ForegroundColor DarkCyan
-Write-Host "              Odoo 19 Guided Installer" -ForegroundColor Cyan
+Write-Host "            Odoo $supportedVersionsLabel Guided Installer" -ForegroundColor Cyan
 Write-Host "     Community | Enterprise | PostgreSQL | pgAdmin" -ForegroundColor Gray
 Write-Host "============================================================" -ForegroundColor DarkCyan
 Write-Host "Follow the six guided steps. Press Enter to accept a recommended default."
@@ -147,6 +198,43 @@ if ((-not (Test-Path -LiteralPath ".env" -PathType Leaf)) -and
 }
 
 Write-Section "2/6" "Choose how Odoo should run"
+$installedOdooVersion = Get-InstalledOdooVersion
+$defaultOdooVersion = if ($installedOdooVersion) { $installedOdooVersion } else { $supportedOdooVersions[-1] }
+Write-Host "Which Odoo version do you want to install?"
+$versionChoices = @()
+for ($index = 0; $index -lt $supportedOdooVersions.Count; $index++) {
+    $version = $supportedOdooVersions[$index]
+    $label = "Odoo $version"
+    if ($version -eq $installedOdooVersion) { $label += " (installed)" }
+    elseif ((-not $installedOdooVersion) -and ($version -eq $supportedOdooVersions[-1])) { $label += " (recommended)" }
+    Write-Host "  $($index + 1)) $label"
+    if ($version -eq $defaultOdooVersion) { $defaultVersionIndex = "$($index + 1)" }
+    $versionChoices += @("$($index + 1)", $version, $version.Split(".")[0])
+}
+$versionChoice = Read-MenuChoice "Choose an Odoo version [$defaultVersionIndex]" $defaultVersionIndex $versionChoices
+if ($versionChoice -match '^\d+$' -and [int]$versionChoice -le $supportedOdooVersions.Count) {
+    $odooVersion = $supportedOdooVersions[[int]$versionChoice - 1]
+} else {
+    $odooVersion = "$($versionChoice.Split('.')[0]).0"
+}
+$odooMajorVersion = $odooVersion.Split(".")[0]
+Write-Host "Odoo $odooVersion selected (image $($odooImagesByVersion[$odooVersion]))."
+
+# Databases created by one major version cannot be opened by another, so a
+# version switch is only allowed once the old databases are gone.
+$odooVersionChanged = $installedOdooVersion -and ($installedOdooVersion -ne $odooVersion)
+if ($odooVersionChanged) {
+    if ($communityDbVolumeExists -or $enterpriseDbVolumeExists) {
+        Write-Warning "This system already has Odoo $installedOdooVersion databases."
+        Write-Host "Odoo $odooVersion cannot open them; a major-version upgrade needs Odoo's database migration."
+        Write-Host "Back up the databases, remove the odoo19-dual database volumes,"
+        Write-Host "then run the installer again and choose Odoo $odooVersion."
+        exit 1
+    }
+    Write-Host "Switching the existing configuration from Odoo $installedOdooVersion to Odoo $odooVersion (no databases exist yet)."
+}
+
+Write-Host ""
 Write-Host "Select a setup profile:"
 Write-Host "  1) Testing (recommended for evaluation and development)"
 Write-Host "  2) Production (enables two Odoo workers and memory limits)"
@@ -181,7 +269,7 @@ function Test-EnterpriseAddons([string]$Path) {
 
 function Read-EnterpriseSource([string]$SuggestedPath = "") {
     if ([string]::IsNullOrWhiteSpace($SuggestedPath)) {
-        $SuggestedPath = Join-Path $PSScriptRoot "enterprise-19.0"
+        $SuggestedPath = Join-Path $PSScriptRoot "enterprise-$odooVersion"
     }
     while ($true) {
         Write-Host "Enterprise path detected from the current installer location:"
@@ -194,7 +282,7 @@ function Read-EnterpriseSource([string]$SuggestedPath = "") {
             continue
         }
         if (-not (Test-Path -LiteralPath (Join-Path $enteredPath "web_enterprise\__manifest__.py") -PathType Leaf)) {
-            Write-Warning "The web_enterprise module was not found. Please select a complete Odoo 19 Enterprise addon folder."
+            Write-Warning "The web_enterprise module was not found. Please select a complete Odoo $odooVersion Enterprise addon folder."
             continue
         }
         return (Resolve-Path -LiteralPath $enteredPath).Path
@@ -206,15 +294,32 @@ $startEnterprise = $false
 $enterpriseSource = ""
 $installedEnterprisePath = Join-Path $PSScriptRoot "addons\enterprise"
 $bundledEnterpriseSource = ""
-foreach ($candidateName in @("enterprise-19.0", "enterprise")) {
+$bundledEnterpriseArchive = ""
+# The unversioned legacy folder only ever held Odoo 19 addons.
+$enterpriseCandidateNames = @("enterprise-$odooVersion")
+if ($odooVersion -eq "19.0") { $enterpriseCandidateNames += "enterprise" }
+foreach ($candidateName in $enterpriseCandidateNames) {
     $candidatePath = Join-Path $PSScriptRoot $candidateName
     if (Test-EnterpriseAddons $candidatePath) {
         $bundledEnterpriseSource = $candidatePath
         break
     }
 }
+$enterpriseArchivePath = Join-Path $PSScriptRoot "enterprise-$odooVersion.zip"
+if ([string]::IsNullOrWhiteSpace($bundledEnterpriseSource) -and
+    (Test-Path -LiteralPath $enterpriseArchivePath -PathType Leaf) -and
+    (-not (Test-Path -LiteralPath (Join-Path $PSScriptRoot "enterprise-$odooVersion")))) {
+    $bundledEnterpriseArchive = $enterpriseArchivePath
+    $bundledEnterpriseSource = $enterpriseArchivePath
+}
+# The installed copy belongs to the version recorded in .env; legacy installs
+# without .env only ever held Odoo 19 addons.
+$installedEnterpriseVersion = if ($installedOdooVersion) { $installedOdooVersion } else { "19.0" }
+$installedEnterpriseMatches = (Test-EnterpriseAddons $installedEnterprisePath) -and
+    ($installedEnterpriseVersion -eq $odooVersion)
 
-if (Test-EnterpriseAddons $installedEnterprisePath) {
+Write-Host "Odoo version: $odooVersion"
+if ($installedEnterpriseMatches) {
     Write-Host "Existing Enterprise addons are already installed."
     Write-Host "  1) Reuse the installed Enterprise addons (recommended)"
     Write-Host "  2) Import or update Enterprise addons from another folder"
@@ -222,7 +327,11 @@ if (Test-EnterpriseAddons $installedEnterprisePath) {
     $editionChoice = Read-MenuChoice "Choose an edition option [1]" "1" @("1", "2", "3")
     switch ($editionChoice) {
         "1" { $startEnterprise = $true }
-        "2" { $enterpriseSource = Read-EnterpriseSource $bundledEnterpriseSource; $startEnterprise = $true }
+        "2" {
+            $suggestedSource = if ($bundledEnterpriseArchive) { "" } else { $bundledEnterpriseSource }
+            $enterpriseSource = Read-EnterpriseSource $suggestedSource
+            $startEnterprise = $true
+        }
         "3" { $startEnterprise = $false }
         default { throw "Choose 1, 2, or 3." }
     }
@@ -234,14 +343,20 @@ if (Test-EnterpriseAddons $installedEnterprisePath) {
     Write-Host "  3) Install Community only"
     $editionChoice = Read-MenuChoice "Choose an edition option [1]" "1" @("1", "2", "3")
     switch ($editionChoice) {
-        "1" { $enterpriseSource = $bundledEnterpriseSource; $startEnterprise = $true }
+        "1" {
+            if ($bundledEnterpriseArchive) {
+                $bundledEnterpriseSource = Expand-EnterpriseArchive $bundledEnterpriseArchive $odooVersion
+            }
+            $enterpriseSource = $bundledEnterpriseSource
+            $startEnterprise = $true
+        }
         "2" { $enterpriseSource = Read-EnterpriseSource; $startEnterprise = $true }
         "3" { $startEnterprise = $false }
         default { throw "Choose 1, 2, or 3." }
     }
 } else {
     Write-Host "Community is free and requires no additional files."
-    Write-Host "Enterprise requires your licensed Odoo 19 Enterprise addon folder."
+    Write-Host "Enterprise requires your licensed Odoo $odooVersion Enterprise addon folder."
     Write-Host "  1) Install Community only (recommended)"
     Write-Host "  2) Install Community + Enterprise"
     $editionChoice = Read-MenuChoice "Choose an edition option [1]" "1" @("1", "2")
@@ -264,14 +379,6 @@ function New-RandomHex([int]$bytes = 24) {
     return ($buffer | ForEach-Object { $_.ToString("x2") }) -join ""
 }
 
-function Get-EnvValue([string]$key) {
-    if (-not (Test-Path -LiteralPath ".env" -PathType Leaf)) { return $null }
-    $prefix = "$key="
-    $line = Get-Content -LiteralPath ".env" | Where-Object { $_.StartsWith($prefix) } | Select-Object -First 1
-    if ($null -eq $line) { return $null }
-    return $line.Substring($prefix.Length)
-}
-
 function Get-ConfigValue([string]$path, [string]$key) {
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { return $null }
     $line = Get-Content -LiteralPath $path | Where-Object { $_ -match "^\s*$key\s*=" } | Select-Object -First 1
@@ -279,7 +386,7 @@ function Get-ConfigValue([string]$path, [string]$key) {
     return (($line -split "=", 2)[1]).Trim()
 }
 
-$odooImage = "odoo:19.0-20260908"
+$odooImage = $odooImagesByVersion[$odooVersion]
 $postgresImage = "postgres:15.19"
 $pgAdminImage = "dpage/pgadmin4:9.17"
 $pgAdminEnabled = $false
@@ -300,7 +407,8 @@ if (Test-Path -LiteralPath ".env" -PathType Leaf) {
     if ([string]::IsNullOrWhiteSpace($enterpriseAdminPassword)) { $enterpriseAdminPassword = New-RandomHex }
     $savedOdooImage = Get-EnvValue "ODOO_IMAGE"
     $savedPostgresImage = Get-EnvValue "POSTGRES_IMAGE"
-    if (-not [string]::IsNullOrWhiteSpace($savedOdooImage)) { $odooImage = $savedOdooImage }
+    # A saved image only applies to the version it was installed with.
+    if ((-not [string]::IsNullOrWhiteSpace($savedOdooImage)) -and (-not $odooVersionChanged)) { $odooImage = $savedOdooImage }
     if (-not [string]::IsNullOrWhiteSpace($savedPostgresImage)) { $postgresImage = $savedPostgresImage }
     $savedPgAdminImage = Get-EnvValue "PGADMIN_IMAGE"
     $savedPgAdminEnabled = Get-EnvValue "PGADMIN_ENABLED"
@@ -373,6 +481,7 @@ if (($odooImage -notmatch '^[A-Za-z0-9][A-Za-z0-9._/@:-]+$') -or
 }
 
 Write-Section "5/6" "Review the installation plan"
+Write-Host ("  {0,-24} {1}" -f "Odoo version", "$odooVersion ($odooImage)")
 Write-Host ("  {0,-24} {1}" -f "Profile", $mode)
 Write-Host ("  {0,-24} {1}" -f "Community", "enabled on port $communityPort")
 if ($startEnterprise) {
@@ -400,6 +509,13 @@ if (-not (Read-YesNo "Start this installation now?" $true)) {
 
 if (-not [string]::IsNullOrWhiteSpace($enterpriseSource) -and
     ((Resolve-Path -LiteralPath $enterpriseSource).Path -ne (Resolve-Path -LiteralPath $installedEnterprisePath).Path)) {
+    # Addons left from a different Odoo version must not mix with the new ones.
+    if ((-not $installedEnterpriseMatches) -and (Test-EnterpriseAddons $installedEnterprisePath)) {
+        Write-Host "Removing the installed Odoo $installedEnterpriseVersion Enterprise addons copy..."
+        Get-ChildItem -LiteralPath $installedEnterprisePath -Force |
+            Where-Object { $_.Name -ne ".gitkeep" } |
+            Remove-Item -Recurse -Force
+    }
     Write-Host "Copying Enterprise addons into this installation. This may take a moment..."
     Get-ChildItem -LiteralPath $enterpriseSource -Force |
         Copy-Item -Destination $installedEnterprisePath -Recurse -Force
@@ -408,6 +524,7 @@ if (-not [string]::IsNullOrWhiteSpace($enterpriseSource) -and
 Write-Host "Generating private configuration and credentials..."
 
 @"
+ODOO_VERSION=$odooVersion
 ODOO_IMAGE=$odooImage
 POSTGRES_IMAGE=$postgresImage
 PGADMIN_IMAGE=$pgAdminImage
@@ -452,8 +569,8 @@ Write-OdooConfig "config/enterprise/odoo.conf" "db-enterprise" $enterpriseDbPass
 $servers = [ordered]@{
     Servers = [ordered]@{
         "1" = [ordered]@{
-            Name = "Odoo 19 Community PostgreSQL"
-            Group = "Odoo 19"
+            Name = "Odoo $odooMajorVersion Community PostgreSQL"
+            Group = "Odoo $odooMajorVersion"
             Host = "db-community"
             Port = 5432
             MaintenanceDB = "postgres"
@@ -464,8 +581,8 @@ $servers = [ordered]@{
 }
 if ($startEnterprise) {
     $servers.Servers["2"] = [ordered]@{
-        Name = "Odoo 19 Enterprise PostgreSQL"
-        Group = "Odoo 19"
+        Name = "Odoo $odooMajorVersion Enterprise PostgreSQL"
+        Group = "Odoo $odooMajorVersion"
         Host = "db-enterprise"
         Port = 5432
         MaintenanceDB = "postgres"
@@ -518,6 +635,7 @@ $hostIp = (Get-NetIPAddress -AddressFamily IPv4 |
 if ([string]::IsNullOrWhiteSpace($hostIp)) { $hostIp = "127.0.0.1" }
 
 $installationInfo = @(
+    "Odoo version: $odooVersion",
     "Mode: $mode",
     "Automatic startup: enabled after Windows sign-in (containers restart unless manually stopped)",
     "Community: http://${hostIp}:$communityPort",

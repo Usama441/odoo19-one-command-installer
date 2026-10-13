@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
-  <title id="title">Odoo 19 Docker service architecture</title>
+  <title id="title">Odoo 19 &amp; 20 Docker service architecture</title>
   <desc id="desc">Browser access to Odoo Community, Odoo Enterprise, and pgAdmin, with isolated PostgreSQL databases and persistent data volumes.</desc>
   <defs>
     <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
@@ -46,13 +46,13 @@
   <text class="label" x="455" y="148">WEB SERVICES</text>
   <g filter="url(#shadow)">
     <rect x="420" y="180" width="350" height="175" rx="22" fill="#714b67"/>
-    <text class="white-heading" x="455" y="230">Odoo 19 Community</text>
+    <text class="white-heading" x="455" y="230">Odoo 19/20 Community</text>
     <text class="white-body" x="455" y="270">Community addons</text>
     <text class="white-body" x="455" y="300">Custom: addons/community</text>
     <text class="white-body" x="455" y="330">Filestore: community-data</text>
 
     <rect x="420" y="430" width="350" height="175" rx="22" fill="#714b67"/>
-    <text class="white-heading" x="455" y="480">Odoo 19 Enterprise</text>
+    <text class="white-heading" x="455" y="480">Odoo 19/20 Enterprise</text>
     <text class="white-body" x="455" y="520">Licensed Enterprise addons</text>
     <text class="white-body" x="455" y="550">Custom: enterprise-custom</text>
     <text class="white-body" x="455" y="580">Filestore: enterprise-data</text>

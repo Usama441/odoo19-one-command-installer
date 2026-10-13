@@ -1,19 +1,19 @@
-# Odoo 19 multi-mode one-command installer
+# Odoo 19 & 20 multi-mode one-command installer
 
 Guided installers for Ubuntu and Windows that run Community only, Enterprise
-only, or both Odoo 19 editions, with optional pgAdmin, as isolated Docker
-services.
+only, or both editions of Odoo 19 or Odoo 20, with optional pgAdmin, as isolated
+Docker services. The installer asks which Odoo version to install.
 
 **Script by TI ASSOCIATES · Developed by USAMA ARSHAD**
 
-![Odoo 19 installer flow](docs/images/installer-flow.svg)
+![Odoo installer flow](docs/images/installer-flow.svg)
 
 ## What gets installed
 
 | Component | When it starts | Default address |
 |---|---|---|
-| Odoo 19 Community + PostgreSQL | Community or Both is selected | Ubuntu testing: `http://localhost:8069`; production/Windows: `http://SERVER-IP:8069` |
-| Odoo 19 Enterprise + PostgreSQL | Enterprise or Both is selected and licensed addons exist | Ubuntu testing: `http://localhost:8070`; production/Windows: `http://SERVER-IP:8070` |
+| Odoo Community (19 or 20) + PostgreSQL | Community or Both is selected | Ubuntu testing: `http://localhost:8069`; production/Windows: `http://SERVER-IP:8069` |
+| Odoo Enterprise (19 or 20) + PostgreSQL | Enterprise or Both is selected and licensed addons exist | Ubuntu testing: `http://localhost:8070`; production/Windows: `http://SERVER-IP:8070` |
 | pgAdmin 4 web application | When the user answers `y` | Ubuntu testing: `http://localhost:5050`; production/Windows: `http://SERVER-IP:5050` |
 
 Community and Enterprise use separate databases, passwords, filestores, ports,
@@ -31,8 +31,9 @@ without exposing PostgreSQL ports to the host network.
   makes its `default` context active. Selecting Docker Desktop skips native
   installation and exits cleanly, because Docker Desktop is not supported for
   this Ubuntu deployment. The Windows installer continues to use Docker Desktop.
-- A valid Odoo Enterprise subscription and a local copy of the Odoo 19
-  Enterprise addons if Enterprise will be used.
+- A valid Odoo Enterprise subscription and a local copy of the Enterprise
+  addons for the chosen version (`enterprise-19.0` or `enterprise-20.0`) if
+  Enterprise will be used.
 - Enough free disk space for Docker images, databases, filestores, and backups.
 
 Do not run the Ubuntu installer as `root`. Run it as your normal user and enter
@@ -62,8 +63,8 @@ numbered menu instead.
 
 ```text
 ============================================================
-             ODOO 19 DEPLOYMENT CONTROL CENTER
-                    Installer v1.1.0
+               ODOO DEPLOYMENT CONTROL CENTER
+                    Installer v1.2.0
      Community • Enterprise • PostgreSQL • pgAdmin
                   Script by TI ASSOCIATES
               Developed by USAMA ARSHAD
@@ -137,7 +138,8 @@ volumes and their mount locations, project networks, generated files, tracked
 packages, Docker repository setup, installed source/addon copies, and source
 folders that must be preserved. Docker resources must carry the expected
 `odoo19-dual` Compose ownership label; a missing or mismatched label is reported
-and skipped instead of being deleted.
+and skipped instead of being deleted. The project name stays `odoo19-dual` for
+both Odoo versions so existing installations keep their containers and volumes.
 
 Ubuntu uninstall pins the selected native Linux Docker Engine endpoint before
 the audit, just as installation does. Docker Desktop and remote contexts are
@@ -190,10 +192,11 @@ APT source/key can be removed with the separate confirmation
 removed.
 
 For Enterprise-only, both-editions, and complete-stack removal, the audit also
-lists eligible installed copies under `/opt/odoo/odoo19`. The user may keep them
+lists eligible installed copies under `/opt/odoo/odoo<major>` (for example
+`/opt/odoo/odoo19` or `/opt/odoo/odoo20`). The user may keep them
 (the default) or permanently remove only the listed Enterprise/custom-addon
 copies by typing `DELETE INSTALLED SOURCE`. The original licensed
-`enterprise-19.0` folder and addon folders inside the Git checkout are always
+`enterprise-19.0`/`enterprise-20.0` folders and addon folders inside the Git checkout are always
 preserved, so the installer's only copy of user-supplied source is not erased.
 If Docker has already been removed outside the installer, Option 6 still scans
 for leftover generated configuration and `/opt` addon copies and can delete them
@@ -272,6 +275,7 @@ how to rerun it.
 
 | Order | Prompt | What it controls |
 |---:|---|---|
+| 0 | `Choose an Odoo version [2]` | Asked right after an install option is chosen in the main menu (Windows asks it at the start of step 2). `1` selects Odoo 19.0 and `2` selects Odoo 20.0 (the default on a new machine). On a rerun the installed version is the default. Switching versions is refused while databases from the other version exist; back them up and remove them first, because a major-version upgrade needs Odoo's database migration. |
 | 1 | `Choose a profile [1]` | `1` selects the lightweight testing server and binds web ports only to `127.0.0.1`. `2` selects production, binds to all host interfaces, and opens the hardware-aware performance advisor. |
 | 2 | `Community web port [8069]` | Asked only when Community or Both was selected in the Ubuntu menu. |
 | 3 | `Enterprise addons folder` | Asked only when Enterprise is selected and complete addons were not detected automatically. |
@@ -284,7 +288,8 @@ how to rerun it.
 | 10 | `pgAdmin login email [admin@example.com]` | Asked only on the first pgAdmin setup. Existing pgAdmin data reuses the saved email. |
 | 11 | `Start this installation now? [Y/n]` | Shows after a complete plan summary and provides a final chance to cancel before configuration or Enterprise addons are changed. |
 
-Windows still uses its adaptive edition menu inside the guided wizard. The new
+Windows asks for the Odoo version and then uses its adaptive edition menu inside
+the guided wizard. The new
 top-level action and uninstall menu are specific to the Ubuntu terminal script.
 
 PostgreSQL passwords, separate Community and Enterprise Odoo master passwords,
@@ -324,6 +329,7 @@ Example Community + pgAdmin installation when no Enterprise folder is detected:
 
 ```text
 Choose an option [1]: 1
+Choose an Odoo version [2]:
 Refresh package lists and upgrade installed Ubuntu packages now? [y/N]: n
 Choose a profile [1]:
 Community web port [8069]:
@@ -333,9 +339,12 @@ pgAdmin login email [admin@example.com]: admin@example.com
 Start this installation now? [Y/n]:
 ```
 
-When `enterprise-19.0/` is beside the installer, both scripts detect its full
-path. Ubuntu copies it into `/opt/odoo/odoo19/enterprise`, matching the verified
-production layout, while Windows keeps using the repository-local addon folders.
+When `enterprise-<version>/` (for example `enterprise-20.0/`) is beside the
+installer, both scripts detect its full path. If only `enterprise-<version>.zip`
+is present, the installer extracts it into `enterprise-<version>/` when
+Enterprise is selected. Ubuntu copies the addons into
+`/opt/odoo/odoo<major>/enterprise`, matching the verified production layout,
+while Windows keeps using the repository-local addon folders.
 The initially detected source path is built from the installer's current
 location, so Linux and Windows usernames are detected automatically instead of
 being hard-coded.
@@ -361,7 +370,8 @@ running containers, and disabling pgAdmin stops its existing container.
    OpenSSL, Docker Engine, Compose, and Docker service status. Missing items are
    installed only after bulk or per-item approval. Windows checks Docker Desktop,
    can install it through `winget`, and configures it to start at user sign-in.
-5. **Guide the user through choices.** Numbered menus select testing/production,
+5. **Guide the user through choices.** Numbered menus select the Odoo version
+   (19.0 or 20.0), testing/production,
    optional pgAdmin, and only the ports relevant to the chosen Odoo editions.
    Testing is reachable only from the same machine through `localhost`.
    Production binds web ports to all host interfaces and adds the hardware-aware
@@ -371,11 +381,11 @@ running containers, and disabling pgAdmin stops its existing container.
    volumes. If data volumes exist but `.env` is missing, it stops instead of
    creating new passwords that cannot access the existing data.
 7. **Prepare Enterprise.** The installer first detects existing copied addons or
-   `enterprise-19.0/` beside the script. Manual path entry is requested only when
+   `enterprise-<version>/` (or its `.zip`) beside the script. Manual path entry is requested only when
    complete Enterprise addons were not detected. The folder must contain addon
    manifests and `web_enterprise`. Ubuntu then stores the licensed source under
-   `/opt/odoo/odoo19/enterprise` and prepares the shared custom-module directory
-   `/opt/odoo/odoo19/custom_addons/<folder-name>`. The folder name is requested
+   `/opt/odoo/odoo<major>/enterprise` and prepares the shared custom-module directory
+   `/opt/odoo/odoo<major>/custom_addons/<folder-name>`. The folder name is requested
    in the terminal; spaces are safely converted to underscores.
 8. **Configure pgAdmin.** If selected, the script prepares pgAdmin login data,
    a server-definition file, and a protected PostgreSQL password file. It
@@ -401,7 +411,7 @@ running containers, and disabling pgAdmin stops its existing container.
 
 ## Runtime architecture
 
-![Odoo 19 Docker service architecture](docs/images/service-architecture.svg)
+![Odoo Docker service architecture](docs/images/service-architecture.svg)
 
 | Web service | Internal database | Persistent storage | Start condition |
 |---|---|---|---|
@@ -411,9 +421,9 @@ running containers, and disabling pgAdmin stops its existing container.
 
 The two PostgreSQL services listen only on Docker's internal network. Only the
 Odoo and pgAdmin web ports are published on the host. On Ubuntu, Enterprise code
-is bind-mounted read-only from `/opt/odoo/odoo19/enterprise`, while the shared
+is bind-mounted read-only from `/opt/odoo/odoo<major>/enterprise`, while the shared
 custom directory is bind-mounted from
-`/opt/odoo/odoo19/custom_addons/<folder-name>` into both Odoo editions.
+`/opt/odoo/odoo<major>/custom_addons/<folder-name>` into both Odoo editions.
 
 ## Automatic startup after a restart
 
@@ -438,10 +448,11 @@ unless it was enabled during installation.
 ## Files created or updated
 
 Ubuntu keeps licensed and custom addon code in a stable production-style host
-location outside the Git checkout:
+location outside the Git checkout, one folder per Odoo major version
+(`/opt/odoo/odoo19` or `/opt/odoo/odoo20`):
 
 ```text
-/opt/odoo/odoo19/
+/opt/odoo/odoo<major>/
 ├── enterprise/                       # Licensed Odoo Enterprise addons
 └── custom_addons/
     └── <your-folder-name>/             # Custom modules shared by both editions
@@ -450,7 +461,7 @@ location outside the Git checkout:
 The Ubuntu installer asks for this folder name before creating anything. For
 example, entering `TI Associates` creates `TI_Associates/`. Place each custom
 module directly inside the selected folder, so its manifest looks like
-`/opt/odoo/odoo19/custom_addons/<folder-name>/my_module/__manifest__.py`.
+`/opt/odoo/odoo<major>/custom_addons/<folder-name>/my_module/__manifest__.py`.
 Both Ubuntu Odoo containers mount this directory at `/mnt/extra-addons`.
 Repository-local Community and Enterprise custom modules from an older installer
 run are migrated without replacing an already-present module.
@@ -459,7 +470,7 @@ The installer repository continues to hold configuration and credentials:
 
 ```text
 odoo19-one-command-installer/
-├── .env                              # Image versions, ports, and credentials
+├── .env                              # Odoo version, images, ports, and credentials
 ├── installation-info.txt             # URLs and user-facing login details
 ├── config/
 │   ├── community/odoo.conf           # Community database and runtime settings
@@ -475,7 +486,7 @@ odoo19-one-command-installer/
 
 `.env`, `installation-info.txt`, generated configuration files, and legacy
 repository-local Enterprise copies are excluded by `.gitignore`. Ubuntu's
-`/opt/odoo/odoo19` source directories live outside the Git repository. Secret
+`/opt/odoo/odoo<major>` source directories live outside the Git repository. Secret
 files are made owner-readable only where container compatibility permits.
 
 ## First browser setup
@@ -504,7 +515,8 @@ desktop application.
 
 1. Open the pgAdmin URL from `installation-info.txt`.
 2. Sign in with its saved **pgAdmin login email** and **pgAdmin login password**.
-3. Expand the `Odoo 19` group in the left panel.
+3. Expand the `Odoo 19` or `Odoo 20` group (matching the installed version) in
+   the left panel.
 4. Open the registered server for the Community and/or Enterprise edition that
    was selected during installation.
 
@@ -521,9 +533,10 @@ refreshed when pgAdmin starts; manually added server definitions may be replaced
 | Odoo master passwords | Generated | Reused from `.env` or existing Odoo config |
 | pgAdmin password | Generated | Reused from `.env` |
 | Odoo ports and mode | Selected through guided menus | Asked again and configuration updated |
-| Custom addons folder | User enters a folder name under `/opt/odoo/odoo19/custom_addons` | Saved name is offered as the default and can be changed |
+| Odoo version | Selected; Odoo 20.0 is the default | Installed version is the default; switching requires removing the old databases first |
+| Custom addons folder | User enters a folder name under `/opt/odoo/odoo<major>/custom_addons` | Saved name is offered as the default and can be changed |
 | pgAdmin choice and port | Asked; disabled by default | Asked again; previous enabled state and port become defaults |
-| Enterprise addons | Nearby folder is detected and copied to `/opt/odoo/odoo19/enterprise` on Ubuntu | Existing persistent addons are reused automatically when Enterprise is selected |
+| Enterprise addons | Nearby `enterprise-<version>` folder or zip is detected and copied to `/opt/odoo/odoo<major>/enterprise` on Ubuntu | Existing persistent addons are reused automatically when Enterprise is selected |
 | Persistent databases and filestores | Created | Kept and reused |
 
 If an existing database or pgAdmin volume is present but its required saved
@@ -532,15 +545,17 @@ credentials are missing, restore `.env` from backup before rerunning.
 ## Enterprise requirement
 
 There is no separate official Odoo Enterprise Docker image. This installer uses
-the official Odoo 19 image together with your licensed Enterprise addon files.
+the official Odoo 19 or Odoo 20 image together with your licensed Enterprise
+addon files for the same version.
 You must have a valid Odoo Enterprise subscription and a legal local copy of
 those addons.
 
 To add Enterprise after a Community-only installation, place the licensed folder
-beside the installer and name it `enterprise-19.0`, then choose Enterprise or
-Both from the Ubuntu main menu. Ubuntu stores and reuses the installed copy under
-`/opt/odoo/odoo19/enterprise`. Add custom modules under
-`/opt/odoo/odoo19/custom_addons/<folder-name>`, restart the relevant container,
+beside the installer and name it `enterprise-19.0` or `enterprise-20.0` to match
+the installed version (an `enterprise-<version>.zip` archive also works), then
+choose Enterprise or Both from the Ubuntu main menu. Ubuntu stores and reuses the
+installed copy under `/opt/odoo/odoo<major>/enterprise`. Add custom modules under
+`/opt/odoo/odoo<major>/custom_addons/<folder-name>`, restart the relevant container,
 then update the Apps list in Odoo.
 
 ## Useful commands
@@ -572,14 +587,21 @@ Odoo databases, filestores, and pgAdmin data.
 The default images are pinned so a future installation does not silently use
 different software:
 
-- Odoo: `odoo:19.0-20260908`
+- Odoo 19: `odoo:19.0-20260908`
+- Odoo 20: `odoo:20.0-20260926`
 - PostgreSQL: `postgres:15.19`
 - pgAdmin: `dpage/pgadmin4:9.17`
 
 Before upgrading, back up both PostgreSQL databases and both Odoo filestores,
-verify that the Enterprise addons match the target Odoo 19 build, and then
+verify that the Enterprise addons match the target Odoo build, and then
 deliberately change `ODOO_IMAGE`, `POSTGRES_IMAGE`, or `PGADMIN_IMAGE` in `.env`.
 Rerun the installer to pull and start the chosen images.
+
+Moving an existing installation from Odoo 19 to Odoo 20 is a major-version
+upgrade. Odoo 20 cannot open Odoo 19 databases without Odoo's database
+migration, so the installer refuses to switch versions while Odoo 19 databases
+exist. Migrate the databases through Odoo's upgrade service, or back them up and
+remove them, and then rerun the installer and choose Odoo 20.0.
 
 ## Security and production note
 
@@ -614,5 +636,6 @@ test database and filestore restoration.
 - **`.env` is missing but Docker volumes remain:** Restore `.env` from the same
   installation backup. Do not invent replacement database passwords.
 - **Enterprise does not start:** Confirm
-  `/opt/odoo/odoo19/enterprise/web_enterprise/__manifest__.py` exists and the
-  directory is readable, then rerun the installer.
+  `/opt/odoo/odoo<major>/enterprise/web_enterprise/__manifest__.py` exists
+  (for example `/opt/odoo/odoo20/enterprise` for Odoo 20) and the directory is
+  readable, then rerun the installer.
