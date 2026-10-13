@@ -5,6 +5,136 @@ valid_port() {
   [[ "$1" =~ ^[0-9]{1,5}$ ]] && (( 10#$1 >= 1 && 10#$1 <= 65535 ))
 }
 
+# Pinned official image tag for each selectable Odoo release.
+odoo_image_for_version() {
+  case "$1" in
+    19.0) echo "odoo:19.0-20260908" ;;
+    20.0) echo "odoo:20.0-20260926" ;;
+    *) return 1 ;;
+  esac
+}
+
+set_odoo_version() {
+  ODOO_VERSION="$1"
+  ODOO_MAJOR_VERSION="${ODOO_VERSION%%.*}"
+  DEFAULT_ODOO_IMAGE="$(odoo_image_for_version "$ODOO_VERSION")"
+  ODOO_HOST_ROOT="/opt/odoo/odoo$ODOO_MAJOR_VERSION"
+  ODOO_HOST_ENTERPRISE_DIR="$ODOO_HOST_ROOT/enterprise"
+  ODOO_HOST_CUSTOM_ROOT="$ODOO_HOST_ROOT/custom_addons"
+}
+
+# The version an existing .env was installed with. Files written before
+# ODOO_VERSION was recorded fall back to the image tag, then to 19.0.
+detect_installed_odoo_version() {
+  local version="" image=""
+  if [[ -f "$SCRIPT_DIR/.env" ]]; then
+    version="$(get_env_value ODOO_VERSION)"
+    if [[ -z "$version" ]]; then
+      image="$(get_env_value ODOO_IMAGE)"
+      if [[ "$image" =~ :([0-9]+\.0) ]]; then version="${BASH_REMATCH[1]}"; fi
+    fi
+  fi
+  odoo_image_for_version "$version" >/dev/null 2>&1 || version="19.0"
+  echo "$version"
+}
+
+choose_odoo_version() {
+  local version choice default_index="" index=1 allowed="" label
+  local default_version="${SUPPORTED_ODOO_VERSIONS[-1]}"
+
+  [[ -f "$SCRIPT_DIR/.env" ]] && default_version="$ODOO_VERSION"
+  echo
+  printf '%b\n' "${COLOR_BOLD}Which Odoo version do you want to install?${COLOR_RESET}"
+  for version in "${SUPPORTED_ODOO_VERSIONS[@]}"; do
+    label="Odoo $version"
+    if [[ -f "$SCRIPT_DIR/.env" && "$version" == "$ODOO_VERSION" ]]; then
+      label+=" (current installation)"
+    elif [[ "$version" == "${SUPPORTED_ODOO_VERSIONS[-1]}" ]]; then
+      label+=" (latest)"
+    fi
+    printf '  %s) %s\n' "$index" "$label"
+    [[ "$version" == "$default_version" ]] && default_index="$index"
+    allowed+=" $index $version ${version%%.*}"
+    index=$((index + 1))
+  done
+  read_choice choice "Choose an Odoo version [$default_index]: " "$default_index" "$allowed"
+  if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#SUPPORTED_ODOO_VERSIONS[@]} )); then
+    version="${SUPPORTED_ODOO_VERSIONS[choice - 1]}"
+  else
+    version="${choice%%.*}.0"
+  fi
+  set_odoo_version "$version"
+  printf 'Odoo %s selected (image %s).\n' "$ODOO_VERSION" "$DEFAULT_ODOO_IMAGE"
+}
+
+# Databases created by one major version cannot be opened by another, so a
+# version switch is only allowed once the old databases are gone.
+verify_odoo_version_change() {
+  local installed_version
+
+  [[ -f .env ]] || return 0
+  installed_version="$(detect_installed_odoo_version)"
+  [[ "$installed_version" != "$ODOO_VERSION" ]] || return 0
+  if [[ "$COMMUNITY_DB_VOLUME_EXISTS" == "true" || "$ENTERPRISE_DB_VOLUME_EXISTS" == "true" ]]; then
+    echo
+    printf '%b\n' "${COLOR_YELLOW}This system already has Odoo $installed_version databases.${COLOR_RESET}"
+    echo "Odoo $ODOO_VERSION cannot open them; a major-version upgrade needs Odoo's database migration."
+    echo "Back up the databases (menu option 5), uninstall with database deletion (option 6),"
+    echo "then run the installer again and choose Odoo $ODOO_VERSION."
+    exit 1
+  fi
+  echo "Switching the existing configuration from Odoo $installed_version to Odoo $ODOO_VERSION (no databases exist yet)."
+}
+
+# Bundled licensed Enterprise source for the selected version, checked in
+# order: installed copy, extracted checkout folder, then legacy unversioned
+# locations that only ever held Odoo 19.
+enterprise_source_candidates() {
+  printf '%s\n' "$ODOO_HOST_ENTERPRISE_DIR" "$SCRIPT_DIR/enterprise-$ODOO_VERSION"
+  if [[ "$ODOO_VERSION" == "19.0" ]]; then
+    printf '%s\n' "$SCRIPT_DIR/addons/enterprise" "$SCRIPT_DIR/enterprise"
+  fi
+}
+
+ensure_unzip_available() {
+  if command -v unzip >/dev/null 2>&1; then return 0; fi
+  echo "Installing the unzip utility to extract the Enterprise archive..."
+  if ! install_apt_packages unzip || ! command -v unzip >/dev/null 2>&1; then
+    echo "The unzip package could not be installed."
+    return 1
+  fi
+  track_installer_packages unzip
+}
+
+# Extracts enterprise-<version>.zip into enterprise-<version>/ next to the
+# installer. A staging folder keeps an interrupted extraction from looking
+# like a complete source folder.
+extract_enterprise_archive() {
+  local archive="$1" target="$SCRIPT_DIR/enterprise-$ODOO_VERSION" staging
+  local top_folder="enterprise-$ODOO_VERSION"
+
+  if [[ -e "$target" ]]; then
+    echo "$target exists but is not a complete Enterprise folder. Move it aside so $(basename -- "$archive") can be extracted."
+    return 1
+  fi
+  ensure_unzip_available || return 1
+  staging="$(mktemp -d "$SCRIPT_DIR/.enterprise-extract.XXXXXX")"
+  echo "Extracting $(basename -- "$archive"). This may take a moment..."
+  if ! unzip -q "$archive" "$top_folder/*" -d "$staging"; then
+    rm -rf -- "$staging"
+    echo "Extraction failed. Check that $(basename -- "$archive") is complete."
+    return 1
+  fi
+  if [[ ! -f "$staging/$top_folder/web_enterprise/__manifest__.py" ]]; then
+    rm -rf -- "$staging"
+    echo "$(basename -- "$archive") does not contain $top_folder/web_enterprise."
+    return 1
+  fi
+  mv -- "$staging/$top_folder" "$target"
+  rm -rf -- "$staging"
+  echo "Extracted Enterprise addons to $target"
+}
+
 valid_custom_addons_folder() {
   local folder_name="$1"
   [[ "$folder_name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$ ]] &&
@@ -348,7 +478,7 @@ migrate_legacy_custom_addons() {
 
 read_enterprise_source() {
   local suggested_path="$1" entered_path
-  suggested_path="${suggested_path:-$SCRIPT_DIR/enterprise-19.0}"
+  suggested_path="${suggested_path:-$SCRIPT_DIR/enterprise-$ODOO_VERSION}"
   while true; do
     echo "Default Enterprise path based on the current installer location:"
     echo "  $suggested_path"
@@ -361,7 +491,7 @@ read_enterprise_source() {
       continue
     fi
     if [[ ! -f "$entered_path/web_enterprise/__manifest__.py" ]]; then
-      echo "The web_enterprise module was not found. Please select a complete Odoo 19 Enterprise addon folder."
+      echo "The web_enterprise module was not found. Please select a complete Odoo $ODOO_VERSION Enterprise addon folder."
       continue
     fi
     ENTERPRISE_SOURCE="$entered_path"

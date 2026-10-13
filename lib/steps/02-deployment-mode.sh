@@ -48,6 +48,7 @@ step_choose_deployment_mode() {
     echo "Existing installer data volumes were found, but .env is missing. Restore .env from backup; generated replacement credentials would not unlock the existing data."
     exit 1
   fi
+  verify_odoo_version_change
 
   mkdir -p config/community config/enterprise config/pgadmin addons/community addons/enterprise addons/enterprise-custom
 }

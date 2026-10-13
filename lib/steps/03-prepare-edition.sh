@@ -3,18 +3,20 @@
 
 step_prepare_edition() {
   section "3/6" "Prepare the selected Odoo edition"
+  printf 'Odoo version: %s\n' "$ODOO_VERSION"
   ENTERPRISE_SOURCE=""
   BUNDLED_ENTERPRISE_SOURCE=""
-  for candidate in \
-    "$ODOO_HOST_ENTERPRISE_DIR" \
-    "$SCRIPT_DIR/addons/enterprise" \
-    "$SCRIPT_DIR/enterprise-19.0" \
-    "$SCRIPT_DIR/enterprise"; do
+  ENTERPRISE_ARCHIVE="$SCRIPT_DIR/enterprise-$ODOO_VERSION.zip"
+  while IFS= read -r candidate; do
     if has_enterprise_addons "$candidate" && [[ -f "$candidate/web_enterprise/__manifest__.py" ]]; then
       BUNDLED_ENTERPRISE_SOURCE="$candidate"
       break
     fi
-  done
+  done < <(enterprise_source_candidates)
+  if [[ "$START_ENTERPRISE" == "true" && -z "$BUNDLED_ENTERPRISE_SOURCE" && -f "$ENTERPRISE_ARCHIVE" ]] &&
+     extract_enterprise_archive "$ENTERPRISE_ARCHIVE"; then
+    BUNDLED_ENTERPRISE_SOURCE="$SCRIPT_DIR/enterprise-$ODOO_VERSION"
+  fi
 
   if [[ "$START_ENTERPRISE" == "true" ]]; then
     if has_enterprise_addons "$ODOO_HOST_ENTERPRISE_DIR" &&
@@ -25,7 +27,7 @@ step_prepare_edition() {
       echo "Complete Enterprise addons were detected automatically:"
       printf '  %b%s%b\n' "$COLOR_GREEN" "$ENTERPRISE_SOURCE" "$COLOR_RESET"
     else
-      echo "Enterprise requires your licensed Odoo 19 Enterprise addon folder."
+      echo "Enterprise requires your licensed Odoo $ODOO_VERSION Enterprise addon folder."
       read_enterprise_source ""
     fi
   else
@@ -49,7 +51,7 @@ step_prepare_edition() {
     done
   fi
 
-  ODOO_IMAGE="odoo:19.0-20260908"
+  ODOO_IMAGE="$DEFAULT_ODOO_IMAGE"
   POSTGRES_IMAGE="postgres:15.19"
   PGADMIN_IMAGE="dpage/pgadmin4:9.17"
   PGADMIN_ENABLED="false"
@@ -80,7 +82,10 @@ step_prepare_edition() {
     ENTERPRISE_ADMIN_PASSWORD="${ENTERPRISE_ADMIN_PASSWORD:-$(openssl rand -hex 24)}"
     ODOO_IMAGE="$(get_env_value ODOO_IMAGE)"
     POSTGRES_IMAGE="$(get_env_value POSTGRES_IMAGE)"
-    ODOO_IMAGE="${ODOO_IMAGE:-odoo:19.0-20260908}"
+    # A saved image only applies to the version it was installed with.
+    if [[ -z "$ODOO_IMAGE" || "$(detect_installed_odoo_version)" != "$ODOO_VERSION" ]]; then
+      ODOO_IMAGE="$DEFAULT_ODOO_IMAGE"
+    fi
     POSTGRES_IMAGE="${POSTGRES_IMAGE:-postgres:15.19}"
     SAVED_PGADMIN_IMAGE="$(get_env_value PGADMIN_IMAGE)"
     SAVED_PGADMIN_ENABLED="$(get_env_value PGADMIN_ENABLED)"

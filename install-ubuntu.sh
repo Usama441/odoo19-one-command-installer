@@ -3,9 +3,15 @@ set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 INSTALLER_VERSION="1.1.0"
-ODOO_HOST_ROOT="/opt/odoo/odoo19"
-ODOO_HOST_ENTERPRISE_DIR="$ODOO_HOST_ROOT/enterprise"
-ODOO_HOST_CUSTOM_ROOT="$ODOO_HOST_ROOT/custom_addons"
+# Odoo releases offered by the installer, oldest first. Each needs a pinned
+# image in odoo_image_for_version (lib/config.sh).
+SUPPORTED_ODOO_VERSIONS=(19.0 20.0)
+ODOO_VERSION=""
+ODOO_MAJOR_VERSION=""
+DEFAULT_ODOO_IMAGE=""
+ODOO_HOST_ROOT=""
+ODOO_HOST_ENTERPRISE_DIR=""
+ODOO_HOST_CUSTOM_ROOT=""
 ODOO_HOST_CUSTOM_ADDONS_DIR=""
 cd "$SCRIPT_DIR"
 
@@ -46,6 +52,10 @@ for _installer_lib in ui dashboard system config backup uninstall; do
   source "$LIB_DIR/${_installer_lib}.sh"
 done
 unset _installer_lib LIB_DIR
+
+# Start from the version of an existing installation so the dashboard,
+# backup, and uninstall flows see its paths; installs ask again later.
+set_odoo_version "$(detect_installed_odoo_version)"
 
 STEPS_DIR="$SCRIPT_DIR/lib/steps"
 for _installer_step in 00-bootstrap 01-prerequisites 02-deployment-mode 03-prepare-edition 04-pgadmin 05-review-and-install 06-complete; do

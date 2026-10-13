@@ -8,10 +8,7 @@ show_control_center_status() {
   else
     docker_status="Not installed"
   fi
-  if [[ -f "$SCRIPT_DIR/enterprise-19.0/web_enterprise/__manifest__.py" ||
-        -f "$SCRIPT_DIR/enterprise/web_enterprise/__manifest__.py" ||
-        -f "$SCRIPT_DIR/addons/enterprise/web_enterprise/__manifest__.py" ||
-        -f "$ODOO_HOST_ENTERPRISE_DIR/web_enterprise/__manifest__.py" ]]; then
+  if enterprise_addons_ready; then
     enterprise_status="Ready"
   else
     enterprise_status="Not detected"
@@ -117,8 +114,8 @@ draw_interactive_dashboard() {
 
   dashboard_border '╭' '╮'
   dashboard_header_row \
-    "$COLOR_PURPLE$COLOR_BOLD" "odoo 19" \
-    "$COLOR_WHITE$COLOR_BOLD" "ODOO 19 DEPLOYMENT CONTROL CENTER  •  v$INSTALLER_VERSION" \
+    "$COLOR_PURPLE$COLOR_BOLD" "odoo" \
+    "$COLOR_WHITE$COLOR_BOLD" "ODOO DEPLOYMENT CONTROL CENTER  •  v$INSTALLER_VERSION" \
     "$COLOR_GREEN$COLOR_BOLD" "      ✓  READY"
   dashboard_header_row \
     "$COLOR_PURPLE$COLOR_BOLD" "" \
@@ -130,7 +127,7 @@ draw_interactive_dashboard() {
     "$COLOR_MUTED" "Developed by USAMA ARSHAD"
   dashboard_border '╰' '╯'
   echo
-  dashboard_centered_text "$COLOR_WHITE$COLOR_BOLD" "Welcome to your all-in-one Odoo 19 deployment workspace."
+  dashboard_centered_text "$COLOR_WHITE$COLOR_BOLD" "Welcome to your all-in-one Odoo $(supported_odoo_versions_label) deployment workspace."
   dashboard_centered_text "$COLOR_MUTED" "Install, inspect, maintain, or safely remove your stack from one place."
   echo
   dashboard_border '╭' '╮'

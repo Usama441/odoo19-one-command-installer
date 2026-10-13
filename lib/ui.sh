@@ -6,7 +6,7 @@ print_banner() {
   cat <<EOF
 
 ============================================================
-             ODOO 19 DEPLOYMENT CONTROL CENTER
+               ODOO DEPLOYMENT CONTROL CENTER
                     Installer v$INSTALLER_VERSION
      Community • Enterprise • PostgreSQL • pgAdmin
                   Script by TI ASSOCIATES
@@ -14,6 +14,15 @@ print_banner() {
 ============================================================
 EOF
   printf '%b' "$COLOR_RESET"
+}
+
+# "19 & 20" style list of the selectable Odoo major versions.
+supported_odoo_versions_label() {
+  local version label=""
+  for version in "${SUPPORTED_ODOO_VERSIONS[@]}"; do
+    label+="${label:+ & }${version%%.*}"
+  done
+  printf '%s' "$label"
 }
 
 section() {

@@ -76,7 +76,7 @@ package_installed() {
 
 installer_package_is_supported() {
   case "$1" in
-    ca-certificates|curl|openssl|rar|sqlite3|docker-ce|docker-ce-cli|docker-ce-rootless-extras|containerd.io|docker-buildx-plugin|docker-compose-plugin) return 0 ;;
+    ca-certificates|curl|openssl|rar|sqlite3|unzip|docker-ce|docker-ce-cli|docker-ce-rootless-extras|containerd.io|docker-buildx-plugin|docker-compose-plugin) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -213,11 +213,19 @@ setup_docker_repository() {
   save_installer_state
 }
 
+# True when Enterprise source for any supported version is available, either
+# extracted, installed, or as an enterprise-<version>.zip archive.
 enterprise_addons_ready() {
-  [[ -f "$SCRIPT_DIR/enterprise-19.0/web_enterprise/__manifest__.py" ||
-     -f "$SCRIPT_DIR/enterprise/web_enterprise/__manifest__.py" ||
-     -f "$SCRIPT_DIR/addons/enterprise/web_enterprise/__manifest__.py" ||
-     -f "$ODOO_HOST_ENTERPRISE_DIR/web_enterprise/__manifest__.py" ]]
+  local version
+  for version in "${SUPPORTED_ODOO_VERSIONS[@]}"; do
+    if [[ -f "$SCRIPT_DIR/enterprise-$version/web_enterprise/__manifest__.py" ||
+          -f "$SCRIPT_DIR/enterprise-$version.zip" ||
+          -f "/opt/odoo/odoo${version%%.*}/enterprise/web_enterprise/__manifest__.py" ]]; then
+      return 0
+    fi
+  done
+  [[ -f "$SCRIPT_DIR/enterprise/web_enterprise/__manifest__.py" ||
+     -f "$SCRIPT_DIR/addons/enterprise/web_enterprise/__manifest__.py" ]]
 }
 
 resolve_install_docker_endpoint() {

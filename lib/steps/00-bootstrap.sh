@@ -3,7 +3,7 @@
 
 step_bootstrap_and_menu() {
   print_banner
-  printf '%b\n' "${COLOR_BOLD}Welcome to your all-in-one Odoo 19 deployment workspace.${COLOR_RESET}"
+  printf '%b\n' "${COLOR_BOLD}Welcome to your all-in-one Odoo $(supported_odoo_versions_label) deployment workspace.${COLOR_RESET}"
   echo "Install, inspect, maintain, or safely remove your stack from one place."
 
   if [[ "${EUID}" -eq 0 ]]; then
@@ -155,4 +155,8 @@ step_bootstrap_and_menu() {
     6) run_uninstaller; exit 0 ;;
     7) echo "Goodbye."; exit 0 ;;
   esac
+
+  if [[ "$INSTALL_ACTION" == "install" ]]; then
+    choose_odoo_version
+  fi
 }

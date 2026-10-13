@@ -3,6 +3,7 @@
 
 step_review_and_install() {
   section "5/6" "Review the installation plan"
+  printf '  %-24s %s\n' "Odoo version" "$ODOO_VERSION ($ODOO_IMAGE)"
   printf '  %-24s %s\n' "Profile" "$DEPLOYMENT_MODE"
   printf '  %-24s %s\n' "Performance mode" "$PERFORMANCE_MODE"
   if [[ "$DEPLOYMENT_MODE" == "testing" ]]; then
@@ -72,6 +73,7 @@ step_review_and_install() {
 
   umask 077
   cat > .env <<EOF
+ODOO_VERSION=$ODOO_VERSION
 ODOO_IMAGE=$ODOO_IMAGE
 POSTGRES_IMAGE=$POSTGRES_IMAGE
 PGADMIN_IMAGE=$PGADMIN_IMAGE
@@ -107,12 +109,12 @@ EOF
     "$ENTERPRISE_WORKERS" "$ODOO_MAX_CRON_THREADS" "$ODOO_LIMIT_MEMORY_SOFT" "$ODOO_LIMIT_MEMORY_HARD"
 
   if [[ "$START_COMMUNITY" == "true" && "$START_ENTERPRISE" == "true" ]]; then
-    cat > config/pgadmin/servers.json <<'EOF'
+    cat > config/pgadmin/servers.json <<EOF
 {
   "Servers": {
     "1": {
-      "Name": "Odoo 19 Community PostgreSQL",
-      "Group": "Odoo 19",
+      "Name": "Odoo $ODOO_MAJOR_VERSION Community PostgreSQL",
+      "Group": "Odoo $ODOO_MAJOR_VERSION",
       "Host": "db-community",
       "Port": 5432,
       "MaintenanceDB": "postgres",
@@ -120,8 +122,8 @@ EOF
       "SSLMode": "prefer"
     },
     "2": {
-      "Name": "Odoo 19 Enterprise PostgreSQL",
-      "Group": "Odoo 19",
+      "Name": "Odoo $ODOO_MAJOR_VERSION Enterprise PostgreSQL",
+      "Group": "Odoo $ODOO_MAJOR_VERSION",
       "Host": "db-enterprise",
       "Port": 5432,
       "MaintenanceDB": "postgres",
@@ -132,12 +134,12 @@ EOF
 }
 EOF
   elif [[ "$START_ENTERPRISE" == "true" ]]; then
-    cat > config/pgadmin/servers.json <<'EOF'
+    cat > config/pgadmin/servers.json <<EOF
 {
   "Servers": {
     "1": {
-      "Name": "Odoo 19 Enterprise PostgreSQL",
-      "Group": "Odoo 19",
+      "Name": "Odoo $ODOO_MAJOR_VERSION Enterprise PostgreSQL",
+      "Group": "Odoo $ODOO_MAJOR_VERSION",
       "Host": "db-enterprise",
       "Port": 5432,
       "MaintenanceDB": "postgres",
@@ -148,12 +150,12 @@ EOF
 }
 EOF
   else
-    cat > config/pgadmin/servers.json <<'EOF'
+    cat > config/pgadmin/servers.json <<EOF
 {
   "Servers": {
     "1": {
-      "Name": "Odoo 19 Community PostgreSQL",
-      "Group": "Odoo 19",
+      "Name": "Odoo $ODOO_MAJOR_VERSION Community PostgreSQL",
+      "Group": "Odoo $ODOO_MAJOR_VERSION",
       "Host": "db-community",
       "Port": 5432,
       "MaintenanceDB": "postgres",
@@ -258,6 +260,7 @@ EOF
   umask 077
   {
   cat <<EOF
+Odoo version: $ODOO_VERSION
 Mode: $DEPLOYMENT_MODE
 Performance mode: $PERFORMANCE_MODE
 Network binding: $BIND_ADDRESS

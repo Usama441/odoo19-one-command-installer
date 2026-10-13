@@ -17,3 +17,5 @@ config/pgadmin/servers.json
 config/pgadmin/pgpass
 addons/enterprise/*
 !addons/enterprise/.gitkeep
+enterprise-*.zip
+/enterprise-*/

@@ -97,21 +97,27 @@ remove_foreign_docker_resources() {
 }
 
 discover_odoo_images() {
-  local key default_image env_image image
+  local key version env_image image
   local env_file="$SCRIPT_DIR/.env"
+  local -a default_images=()
 
   UNINSTALL_TARGET_IMAGES=()
   for key in ODOO_IMAGE POSTGRES_IMAGE PGADMIN_IMAGE; do
     case "$key" in
-      ODOO_IMAGE) default_image="odoo:19.0-20260908" ;;
-      POSTGRES_IMAGE) default_image="postgres:15.19" ;;
-      PGADMIN_IMAGE) default_image="dpage/pgadmin4:9.17" ;;
+      ODOO_IMAGE)
+        default_images=()
+        for version in "${SUPPORTED_ODOO_VERSIONS[@]}"; do
+          default_images+=("$(odoo_image_for_version "$version")")
+        done
+        ;;
+      POSTGRES_IMAGE) default_images=("postgres:15.19") ;;
+      PGADMIN_IMAGE) default_images=("dpage/pgadmin4:9.17") ;;
     esac
     env_image=""
     if [[ -f "$env_file" ]]; then
       env_image="$(awk -v key="$key" 'index($0, key "=") == 1 { value = substr($0, length(key) + 2); sub(/\r$/, "", value); print value; exit }' "$env_file")"
     fi
-    for image in "$env_image" "$default_image"; do
+    for image in "$env_image" "${default_images[@]}"; do
       [[ -n "$image" ]] || continue
       uninstall_list_contains "$image" "${UNINSTALL_TARGET_IMAGES[@]}" && continue
       if "${UNINSTALL_DOCKER_COMMAND[@]}" image inspect "$image" >/dev/null 2>&1; then
@@ -357,7 +363,7 @@ audit_uninstall_targets() {
   echo
   echo "Original checkout source paths (always preserved):"
   for protected_path in \
-    "$SCRIPT_DIR/enterprise-19.0" \
+    "${SUPPORTED_ODOO_VERSIONS[@]/#/$SCRIPT_DIR/enterprise-}" \
     "$SCRIPT_DIR/addons/enterprise" \
     "$SCRIPT_DIR/addons/community" \
     "$SCRIPT_DIR/addons/enterprise-custom"; do
