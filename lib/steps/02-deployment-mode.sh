@@ -10,15 +10,17 @@ step_choose_deployment_mode() {
   case "${DEPLOYMENT_CHOICE,,}" in
     1|testing)
       DEPLOYMENT_MODE="testing"
-      BIND_ADDRESS="127.0.0.1"
-      ACCESS_HOST="localhost"
       ;;
     2|production)
       DEPLOYMENT_MODE="production"
-      BIND_ADDRESS="0.0.0.0"
-      ACCESS_HOST=""
       ;;
     *) echo "Choose 1 for testing or 2 for production."; exit 1 ;;
+  esac
+  choose_bind_address
+  case "$BIND_ADDRESS" in
+    127.0.0.1) ACCESS_HOST="localhost" ;;
+    0.0.0.0) ACCESS_HOST="" ;;
+    *) ACCESS_HOST="$BIND_ADDRESS" ;;
   esac
 
   echo

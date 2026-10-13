@@ -5,6 +5,65 @@ valid_port() {
   [[ "$1" =~ ^[0-9]{1,5}$ ]] && (( 10#$1 >= 1 && 10#$1 <= 65535 ))
 }
 
+valid_ipv4() {
+  local octet
+  [[ "$1" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]] || return 1
+  for octet in ${1//./ }; do
+    (( 10#$octet <= 255 )) || return 1
+  done
+}
+
+# Sets BIND_ADDRESS, the host address Odoo and pgAdmin web ports publish on:
+# localhost only, or an address the user enters (0.0.0.0 for all interfaces).
+# A saved choice from .env becomes the default on reruns.
+choose_bind_address() {
+  local saved_address="" default_address default_choice choice entered
+
+  if [[ -f .env ]]; then saved_address="$(get_env_value BIND_ADDRESS)"; fi
+  if [[ "$DEPLOYMENT_MODE" == "testing" ]]; then default_address="127.0.0.1"; else default_address="0.0.0.0"; fi
+  if [[ -n "$saved_address" ]] && valid_ipv4 "$saved_address"; then default_address="$saved_address"; fi
+  if [[ "$default_address" == "127.0.0.1" ]]; then default_choice="1"; else default_choice="2"; fi
+
+  echo
+  printf '%b\n' "${COLOR_BOLD}Network bind address${COLOR_RESET}"
+  echo "  1) localhost only (127.0.0.1) - reachable only from this machine"
+  echo "  2) Enter an IP address - a server IP, or 0.0.0.0 for all interfaces"
+  read_choice choice "Choose a bind address option [$default_choice]: " "$default_choice" "1 2"
+  if [[ "$choice" == "1" ]]; then
+    BIND_ADDRESS="127.0.0.1"
+    return
+  fi
+
+  [[ "$default_address" == "127.0.0.1" ]] && default_address="0.0.0.0"
+  echo "IPv4 addresses on this machine: $(hostname -I 2>/dev/null | xargs || echo unknown)"
+  while true; do
+    read -r -p "Bind IP address [$default_address]: " entered
+    entered="${entered:-$default_address}"
+    entered="${entered//[[:space:]]/}"
+    if ! valid_ipv4 "$entered"; then
+      echo "Please enter an IPv4 address such as 192.168.1.10 or 0.0.0.0."
+      continue
+    fi
+    # Docker can only publish on an address assigned to this host.
+    if [[ "$entered" != "0.0.0.0" && "$entered" != "127.0.0.1" ]] &&
+       ! hostname -I 2>/dev/null | tr ' ' '\n' | grep -Fxq "$entered"; then
+      echo "$entered is not assigned to this machine, so Docker could not publish on it."
+      continue
+    fi
+    BIND_ADDRESS="$entered"
+    return
+  done
+}
+
+# Human-readable description of BIND_ADDRESS for the review and summary.
+bind_address_label() {
+  case "$BIND_ADDRESS" in
+    127.0.0.1) echo "localhost only (127.0.0.1)" ;;
+    0.0.0.0) echo "all host interfaces (0.0.0.0)" ;;
+    *) echo "$BIND_ADDRESS only" ;;
+  esac
+}
+
 # Pinned official image tag for each selectable Odoo release.
 odoo_image_for_version() {
   case "$1" in

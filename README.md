@@ -12,9 +12,9 @@ Docker services. The installer asks which Odoo version to install.
 
 | Component | When it starts | Default address |
 |---|---|---|
-| Odoo Community (19 or 20) + PostgreSQL | Community or Both is selected | Ubuntu testing: `http://localhost:8069`; production/Windows: `http://SERVER-IP:8069` |
-| Odoo Enterprise (19 or 20) + PostgreSQL | Enterprise or Both is selected and licensed addons exist | Ubuntu testing: `http://localhost:8070`; production/Windows: `http://SERVER-IP:8070` |
-| pgAdmin 4 web application | When the user answers `y` | Ubuntu testing: `http://localhost:5050`; production/Windows: `http://SERVER-IP:5050` |
+| Odoo Community (19 or 20) + PostgreSQL | Community or Both is selected | `http://localhost:8069` (localhost bind) or `http://SERVER-IP:8069` |
+| Odoo Enterprise (19 or 20) + PostgreSQL | Enterprise or Both is selected and licensed addons exist | `http://localhost:8070` (localhost bind) or `http://SERVER-IP:8070` |
+| pgAdmin 4 web application | When the user answers `y` | `http://localhost:5050` (localhost bind) or `http://SERVER-IP:5050` |
 
 Community and Enterprise use separate databases, passwords, filestores, ports,
 configuration files, and custom-addon folders. pgAdmin can manage both databases
@@ -276,7 +276,8 @@ how to rerun it.
 | Order | Prompt | What it controls |
 |---:|---|---|
 | 0 | `Choose an Odoo version [2]` | Asked right after an install option is chosen in the main menu (Windows asks it at the start of step 2). `1` selects Odoo 19.0 and `2` selects Odoo 20.0 (the default on a new machine). On a rerun the installed version is the default. Switching versions is refused while databases from the other version exist; back them up and remove them first, because a major-version upgrade needs Odoo's database migration. |
-| 1 | `Choose a profile [1]` | `1` selects the lightweight testing server and binds web ports only to `127.0.0.1`. `2` selects production, binds to all host interfaces, and opens the hardware-aware performance advisor. |
+| 1 | `Choose a profile [1]` | `1` selects the lightweight testing server. `2` selects production and opens the hardware-aware performance advisor. |
+| 1a | `Choose a bind address option` | `1` publishes the web ports on `127.0.0.1` only (reachable from this machine). `2` asks for an IP address: a server IP to listen on one network only, or `0.0.0.0` for all interfaces. The default is `1` for testing and `2` with `0.0.0.0` for production; on reruns the saved `BIND_ADDRESS` from `.env` is the default. An address that is not assigned to the machine is rejected. |
 | 2 | `Community web port [8069]` | Asked only when Community or Both was selected in the Ubuntu menu. |
 | 3 | `Enterprise addons folder` | Asked only when Enterprise is selected and complete addons were not detected automatically. |
 | 4 | `Enterprise web port [8070]` | Asked only when Enterprise will start. In Both mode it must differ from the Community port. |
@@ -332,6 +333,7 @@ Choose an option [1]: 1
 Choose an Odoo version [2]:
 Refresh package lists and upgrade installed Ubuntu packages now? [y/N]: n
 Choose a profile [1]:
+Choose a bind address option [1]:
 Community web port [8069]:
 Add pgAdmin to this installation? [y/N]: y
 pgAdmin web port [5050]:
@@ -373,8 +375,9 @@ running containers, and disabling pgAdmin stops its existing container.
 5. **Guide the user through choices.** Numbered menus select the Odoo version
    (19.0 or 20.0), testing/production,
    optional pgAdmin, and only the ports relevant to the chosen Odoo editions.
-   Testing is reachable only from the same machine through `localhost`.
-   Production binds web ports to all host interfaces and adds the hardware-aware
+   The bind address question publishes the web ports on `localhost` only or on
+   an IP address the user enters (`0.0.0.0` for all interfaces); the choice is
+   saved as `BIND_ADDRESS` in `.env`. Production adds the hardware-aware
    worker, cron, and memory advisor. A recent Compose version with `--wait`
    support is required.
 6. **Protect existing data.** The script detects installer-created Docker
@@ -403,9 +406,9 @@ running containers, and disabling pgAdmin stops its existing container.
    selected Odoo editions and optional pgAdmin start. Every created service has
    the `restart: unless-stopped` policy.
 12. **Wait for health.** Docker Compose waits up to 300 seconds for all requested
-   services. On Ubuntu production installs, an already-active UFW firewall
-   receives allow rules for the selected public web ports. Testing mode does not
-   add firewall rules because its ports are bound only to localhost.
+   services. On Ubuntu, when the bind address is not `127.0.0.1`, an
+   already-active UFW firewall receives allow rules for the selected web ports.
+   A localhost-only bind adds no firewall rules.
 13. **Show next steps.** The terminal prints URLs, credentials, and browser setup
    guidance. The access information is also saved to `installation-info.txt`.
 

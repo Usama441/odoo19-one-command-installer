@@ -6,11 +6,7 @@ step_review_and_install() {
   printf '  %-24s %s\n' "Odoo version" "$ODOO_VERSION ($ODOO_IMAGE)"
   printf '  %-24s %s\n' "Profile" "$DEPLOYMENT_MODE"
   printf '  %-24s %s\n' "Performance mode" "$PERFORMANCE_MODE"
-  if [[ "$DEPLOYMENT_MODE" == "testing" ]]; then
-    printf '  %-24s %s\n' "Network exposure" "localhost only (127.0.0.1)"
-  else
-    printf '  %-24s %s\n' "Network exposure" "all host interfaces (0.0.0.0)"
-  fi
+  printf '  %-24s %s\n' "Network exposure" "$(bind_address_label)"
   if [[ "$START_COMMUNITY" == "true" ]]; then
     printf '  %-24s %s\n' "Community" "enabled on port $COMMUNITY_PORT"
     printf '  %-24s %s\n' "Community custom addons" "$ODOO_HOST_CUSTOM_ADDONS_DIR"
@@ -235,7 +231,7 @@ EOF
   if [[ "$PGADMIN_ENABLED" == "true" ]]; then START_SERVICES+=(pgadmin); fi
   "${DOCKER[@]}" compose "${COMPOSE_PROFILE[@]}" up -d --wait --wait-timeout 300 "${START_SERVICES[@]}"
 
-  if [[ "$DEPLOYMENT_MODE" == "production" ]] &&
+  if [[ "$BIND_ADDRESS" != "127.0.0.1" ]] &&
      command -v ufw >/dev/null 2>&1 && sudo ufw status | grep -q '^Status: active'; then
     if [[ "$START_COMMUNITY" == "true" ]]; then
       sudo ufw allow "${COMMUNITY_PORT}/tcp"
@@ -250,7 +246,7 @@ EOF
 
   HOST_IP="$(hostname -I 2>/dev/null | awk '{print $1}' || true)"
   HOST_IP="${HOST_IP:-127.0.0.1}"
-  if [[ "$DEPLOYMENT_MODE" == "production" ]]; then
+  if [[ -z "$ACCESS_HOST" ]]; then
     ACCESS_HOST="$HOST_IP"
   fi
   if [[ -e installation-info.txt ]]; then

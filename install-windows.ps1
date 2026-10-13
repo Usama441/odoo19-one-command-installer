@@ -248,6 +248,55 @@ if ($mode -eq "production") {
     Write-Warning "For a real production server, Ubuntu is recommended instead of Windows Desktop."
 }
 
+# Host address the Odoo and pgAdmin web ports publish on: localhost only, or an
+# address the user enters (0.0.0.0 for all interfaces). A saved choice is the
+# default on reruns.
+function Test-IPv4([string]$Address) {
+    if ($Address -notmatch '^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$') { return $false }
+    foreach ($octet in $Address.Split(".")) { if ([int]$octet -gt 255) { return $false } }
+    return $true
+}
+$hostIpAddresses = @(Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue |
+    Select-Object -ExpandProperty IPAddress)
+$defaultBindAddress = if ($mode -eq "testing") { "127.0.0.1" } else { "0.0.0.0" }
+$savedBindAddress = Get-EnvValue "BIND_ADDRESS"
+if ((-not [string]::IsNullOrWhiteSpace($savedBindAddress)) -and (Test-IPv4 $savedBindAddress)) {
+    $defaultBindAddress = $savedBindAddress
+}
+$defaultBindChoice = if ($defaultBindAddress -eq "127.0.0.1") { "1" } else { "2" }
+Write-Host ""
+Write-Host "Network bind address:"
+Write-Host "  1) localhost only (127.0.0.1) - reachable only from this computer"
+Write-Host "  2) Enter an IP address - a computer IP, or 0.0.0.0 for all interfaces"
+$bindChoice = Read-MenuChoice "Choose a bind address option [$defaultBindChoice]" $defaultBindChoice @("1", "2")
+if ($bindChoice -eq "1") {
+    $bindAddress = "127.0.0.1"
+} else {
+    if ($defaultBindAddress -eq "127.0.0.1") { $defaultBindAddress = "0.0.0.0" }
+    Write-Host "IPv4 addresses on this computer: $($hostIpAddresses -join ', ')"
+    while ($true) {
+        $enteredAddress = Read-Host "Bind IP address [$defaultBindAddress]"
+        if ([string]::IsNullOrWhiteSpace($enteredAddress)) { $enteredAddress = $defaultBindAddress }
+        $enteredAddress = $enteredAddress.Trim()
+        if (-not (Test-IPv4 $enteredAddress)) {
+            Write-Warning "Please enter an IPv4 address such as 192.168.1.10 or 0.0.0.0."
+            continue
+        }
+        # Docker can only publish on an address assigned to this computer.
+        if (($enteredAddress -notin @("0.0.0.0", "127.0.0.1")) -and ($hostIpAddresses -notcontains $enteredAddress)) {
+            Write-Warning "$enteredAddress is not assigned to this computer, so Docker could not publish on it."
+            continue
+        }
+        $bindAddress = $enteredAddress
+        break
+    }
+}
+$bindAddressLabel = switch ($bindAddress) {
+    "127.0.0.1" { "localhost only (127.0.0.1)" }
+    "0.0.0.0" { "all host interfaces (0.0.0.0)" }
+    default { "$bindAddress only" }
+}
+
 Write-Host ""
 Write-Host "The Community web port is used in the browser URL."
 [int]$parsedCommunityPort = Read-Port "Community web port" 8069
@@ -483,6 +532,7 @@ if (($odooImage -notmatch '^[A-Za-z0-9][A-Za-z0-9._/@:-]+$') -or
 Write-Section "5/6" "Review the installation plan"
 Write-Host ("  {0,-24} {1}" -f "Odoo version", "$odooVersion ($odooImage)")
 Write-Host ("  {0,-24} {1}" -f "Profile", $mode)
+Write-Host ("  {0,-24} {1}" -f "Network exposure", $bindAddressLabel)
 Write-Host ("  {0,-24} {1}" -f "Community", "enabled on port $communityPort")
 if ($startEnterprise) {
     Write-Host ("  {0,-24} {1}" -f "Enterprise", "enabled on port $enterprisePort")
@@ -528,6 +578,7 @@ ODOO_VERSION=$odooVersion
 ODOO_IMAGE=$odooImage
 POSTGRES_IMAGE=$postgresImage
 PGADMIN_IMAGE=$pgAdminImage
+BIND_ADDRESS=$bindAddress
 COMMUNITY_PORT=$communityPort
 ENTERPRISE_PORT=$enterprisePort
 COMMUNITY_DB_PASSWORD=$communityDbPassword
@@ -633,10 +684,13 @@ $hostIp = (Get-NetIPAddress -AddressFamily IPv4 |
     Where-Object { $_.IPAddress -notlike "127.*" -and $_.InterfaceOperationalStatus -eq "Up" } |
     Select-Object -First 1 -ExpandProperty IPAddress)
 if ([string]::IsNullOrWhiteSpace($hostIp)) { $hostIp = "127.0.0.1" }
+if ($bindAddress -eq "127.0.0.1") { $hostIp = "localhost" }
+elseif ($bindAddress -ne "0.0.0.0") { $hostIp = $bindAddress }
 
 $installationInfo = @(
     "Odoo version: $odooVersion",
     "Mode: $mode",
+    "Network binding: $bindAddress",
     "Automatic startup: enabled after Windows sign-in (containers restart unless manually stopped)",
     "Community: http://${hostIp}:$communityPort",
     "Community Odoo master password: $communityAdminPassword"
