@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <odoo noupdate="1">
+        <record id="resource_calendar_def_40h" model="resource.calendar">
+            <field name="name">40 hours/week</field>
+            <field name="company_id" eval="False"/>
+            <field name="attendance_ids"
+                eval="[(5, 0, 0),
+                    (0, 0, {'dayofweek': '6', 'duration_hours': 8, 'hour_from': 0, 'hour_to': 0}),
+                    (0, 0, {'dayofweek': '0', 'duration_hours': 8, 'hour_from': 0, 'hour_to': 0}),
+                    (0, 0, {'dayofweek': '1', 'duration_hours': 8, 'hour_from': 0, 'hour_to': 0}),
+                    (0, 0, {'dayofweek': '2', 'duration_hours': 8, 'hour_from': 0, 'hour_to': 0}),
+                    (0, 0, {'dayofweek': '3', 'duration_hours': 8, 'hour_from': 0, 'hour_to': 0}),
+                ]"
+            />
+        </record>
+        <record id="resource_calendar_ramadan_30h" model="resource.calendar">
+            <field name="name">Ramadan 30h / Week</field>
+            <field name="company_id" eval="False"/>
+            <field name="full_time_required_hours">30</field>
+            <field name="reference_calendar_id" eval="False"/>
+            <field name="attendance_ids"
+                eval="[(5, 0, 0),
+                    (0, 0, {'dayofweek': '6', 'duration_hours': 6, 'hour_from': 0, 'hour_to': 0}),
+                    (0, 0, {'dayofweek': '0', 'duration_hours': 6, 'hour_from': 0, 'hour_to': 0}),
+                    (0, 0, {'dayofweek': '1', 'duration_hours': 6, 'hour_from': 0, 'hour_to': 0}),
+                    (0, 0, {'dayofweek': '2', 'duration_hours': 6, 'hour_from': 0, 'hour_to': 0}),
+                    (0, 0, {'dayofweek': '3', 'duration_hours': 6, 'hour_from': 0, 'hour_to': 0}),
+                ]"
+            />
+        </record>
+    </odoo>
+</odoo>

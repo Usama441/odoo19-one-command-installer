@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="pdf_export_main_customer_report" inherit_id="account_reports.pdf_export_main" primary="True">
+        <xpath expr="//body//header" position="replace">
+            <header>
+                <div class="o_title">
+                    <t t-if="report.filter_show_draft and options['all_entries']">[Draft]</t>
+                    <t t-out="report_title"/>
+                </div>
+                <div class="row">
+                    <div class="col-7">
+                        <!-- All company information (name, address, vat, ...) -->
+                        <t t-call="account_reports.company_information_customer_report"/>
+                    </div>
+                    <div class="col-5">
+                        <!-- All tax and bank information -->
+                        <t t-call="account_reports.tax_information_customer_report"/>
+                        <t t-call="account_reports.bank_information_customer_report"/>
+                    </div>
+                </div>
+
+                <t t-call="account_reports.partner_information_customer_report"/>
+            </header>
+        </xpath>
+    </template>
+
+    <template id="partner_information_customer_report">
+        <div class="row mt-3">
+            <div class="col-7">
+                <t t-set="statement_partner_ids" t-value="options.get('partner_ids') or []"/>
+                <t t-if="len(statement_partner_ids) == 1 and statement_partner_ids[0]">
+                    <t t-set="statement_partner" t-value="env['res.partner'].browse(statement_partner_ids)"/>
+                    <div class="fw-bold" t-out="statement_partner.name"/>
+                    <address class="mb-0 o_text_muted" style="white-space: pre-line" t-out="statement_partner.contact_address"/>
+                </t>
+            </div>
+            <div class="col-5">
+                <div>
+                    Date: <span class="o_text_muted" t-out="options['date']['string']"/>
+                </div>
+                <div t-if="options.get('partner_total_due')">
+                    Total Due: <span class="o_text_muted" t-out="options['partner_total_due']"/>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="company_information_customer_report">
+        <t t-set="company_names" t-value="[company['name'] for company in options['companies']]"/>
+        <div class="row align-items-center">
+            <img t-if="env.company.logo" class="col-auto o_account_reports_company_logo me-3" t-att-src="image_data_uri(env.company.logo)" alt="Logo"/>
+            <div class="col">
+                <div class="row">
+                    <div class="col-10" t-out="', '.join(company_names)"/>
+                </div>
+                <address class="mb-0 o_text_muted" t-field="env.company.partner_id" t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
+            </div>
+        </div>
+    </template>
+
+    <template id="tax_information_customer_report">
+        <div class="row text-nowrap">
+            <t t-if="options.get('tax_unit', 'company_only') == 'company_only'">
+                <t t-if="env.company.account_fiscal_country_id.vat_label" t-out="env.company.account_fiscal_country_id.vat_label+':'"/>
+                <t t-else="">
+                    <t t-if="env.company.vat">Tax ID:</t>
+                </t>
+                <t t-out="env.company.vat"/>
+            </t>
+            <t t-else="">
+                <t t-set="tax_unit_vat" t-value="env['account.tax.unit'].browse(options.get('tax_unit')).vat"/>
+                <t t-if="tax_unit_vat">
+                    Tax ID: <t t-out="tax_unit_vat"/>
+                </t>
+            </t>
+        </div>
+    </template>
+
+    <template id="bank_information_customer_report">
+        <t t-set="bank_account" t-value="env.company.partner_id.bank_ids.filtered(lambda bank: bank.allow_out_payment)[:1]"/>
+        <div class="row text-nowrap">
+            <t t-if="bank_account">
+                Bank: <t t-out="bank_account.account_number"/>
+            </t>
+        </div>
+    </template>
+
+</odoo>

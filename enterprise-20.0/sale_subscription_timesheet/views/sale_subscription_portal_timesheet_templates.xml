@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="subscription_portal_sidebar_timesheet" inherit_id="sale_subscription.subscription_portal_sidebar">
+        <xpath expr="//div[hasclass('o_download_pdf')]" position="after">
+            <t t-if="
+                sale_order.timesheet_count > 0
+                and sale_order.state == 'sale'
+                and sale_order.order_line.filtered(lambda l: l.product_type == 'service' and not l.recurring_invoice)
+            ">
+                <a class="btn btn-light flex-grow-1"
+                    t-att-href="'/my/timesheets?search_in=so&amp;search=%s' % sale_order.name"
+                    title='View Timesheets'
+                    target='_blank'
+                    role='button'
+                    icon="schedule"
+                >
+                    <i class="oi oi-fw" data-icon="schedule" role="img" aria-label="View Timesheets"/>
+                    View Timesheets
+                </a>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="subscription_portal_timesheet" inherit_id="sale_timesheet.sale_order_portal_content_inherit">
+        <xpath expr="//t[contains(@t-if, 'sale_order.timesheet_count')]" position="attributes">
+            <attribute name="t-if" add="sale_order.order_line.filtered(lambda l: l.product_type == 'service' and not l.recurring_invoice)" separator="and" />
+        </xpath>
+    </template>
+
+</odoo>

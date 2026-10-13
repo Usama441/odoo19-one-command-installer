@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="account_return_kanban_view_inherit_label" model="ir.ui.view">
+            <field name="name">account.return.kanban.inherit.label</field>
+            <field name="model">account.return</field>
+            <field name="inherit_id" ref="account_reports.account_return_kanban_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='date_submission']" position="after">
+                    <field name="is_quarter_month"/>
+                    <field name="country_code"/>
+                </xpath>
+
+                <xpath expr="//button[@name='action_submit']/span" position="replace">
+                    <span t-if="record.country_code.raw_value == 'IT' and record.type_external_id.raw_value == 'l10n_it_reports.it_tax_return_type' and !record.is_quarter_month.raw_value">Close</span>
+                    <t t-else="">$0</t>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

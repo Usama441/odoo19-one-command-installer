@@ -1,0 +1,193 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# * quality_mrp
+#
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Odoo Translation Bot <c3p@odoo.com>, 2026.
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-28 17:51+0000\n"
+"PO-Revision-Date: 2026-10-08 15:34+0000\n"
+"Last-Translator: Odoo Translation Bot <c3p@odoo.com>\n"
+"Language-Team: Hindi <https://translate.odoo.com/projects/odoo-20/"
+"quality_mrp/hi/>\n"
+"Language: hi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 2026.8.1\n"
+
+#. module: quality_mrp
+#: model:ir.module.module,description:base.module_quality_mrp
+msgid ""
+"\n"
+"Adds workcenters to Quality Control\n"
+msgstr ""
+
+#. module: quality_mrp
+#. odoo-python
+#: code:addons/quality_mrp/models/quality.py:0
+msgid "%(product_name)s is not in Production Order %(production_name)s"
+msgstr ""
+
+#. module: quality_mrp
+#: model_terms:ir.ui.view,arch_db:quality_mrp.mrp_production_view_form_inherit_quality
+#, fuzzy
+msgid "<span class=\"o_stat_text text-danger\">Quality Checks</span>"
+msgstr "<span class=\"o_stat_text text-danger\">क्वालिटी चेक</span>"
+
+#. module: quality_mrp
+#: model_terms:ir.ui.view,arch_db:quality_mrp.mrp_production_view_form_inherit_quality
+#, fuzzy
+msgid "<span class=\"o_stat_text text-success\">Quality Checks</span>"
+msgstr "<span class=\"o_stat_text text-success\">क्वालिटी चेक</span>"
+
+#. module: quality_mrp
+#: model_terms:ir.ui.view,arch_db:quality_mrp.mrp_production_view_form_inherit_quality
+msgid "<span class=\"o_stat_text\">Quality Alerts</span>"
+msgstr ""
+
+#. module: quality_mrp
+#: model_terms:ir.ui.view,arch_db:quality_mrp.mrp_production_view_form_inherit_quality
+#, fuzzy
+msgid "<span class=\"o_stat_text\">Quality Checks</span>"
+msgstr "<span class=\"o_stat_text\">क्वालिटी चेक</span>"
+
+#. module: quality_mrp
+#: model_terms:ir.ui.view,arch_db:quality_mrp.worksheet_page
+msgid "<strong>Manufacturing Order: </strong>"
+msgstr ""
+
+#. module: quality_mrp
+#: model:ir.model.fields,field_description:quality_mrp.field_mrp_production__quality_alert_ids
+msgid "Alerts"
+msgstr "अलर्ट"
+
+#. module: quality_mrp
+#: model:ir.model.fields,field_description:quality_mrp.field_mrp_production__check_ids
+msgid "Checks"
+msgstr "चेक्स"
+
+#. module: quality_mrp
+#: model:ir.model.fields,field_description:quality_mrp.field_mrp_production__display_name
+#: model:ir.model.fields,field_description:quality_mrp.field_quality_alert__display_name
+#: model:ir.model.fields,field_description:quality_mrp.field_quality_check__display_name
+#: model:ir.model.fields,field_description:quality_mrp.field_quality_check_wizard__display_name
+#: model:ir.model.fields,field_description:quality_mrp.field_quality_point__display_name
+#: model:ir.model.fields,field_description:quality_mrp.field_stock_move__display_name
+#: model:ir.model.fields,field_description:quality_mrp.field_stock_move_line__display_name
+msgid "Display Name"
+msgstr "डिस्प्ले का नाम"
+
+#. module: quality_mrp
+#: model:ir.model.fields,field_description:quality_mrp.field_mrp_production__id
+#: model:ir.model.fields,field_description:quality_mrp.field_quality_alert__id
+#: model:ir.model.fields,field_description:quality_mrp.field_quality_check__id
+#: model:ir.model.fields,field_description:quality_mrp.field_quality_check_wizard__id
+#: model:ir.model.fields,field_description:quality_mrp.field_quality_point__id
+#: model:ir.model.fields,field_description:quality_mrp.field_stock_move__id
+#: model:ir.model.fields,field_description:quality_mrp.field_stock_move_line__id
+msgid "ID"
+msgstr "आईडी"
+
+#. module: quality_mrp
+#: model:ir.module.module,shortdesc:base.module_quality_mrp
+msgid "MRP features for Quality Control"
+msgstr ""
+
+#. module: quality_mrp
+#: model:ir.model,name:quality_mrp.model_mrp_production
+#: model_terms:ir.ui.view,arch_db:quality_mrp.quality_alert_view_form_inherit_mrp
+msgid "Manufacturing Order"
+msgstr "विनिर्माण आदेश"
+
+#. module: quality_mrp
+#: model:ir.model,name:quality_mrp.model_stock_move_line
+#, fuzzy
+msgid "Product Moves (Stock Move Line)"
+msgstr "प्रॉडक्ट मूव्स (स्टॉक मूव लाइन)"
+
+#. module: quality_mrp
+#: model:ir.model.fields,field_description:quality_mrp.field_quality_alert__production_id
+#: model:ir.model.fields,field_description:quality_mrp.field_quality_check__production_id
+msgid "Production Order"
+msgstr "उत्पादन के आदेश"
+
+#. module: quality_mrp
+#: model:ir.actions.server,name:quality_mrp.mrp_production_action_create_quality_alert
+#: model:ir.model,name:quality_mrp.model_quality_alert
+#: model_terms:ir.ui.view,arch_db:quality_mrp.mrp_production_view_form_inherit_quality
+#, fuzzy
+msgid "Quality Alert"
+msgstr "क्वालिटी अलर्ट"
+
+#. module: quality_mrp
+#: model:ir.model.fields,field_description:quality_mrp.field_mrp_production__quality_alert_count
+#, fuzzy
+msgid "Quality Alert Count"
+msgstr "क्वालिटी अलर्ट की संख्या"
+
+#. module: quality_mrp
+#: model:ir.actions.server,name:quality_mrp.mrp_production_action_quality_check_on_demand
+#: model:ir.model,name:quality_mrp.model_quality_check
+msgid "Quality Check"
+msgstr "क्वालिटी चेक"
+
+#. module: quality_mrp
+#: model:ir.model.fields,field_description:quality_mrp.field_mrp_production__quality_check_fail
+#, fuzzy
+msgid "Quality Check Fail"
+msgstr "क्वालिटी चेक फेल"
+
+#. module: quality_mrp
+#: model:ir.model.fields,field_description:quality_mrp.field_mrp_production__quality_check_todo
+#, fuzzy
+msgid "Quality Check Todo"
+msgstr "क्वालिटी चेक किया जाना बाकी"
+
+#. module: quality_mrp
+#: model:ir.actions.act_window,name:quality_mrp.quality_check_action_mo
+#: model_terms:ir.ui.view,arch_db:quality_mrp.mrp_production_view_form_inherit_quality
+msgid "Quality Checks"
+msgstr "क्वालिटी जांच"
+
+#. module: quality_mrp
+#: model:ir.model,name:quality_mrp.model_quality_point
+#, fuzzy
+msgid "Quality Control Point"
+msgstr "क्वालिटी कंट्रोल पॉइंट"
+
+#. module: quality_mrp
+#: model:ir.module.module,summary:base.module_quality_mrp
+msgid "Quality Management with MRP"
+msgstr ""
+
+#. module: quality_mrp
+#: model:ir.model,name:quality_mrp.model_stock_move
+msgid "Stock Move"
+msgstr "चाल स्टॉक"
+
+#. module: quality_mrp
+#. odoo-python
+#: code:addons/quality_mrp/models/quality.py:0
+msgid ""
+"The Quantity quality check type is not possible with manufacturing operation "
+"types."
+msgstr ""
+"प्रॉडक्ट के कामों में आप सिर्फ 'कितनी मात्रा' है, उसके हिसाब से क्वालिटी चेक नहीं कर सकते।"
+
+#. module: quality_mrp
+#: model:ir.model,name:quality_mrp.model_quality_check_wizard
+#, fuzzy
+msgid "Wizard for Quality Check Pop Up"
+msgstr "क्वालिटी चेक पॉप-अप के लिए विज़ॉर्ड"
+
+#. module: quality_mrp
+#. odoo-python
+#: code:addons/quality_mrp/models/mrp_production.py:0
+#, fuzzy
+msgid "You still need to do the quality checks!"
+msgstr "आपको अभी भी क्वालिटी चेक करने होंगे!"

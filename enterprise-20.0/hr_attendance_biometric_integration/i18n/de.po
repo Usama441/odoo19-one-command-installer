@@ -1,0 +1,375 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# * hr_attendance_biometric_integration
+#
+# "Larissa Manderfeld (lman)" <lman@odoo.com>, 2026.
+# Odoo Translation Bot <c3p@odoo.com>, 2026.
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.5a1+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-04 18:06+0000\n"
+"PO-Revision-Date: 2026-10-08 11:35+0000\n"
+"Last-Translator: Odoo Translation Bot <c3p@odoo.com>\n"
+"Language-Team: German <https://translate.odoo.com/projects/odoo-20/"
+"hr_attendance_biometric_integration/de/>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"Language: de\n"
+"X-Generator: Weblate 2026.8.1\n"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__message_needaction
+msgid "Action Needed"
+msgstr "Aktion erforderlich"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__message_attachment_count
+msgid "Attachment Count"
+msgstr "Anzahl Anhänge"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model,name:hr_attendance_biometric_integration.model_hr_attendance
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__attendance_id
+msgid "Attendance"
+msgstr "Anwesenheit"
+
+#. module: hr_attendance_biometric_integration
+#: model_terms:ir.ui.view,arch_db:hr_attendance_biometric_integration.view_hr_attendance_biometric_event_form
+msgid "Attendance Details"
+msgstr "Anwesenheitsdetails"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields.selection,name:hr_attendance_biometric_integration.selection__hr_attendance__in_mode__biometric
+#: model:ir.model.fields.selection,name:hr_attendance_biometric_integration.selection__hr_attendance__out_mode__biometric
+#: model_terms:ir.ui.view,arch_db:hr_attendance_biometric_integration.hr_attendance_view_form_inherit_biometric
+msgid "Biometric"
+msgstr "Biometrisch"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model,name:hr_attendance_biometric_integration.model_hr_attendance_biometric_event
+msgid "Biometric Attendance Event"
+msgstr "Biometrisches Anwesenheitsereignis"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.module.module,shortdesc:base.module_hr_attendance_biometric_integration
+msgid "Biometric Attendances"
+msgstr "Biometrische Anwesenheiten"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance__biometric_check_in_event_id
+msgid "Biometric Check-In Event"
+msgstr "Ereignis mit biometrischer Anmeldung"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance__biometric_check_out_event_id
+msgid "Biometric Check-Out Event"
+msgstr "Ereignis mit biometrischer Abmeldung"
+
+#. module: hr_attendance_biometric_integration
+#: model_terms:ir.ui.view,arch_db:hr_attendance_biometric_integration.view_hr_attendance_biometric_event_form
+msgid "Biometric Details"
+msgstr "Biometrische Daten"
+
+#. module: hr_attendance_biometric_integration
+#: model_terms:ir.ui.view,arch_db:hr_attendance_biometric_integration.view_hr_attendance_biometric_event_form
+msgid "Biometric Event"
+msgstr "Biometrisches Ereignis"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.actions.act_window,name:hr_attendance_biometric_integration.action_hr_attendance_biometric_event
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_employee__biometric_event_ids
+#: model:ir.ui.menu,name:hr_attendance_biometric_integration.menu_hr_attendance_biometric_event
+#: model_terms:ir.ui.view,arch_db:hr_attendance_biometric_integration.view_hr_attendance_biometric_event_search
+#: model_terms:ir.ui.view,arch_db:hr_attendance_biometric_integration.view_hr_attendance_biometric_event_tree
+msgid "Biometric Events"
+msgstr "Biometrische Ereignisse"
+
+#. module: hr_attendance_biometric_integration
+#: model_terms:ir.actions.act_window,help:hr_attendance_biometric_integration.action_hr_attendance_biometric_event
+msgid ""
+"Biometric punches are stored here before they are processed into "
+"attendances."
+msgstr ""
+"Biometrische Stempelungen werden hier gespeichert, bevor sie zu "
+"Anwesenheiten verarbeitet werden."
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__company_id
+#: model_terms:ir.ui.view,arch_db:hr_attendance_biometric_integration.view_hr_attendance_biometric_event_search
+msgid "Company"
+msgstr "Unternehmen"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__create_uid
+msgid "Created by"
+msgstr "Erstellt von"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__create_date
+msgid "Created on"
+msgstr "Erstellt am"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__device_id
+msgid "Device"
+msgstr "Gerät"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance__display_name
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__display_name
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_employee__display_name
+msgid "Display Name"
+msgstr "Anzeigename"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model,name:hr_attendance_biometric_integration.model_hr_employee
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__employee_id
+#: model_terms:ir.ui.view,arch_db:hr_attendance_biometric_integration.view_hr_attendance_biometric_event_search
+msgid "Employee"
+msgstr "Mitarbeiter"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__employee_code
+msgid "Employee Code"
+msgstr "Mitarbeitercode"
+
+#. module: hr_attendance_biometric_integration
+#. odoo-python
+#: code:addons/hr_attendance_biometric_integration/models/biometric_event.py:0
+msgid "Employee not found"
+msgstr "Mitarbeiter nicht gefunden"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields.selection,name:hr_attendance_biometric_integration.selection__hr_attendance_biometric_event__state__error
+msgid "Error"
+msgstr "Fehler"
+
+#. module: hr_attendance_biometric_integration
+#: model_terms:ir.ui.view,arch_db:hr_attendance_biometric_integration.view_hr_attendance_biometric_event_search
+msgid "Errors"
+msgstr "Fehler"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__message_follower_ids
+msgid "Followers"
+msgstr "Follower"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Follower (Partner)"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__has_message
+msgid "Has Message"
+msgstr "Hat Nachricht"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance__id
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__id
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_employee__id
+msgid "ID"
+msgstr "ID"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,help:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Falls markiert, erfordern neue Nachrichten Ihre Aufmerksamkeit."
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,help:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__message_has_error
+#: model:ir.model.fields,help:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Falls markiert, weisen einige Nachrichten einen Zustellungsfehler auf."
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__message_is_follower
+msgid "Is Follower"
+msgstr "Ist Follower"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_employee__biometric_last_punch_datetime
+msgid "Last Biometric Punch"
+msgstr "Letzter biometrischer Stempel"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__write_uid
+msgid "Last Updated by"
+msgstr "Zuletzt aktualisiert von"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__write_date
+msgid "Last Updated on"
+msgstr "Zuletzt aktualisiert am"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__message_has_error
+msgid "Message Delivery error"
+msgstr "Nachricht mit Zustellungsfehler"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__message_ids
+msgid "Messages"
+msgstr "Nachrichten"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance__in_mode
+msgid "Mode"
+msgstr "Modus"
+
+#. module: hr_attendance_biometric_integration
+#: model_terms:ir.actions.act_window,help:hr_attendance_biometric_integration.action_hr_attendance_biometric_event
+msgid "No biometric events found"
+msgstr "Keine biometrischen Ereignisse gefunden"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Anzahl Aktionen"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__message_has_error_counter
+msgid "Number of errors"
+msgstr "Anzahl Fehler"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,help:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "Anzahl der Nachrichten, die eine Aktion erfordern"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,help:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Anzahl Nachrichten mit Zustellungsfehler"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance__out_mode
+msgid "Out Mode"
+msgstr "Modus der Abmeldung"
+
+#. module: hr_attendance_biometric_integration
+#: model_terms:ir.ui.view,arch_db:hr_attendance_biometric_integration.view_hr_attendance_biometric_event_form
+#: model_terms:ir.ui.view,arch_db:hr_attendance_biometric_integration.view_hr_attendance_biometric_event_tree
+msgid "Process"
+msgstr "Verarbeiten"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields.selection,name:hr_attendance_biometric_integration.selection__hr_attendance_biometric_event__state__processed
+#: model_terms:ir.ui.view,arch_db:hr_attendance_biometric_integration.view_hr_attendance_biometric_event_form
+#: model_terms:ir.ui.view,arch_db:hr_attendance_biometric_integration.view_hr_attendance_biometric_event_search
+msgid "Processed"
+msgstr "Verarbeitet"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__provider
+#: model_terms:ir.ui.view,arch_db:hr_attendance_biometric_integration.view_hr_attendance_biometric_event_search
+msgid "Provider"
+msgstr "Anbieter"
+
+#. module: hr_attendance_biometric_integration
+#: model_terms:ir.ui.view,arch_db:hr_attendance_biometric_integration.view_hr_attendance_biometric_event_search
+msgid "Punch Date"
+msgstr "Stempeldatum"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__punch_datetime
+msgid "Punch Datetime"
+msgstr "Datum/Uhrzeit des Stempels"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__punch_reference
+msgid "Punch Reference"
+msgstr "Stempelreferenz"
+
+#. module: hr_attendance_biometric_integration
+#: model_terms:ir.ui.view,arch_db:hr_attendance_biometric_integration.view_hr_attendance_biometric_event_form
+msgid "Punch Time"
+msgstr "Stempelzeit"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__rating_ids
+msgid "Ratings"
+msgstr "Bewertungen"
+
+#. module: hr_attendance_biometric_integration
+#: model_terms:ir.ui.view,arch_db:hr_attendance_biometric_integration.view_hr_attendance_biometric_event_search
+msgid "Received"
+msgstr "Erhalten"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "SMS-Zustellungsfehler"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.module.module,summary:base.module_hr_attendance_biometric_integration
+msgid "Shared biometric attendance inbox and processor"
+msgstr "Gemeinsamer Posteingang und Prozessor für biometrische Anwesenheiten"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__state
+#: model_terms:ir.ui.view,arch_db:hr_attendance_biometric_integration.view_hr_attendance_biometric_event_search
+msgid "State"
+msgstr "Status"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.constraint,message:hr_attendance_biometric_integration.constraint_hr_attendance_biometric_event_unique_punch_reference
+msgid "The biometric event already exists for this company and provider."
+msgstr ""
+"Das biometrische Ereignis existiert bereits für dieses Unternehmen und "
+"diesen Anbieter."
+
+#. module: hr_attendance_biometric_integration
+#. odoo-python
+#: code:addons/hr_attendance_biometric_integration/models/biometric_event.py:0
+msgid "There is no transaction found to processed."
+msgstr "Es wurde keine zu verarbeitende Transaktion gefunden."
+
+#. module: hr_attendance_biometric_integration
+#. odoo-python
+#: code:addons/hr_attendance_biometric_integration/models/biometric_event.py:0
+msgid ""
+"This event was received with a datetime earlier than the last processed biometric punch.\n"
+"\n"
+"Last processed punch: %(punch)s\n"
+"Current Datetime: %(datetime)s"
+msgstr ""
+"Dieses Ereignis wurde mit einem Zeitstempel empfangen, der vor dem zuletzt "
+"verarbeiteten biometrischen Stempel liegt.\n"
+"\n"
+"Zuletzt verarbeiteter Stempel: %(punch)s\n"
+"Aktueller Zeitstempel: %(datetime)s"
+
+#. module: hr_attendance_biometric_integration
+#. odoo-python
+#: code:addons/hr_attendance_biometric_integration/models/biometric_event.py:0
+msgid ""
+"This event was received with a datetime earlier than the open attendance check-in.\n"
+"\n"
+"Last processed punch: %(punch)s\n"
+"Current Datetime: %(datetime)s"
+msgstr ""
+"Dieses Ereignis wurde mit einem Datums- und Zeitstempel empfangen, der vor "
+"Beginn der Anmeldung liegt.\n"
+"\n"
+"Zuletzt verarbeiteter Stempel: %(punch)s\n"
+"Aktuelles Datum und Uhrzeit: %(datetime)s"
+
+#. module: hr_attendance_biometric_integration
+#: model_terms:ir.ui.view,arch_db:hr_attendance_biometric_integration.view_hr_attendance_biometric_event_search
+msgid "Today"
+msgstr "Heute"
+
+#. module: hr_attendance_biometric_integration
+#: model:ir.model.fields,field_description:hr_attendance_biometric_integration.field_hr_attendance_biometric_event__warning_note
+msgid "Warning Note"
+msgstr "Warnhinweis"
+
+#. module: hr_attendance_biometric_integration
+#. odoo-python
+#: code:addons/hr_attendance_biometric_integration/models/biometric_event.py:0
+msgid "You cannot delete biometric events that have already been processed"
+msgstr "Sie können bereits verarbeitete biometrische Ereignisse nicht löschen"

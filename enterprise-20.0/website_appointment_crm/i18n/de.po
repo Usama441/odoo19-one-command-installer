@@ -1,0 +1,66 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# * website_appointment_crm
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
+# "Larissa Manderfeld (lman)" <lman@odoo.com>, 2025, 2026.
+# Odoo Translation Bot <c3p@odoo.com>, 2026.
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server saas~18.2+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-28 18:00+0000\n"
+"PO-Revision-Date: 2026-10-08 11:34+0000\n"
+"Last-Translator: Odoo Translation Bot <c3p@odoo.com>\n"
+"Language-Team: German <https://translate.odoo.com/projects/odoo-20/"
+"website_appointment_crm/de/>\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.8.1\n"
+
+#. module: website_appointment_crm
+#: model:ir.module.module,description:base.module_website_appointment_crm
+msgid ""
+"\n"
+"Enrich lead created automatically through an appointment with gathered "
+"website visitor information such as language,\n"
+"country and detailed information like pages browsed by the lead (through a "
+"link to website visitor).\n"
+msgstr ""
+"\n"
+"Reichern Sie Leads, die automatisch durch einen Termin erstellt werden, mit "
+"gesammelten Informationen über den Website-Besucher an, wie z. B. Sprache,\n"
+"Land und detaillierte Informationen wie den vom Lead besuchten Seiten (über "
+"einen Link zum Website-Besucher).\n"
+
+#. module: website_appointment_crm
+#: model:ir.model,name:website_appointment_crm.model_calendar_event
+msgid "Calendar Event"
+msgstr "Kalender-Ereignis"
+
+#. module: website_appointment_crm
+#: model:ir.model.fields,field_description:website_appointment_crm.field_calendar_event__display_name
+msgid "Display Name"
+msgstr "Anzeigename"
+
+#. module: website_appointment_crm
+#: model:ir.module.module,summary:base.module_website_appointment_crm
+msgid ""
+"Enrich lead created automatically through an appointment with gathered "
+"website visitor information"
+msgstr ""
+"Reichern Sie automatisch durch einen Termin erstellte Leads mit den "
+"gesammelten Informationen der Website-Besucher an."
+
+#. module: website_appointment_crm
+#: model:ir.model.fields,field_description:website_appointment_crm.field_calendar_event__id
+msgid "ID"
+msgstr "ID"
+
+#. module: website_appointment_crm
+#: model:ir.module.module,shortdesc:base.module_website_appointment_crm
+msgid "Website Appointment Lead Enrichment"
+msgstr "Website, Termine & Lead-Anreicherung"

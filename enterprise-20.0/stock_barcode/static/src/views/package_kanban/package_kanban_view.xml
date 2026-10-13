@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="stock_barcode.PackageKanbanControlPanel">
+        <div t-if="this.pagerProps and this.pagerProps.total > 0" class="o_barcode_package_pager d-flex justify-content-end p-2">
+            <Pager t-props="this.pagerProps"/>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,293 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# * ai_helpdesk
+#
+# "Manon Rondou (ronm)" <ronm@odoo.com>, 2026.
+# "Cécile Collart (cco)" <cco@odoo.com>, 2026.
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server saas~19.2+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-25 17:47+0000\n"
+"PO-Revision-Date: 2026-10-05 11:22+0000\n"
+"Last-Translator: \"Cécile Collart (cco)\" <cco@odoo.com>\n"
+"Language-Team: French <https://translate.odoo.com/projects/odoo-20/"
+"ai_helpdesk/fr/>\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 2026.8.1\n"
+
+#. module: ai_helpdesk
+#: model_terms:ir.ui.view,arch_db:ai_helpdesk.helpdesk_ticket_view_form
+msgid "<span class=\"o_stat_text order-2\">Closed</span>"
+msgstr "<span class=\"o_stat_text order-2\">Fermé</span>"
+
+#. module: ai_helpdesk
+#: model_terms:ir.ui.view,arch_db:ai_helpdesk.helpdesk_ticket_view_form
+msgid "<span class=\"o_stat_text order-2\">Similar</span>"
+msgstr "<span class=\"o_stat_text order-2\">Similaire</span>"
+
+#. module: ai_helpdesk
+#: model_terms:ir.ui.view,arch_db:ai_helpdesk.helpdesk_ticket_view_form
+msgid "<span class=\"o_stat_text\">Searching...</span>"
+msgstr "<span class=\"o_stat_text\">Recherche en cours...</span>"
+
+#. module: ai_helpdesk
+#: model_terms:ir.ui.view,arch_db:ai_helpdesk.helpdesk_team_view_form
+msgid "AI"
+msgstr "IA"
+
+#. module: ai_helpdesk
+#: model:ir.module.module,shortdesc:base.module_ai_helpdesk
+msgid "AI Helpdesk"
+msgstr "IA Assistance"
+
+#. module: ai_helpdesk
+#: model:ir.model,name:ai_helpdesk.model_ai_composer
+msgid "AI model configurations (Default Prompt) for text drafting."
+msgstr ""
+"Configurations de modèle d’IA (prompt par défaut) pour la rédaction de texte."
+
+#. module: ai_helpdesk
+#: model:ir.model.fields,field_description:ai_helpdesk.field_helpdesk_team__ai_agent_id
+msgid "Agent"
+msgstr "Agent"
+
+#. module: ai_helpdesk
+#: model_terms:ir.ui.view,arch_db:ai_helpdesk.helpdesk_team_view_form
+msgid "Agent that will be used when interacting with tickets of this team."
+msgstr ""
+"Agent qui sera utilisé lors des interactions avec les tickets de cette "
+"équipe."
+
+#. module: ai_helpdesk
+#: model:ir.model.fields,field_description:ai_helpdesk.field_helpdesk_ticket__similar_closed_tickets_count
+msgid "Amount of similar closed tickets"
+msgstr "Nombre de tickets clôturés similaires"
+
+#. module: ai_helpdesk
+#: model:ir.model.fields,field_description:ai_helpdesk.field_helpdesk_ticket__similar_tickets_count
+msgid "Amount of similar tickets"
+msgstr "Nombre de tickets similaires"
+
+#. module: ai_helpdesk
+#: model:ir.module.module,summary:base.module_ai_helpdesk
+msgid "Augment Helpdesk with AI Agents."
+msgstr "Enrichir Assistance avec des agents IA."
+
+#. module: ai_helpdesk
+#: model_terms:ir.ui.view,arch_db:ai_helpdesk.helpdesk_team_view_form
+msgid "Controls how far in the past should the search for similar tickets go."
+msgstr "Contrôle jusqu’où dans le passé rechercher des tickets similaires."
+
+#. module: ai_helpdesk
+#: model:ir.model,website_form_label:ai_helpdesk.model_helpdesk_ticket
+msgid "Create a Ticket"
+msgstr "Créer un ticket"
+
+#. module: ai_helpdesk
+#. odoo-python
+#: code:addons/ai_helpdesk/models/helpdesk_ticket.py:0
+msgid "Default agent not found, cannot find similar records."
+msgstr ""
+"Agent par défaut introuvable, impossible de trouver des enregistrements "
+"similaires."
+
+#. module: ai_helpdesk
+#: model:ir.model.fields,field_description:ai_helpdesk.field_ai_composer__display_name
+#: model:ir.model.fields,field_description:ai_helpdesk.field_helpdesk_team__display_name
+#: model:ir.model.fields,field_description:ai_helpdesk.field_helpdesk_ticket__display_name
+#: model:ir.model.fields,field_description:ai_helpdesk.field_mail_message__display_name
+msgid "Display Name"
+msgstr "Nom d’affichage"
+
+#. module: ai_helpdesk
+#: model:ir.model.fields,field_description:ai_helpdesk.field_helpdesk_ticket__embedding_status
+msgid "Embedding Status"
+msgstr "Statut d’embedding"
+
+#. module: ai_helpdesk
+#: model:ir.model.fields,field_description:ai_helpdesk.field_helpdesk_team__use_ai
+#: model:ir.model.fields,field_description:ai_helpdesk.field_helpdesk_ticket__use_ai
+msgid "Enable AI features"
+msgstr "Activer les fonctionnalités IA"
+
+#. module: ai_helpdesk
+#: model:ir.model.fields.selection,name:ai_helpdesk.selection__helpdesk_team__ticket_similarity_time_range__forever
+msgid "Forever"
+msgstr "Pour toujours"
+
+#. module: ai_helpdesk
+#: model_terms:ai.prompt.button,prompt:ai_helpdesk.ai_prompt_solution_similar_tickets
+msgid ""
+"Help the support operator find a solution for this ticket, using the similar "
+"tickets present in your context.\n"
+"\n"
+"You are talking to the support operator, not to the customer. Never phrase "
+"your answer as a reply to the customer.\n"
+"\n"
+"## Resolution rules\n"
+"\n"
+"- Read the similar tickets in your context and look for how they were "
+"actually resolved: the closing messages in their chatter, what the operator "
+"did, what the customer confirmed.\n"
+"- If one or more of them contain a resolution, summarize it as a few "
+"concrete steps and cite the tickets it comes from. If they point to "
+"different solutions, list them, the most likely one first.\n"
+"- If similar tickets exist but none of them was resolved, say it and report "
+"what has already been tried in those tickets.\n"
+"- If no similar ticket is present in your context, tell the operator that "
+"you found none and ask whether they want you to look elsewhere (other "
+"tickets in the database, or your own knowledge). Wait for their answer.\n"
+"- Never propose a solution that does not come from tickets unless the "
+"operator explicitly asked for it. When you do, say clearly that it is not "
+"backed by past tickets.\n"
+"- Your first message must deliver what the tickets say, not ask the operator "
+"how to proceed.\n"
+"\n"
+"## Next step\n"
+"\n"
+"- Once you have a clear solution, put it in the `question` argument of the "
+"`ai_tool_ask_user_question` tool and end that text with the offer to write "
+"the reply to the customer, for example: \"Want me to draft the email to the "
+"customer?\". The solution must be inside that argument.\n"
+"- Only write the email once the operator agrees. That message must then "
+"contain the email body alone, ready to be sent or edited, with nothing "
+"before or after it."
+msgstr ""
+"Aide l’opérateur de support à trouver une solution pour ce ticket, en "
+"utilisant les tickets similaires présents dans ton contexte.\n"
+"\n"
+"Tu t’adresses à l’opérateur de support, pas au client. Ne formule jamais ta "
+"réponse comme une réponse au client.\n"
+"\n"
+"## Règles de résolution\n"
+"\n"
+"- Lis les tickets similaires dans ton contexte et cherche comment ils ont "
+"réellement été résolus : les messages de clôture dans leur chatter, ce que "
+"l’opérateur a fait, ce que le client a confirmé.\n"
+"- Si un ou plusieurs d’entre eux contiennent une résolution, résume-la en "
+"quelques étapes concrètes et cite les tickets dont elle provient. S’ils "
+"indiquent des solutions différentes, liste-les en commençant par la plus "
+"probable.\n"
+"- Si des tickets similaires existent mais qu’aucun d’eux n’a été résolu, dis-"
+"le et indique ce qui a déjà été tenté dans ces tickets.\n"
+"- Si aucun ticket similaire n’est présent dans ton contexte, dis à "
+"l’opérateur que tu n’en as trouvé aucun et demande-lui s’il souhaite que tu "
+"cherches ailleurs (autres tickets dans la base de données ou tes propres "
+"connaissances). Attends sa réponse.\n"
+"- Ne propose jamais une solution qui ne provient pas des tickets, sauf si "
+"l’opérateur te l’a explicitement demandé. Dans ce cas, indique clairement "
+"qu’elle n’est pas étayée par des tickets passés.\n"
+"- Ton premier message doit présenter ce que disent les tickets, et non "
+"demander à l’opérateur comment procéder.\n"
+"\n"
+"## Étape suivante\n"
+"\n"
+"- Une fois que tu as une solution claire, place-la dans l’argument "
+"`question` de l’outil `ai_tool_ask_user_question` et termine ce texte par la "
+"proposition de rédiger la réponse au client, par exemple : \"Veux-tu que je "
+"rédige l’e-mail au client ?\". La solution doit se trouver dans cet "
+"argument.\n"
+"- Ne rédige l’e-mail qu’une fois que l’opérateur a accepté. Ce message doit "
+"alors contenir uniquement le corps de l’e-mail, prêt à être envoyé ou "
+"modifié, sans rien avant ni après."
+
+#. module: ai_helpdesk
+#: model:ir.model,name:ai_helpdesk.model_helpdesk_team
+msgid "Helpdesk Team"
+msgstr "Équipe d'Assistance"
+
+#. module: ai_helpdesk
+#: model:ir.model,name:ai_helpdesk.model_helpdesk_ticket
+msgid "Helpdesk Ticket"
+msgstr "Ticket d'Assistance"
+
+#. module: ai_helpdesk
+#: model:ir.model.fields,help:ai_helpdesk.field_helpdesk_team__ticket_similarity_threshold
+msgid "How close tickets should be to be considered similar."
+msgstr ""
+"Degré de proximité requis pour que des tickets soient considérés comme "
+"similaires."
+
+#. module: ai_helpdesk
+#: model:ir.model.fields,field_description:ai_helpdesk.field_ai_composer__id
+#: model:ir.model.fields,field_description:ai_helpdesk.field_helpdesk_team__id
+#: model:ir.model.fields,field_description:ai_helpdesk.field_helpdesk_ticket__id
+#: model:ir.model.fields,field_description:ai_helpdesk.field_mail_message__id
+msgid "ID"
+msgstr "ID"
+
+#. module: ai_helpdesk
+#: model:ir.model.fields,field_description:ai_helpdesk.field_helpdesk_team__ticket_similarity_time_range
+msgid "Include Tickets from"
+msgstr "Inclure les tickets depuis"
+
+#. module: ai_helpdesk
+#: model:ir.model.fields.selection,name:ai_helpdesk.selection__helpdesk_team__ticket_similarity_time_range__3m
+msgid "Last 3 Months"
+msgstr "3 derniers mois"
+
+#. module: ai_helpdesk
+#: model:ir.model.fields.selection,name:ai_helpdesk.selection__helpdesk_team__ticket_similarity_time_range__1y
+msgid "Last 365 days"
+msgstr "365 derniers jours"
+
+#. module: ai_helpdesk
+#: model:ir.model.fields.selection,name:ai_helpdesk.selection__helpdesk_team__ticket_similarity_time_range__6m
+msgid "Last 6 Months"
+msgstr "6 derniers mois"
+
+#. module: ai_helpdesk
+#: model:ir.model.fields.selection,name:ai_helpdesk.selection__helpdesk_team__ticket_similarity_time_range__1w
+msgid "Last Week"
+msgstr "Semaine dernière"
+
+#. module: ai_helpdesk
+#: model_terms:ir.ui.view,arch_db:ai_helpdesk.helpdesk_team_view_form
+msgid "Look for Similar Tickets"
+msgstr "Rechercher des tickets similaires"
+
+#. module: ai_helpdesk
+#: model:ir.actions.server,name:ai_helpdesk.action_recompute_ticket_embeddings
+msgid "Look for similar tickets"
+msgstr "Rechercher des tickets similaires"
+
+#. module: ai_helpdesk
+#: model:ir.model,name:ai_helpdesk.model_mail_message
+msgid "Message"
+msgstr "Message"
+
+#. module: ai_helpdesk
+#: model:ir.model.fields,field_description:ai_helpdesk.field_helpdesk_ticket__embedding_ids
+msgid "Record embedding ids"
+msgstr "ID d’embedding de l’enregistrement"
+
+#. module: ai_helpdesk
+#: model_terms:ai.prompt.button,prompt:ai_helpdesk.ai_prompt_top_ticket_cause
+msgid ""
+"Search for helpdesk tickets (model_name: helpdesk.ticket), retrieve the most "
+"recent 5 tickets and summarize what they complain about (field_name: "
+"description).\n"
+"Include the ticket name (field_name: name) in the response. Don't mention "
+"model_name or field_name or any record ids in the response."
+msgstr ""
+"Recherchez les tickets d’assistance (model_name : helpdesk.ticket), "
+"récupérez les 5 tickets les plus récents et résumez les problèmes signalés "
+"dans leur description (field_name : description).\n"
+"Incluez le nom du ticket (field_name : name) dans la réponse. Ne mentionnez "
+"ni model_name, ni field_name, ni aucun identifiant d’enregistrement dans la "
+"réponse."
+
+#. module: ai_helpdesk
+#: model:ir.model.fields,field_description:ai_helpdesk.field_helpdesk_team__ticket_similarity_threshold
+msgid "Similarity Threshold"
+msgstr "Seuil de similarité"
+
+#. module: ai_helpdesk
+#: model:ir.model.constraint,message:ai_helpdesk.constraint_helpdesk_team_ticket_similarity_threshold_is_between_0_and_1
+msgid "The ticket similarity threshold must be between 0 and 1.0"
+msgstr "Le seuil de similarité des tickets doit être compris entre 0 et 1.0"

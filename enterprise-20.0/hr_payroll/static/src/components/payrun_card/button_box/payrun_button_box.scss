@@ -1,0 +1,20 @@
+.o_payrun_action_buttons .btn:not(.o-dropdown-caret) {
+    border: inherit;
+    width: 100%;
+    background-color: inherit;
+    color: inherit;
+    font-weight: $font-weight-normal;
+    text-align: left;
+
+    &:hover {
+        background-color: $dropdown-link-hover-bg;
+        color: inherit;
+    }
+}
+
+/* In the list view control panel, the inline buttons stand next to the "More"
+   dropdown: give them the same outlined look. */
+.o_payrun_button_box_list > .btn-secondary {
+    --btn-bg: transparent;
+    border: var(--btn-border-width) solid var(--btn-border-color) !important;
+}

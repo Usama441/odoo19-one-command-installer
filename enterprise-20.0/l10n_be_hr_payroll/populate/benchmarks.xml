@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="benchmark_be_payrun_compute" model="populate.blueprint">
+        <field name="name">Benchmark: Belgian Payroll Payrun Compute</field>
+        <field name="definition_xml" type="xml">
+            <create model="res.company" count="1" id="bench_be_payroll_company" scale="False" parallel="False">
+                <field name="name" eval="'Benchmark Belgian Payroll Company'"/>
+                <field name="country_id" eval="env.ref('base.be').id"/>
+            </create>
+
+            <write model="payroll.config.settings" ref="bench_be_payroll_company.payroll_config_ids" batched="True">
+                <field name="l10n_be_employer_category_id" eval="env.ref('l10n_be_hr_payroll.l10n_be_employer_category_00010').id"/>
+            </write>
+
+            <write model="l10n.be.joint.committee" domain="[('active', 'in', [True, False]), ('egov3_code', '=', '200')]" batched="True">
+                <field name="active" eval="True"/>
+            </write>
+
+            <create model="hr.employee" count="300" id="bench_be_payroll_employees">
+                <value name="counter" generator="misc.counter" start="1" unique="True"/>
+                <field name="name" eval="f'Benchmark BE Payroll Employee {counter:05}'"/>
+                <field name="company_id" ref="bench_be_payroll_company"/>
+                <field name="private_country_id" eval="env.ref('base.be').id"/>
+                <field name="birthday" eval="'1990-01-01'"/>
+                <field name="date_version" eval="'2026-01-01'"/>
+                <field name="contract_date_start" eval="'2026-01-01'"/>
+                <field name="structure_type_id" eval="env.ref('hr.structure_type_employee_cp200').id"/>
+                <field name="employee_type_id" eval="env.ref('hr.contract_type_employee').id"/>
+                <field name="resource_calendar_id" ref="bench_be_payroll_company.resource_calendar_id"/>
+                <field name="schedule_pay" eval="'monthly'"/>
+                <field name="wage_type" eval="'monthly'"/>
+                <field name="currency_id" ref="bench_be_payroll_company.currency_id"/>
+                <field name="wage" start="2500.0" end="8500.0" distribution="normal(mean=5000, std=1200)"/>
+                <field name="review_state" eval="'1_reviewed'"/>
+                <field name="l10n_be_joint_committee_id" eval="env.ref('l10n_be_hr_payroll.l10n_be_joint_committee_200').id"/>
+                <field name="l10n_be_salary_scale_id" eval="env.ref('l10n_be_hr_payroll.cp200_b').id"/>
+                <field name="l10n_be_worker_code_id" eval="env.ref('l10n_be_hr_payroll.l10n_be_worker_code_00495').id"/>
+                <field name="l10n_be_dimona_category" eval="'oth'"/>
+                <field name="sex" values="['male', 'female']"/>
+                <field name="marital" values="['single', 'married']"/>
+                <field name="spouse_fiscal_status" eval="'without_income'"/>
+                <field name="l10n_be_resident_situation" eval="'resident'"/>
+            </create>
+
+            <create model="hr.payslip.run" count="1" id="bench_be_payroll_payrun" scale="False" parallel="False">
+                <field name="name" eval="'Benchmark Belgian Payroll Payrun - August 2026'"/>
+                <field name="date_start" eval="'2026-08-01'"/>
+                <field name="date_end" eval="'2026-08-31'"/>
+                <field name="structure_id" eval="env.ref('l10n_be_hr_payroll.hr_payroll_structure_cp200_employee_salary').id"/>
+                <field name="company_id" ref="bench_be_payroll_company"/>
+            </create>
+
+            <create model="hr.payslip" count="300" id="bench_be_payroll_payslips" parallel="False">
+                <value name="counter" generator="misc.counter" start="1" unique="True"/>
+                <field name="name" eval="f'Benchmark BE Payroll Payslip {counter:05}'"/>
+                <field name="employee_id" ref="bench_be_payroll_employees"
+                       domain="[('name', '=', 'Benchmark BE Payroll Employee %05d' % counter)]"/>
+                <field name="version_id" eval="env['hr.employee'].browse(employee_id).version_id.id"/>
+                <field name="payslip_run_id" ref="bench_be_payroll_payrun"/>
+                <field name="date_from" eval="'2026-08-01'"/>
+                <field name="date_to" eval="'2026-08-31'"/>
+                <field name="struct_id" eval="env.ref('l10n_be_hr_payroll.hr_payroll_structure_cp200_employee_salary').id"/>
+                <field name="company_id" ref="bench_be_payroll_company"/>
+            </create>
+        </field>
+    </record>
+</odoo>
