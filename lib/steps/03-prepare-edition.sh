@@ -36,8 +36,7 @@ step_prepare_edition() {
 
   if [[ "$START_ENTERPRISE" == "true" ]]; then
     while true; do
-      read -r -p "Enterprise web port [8070]: " ENTERPRISE_PORT
-      ENTERPRISE_PORT="${ENTERPRISE_PORT:-8070}"
+      read_value ENTERPRISE_PORT "Enterprise web port [8070]: "
       if ! valid_port "$ENTERPRISE_PORT"; then
         echo "Please enter a port number from 1 to 65535."
         continue

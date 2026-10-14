@@ -60,8 +60,7 @@ remove_foreign_docker_resources() {
     1|delete) ;;
     *) return 1 ;;
   esac
-  read -r -p "Type DELETE OTHER DOCKER DATA to confirm: " confirmation
-  if [[ "$confirmation" != "DELETE OTHER DOCKER DATA" ]]; then
+  if ! confirm_phrase "DELETE OTHER DOCKER DATA" "Type DELETE OTHER DOCKER DATA to confirm: "; then
     echo "Non-Odoo Docker resources were preserved."
     return 1
   fi
@@ -478,8 +477,7 @@ remove_installer_managed_dependencies() {
   fi
   if [[ "$has_tracked_state" == "false" ]]; then
     echo "Ownership cannot be proven, but no non-Odoo Docker resources were detected."
-    read -r -p "Type REMOVE DETECTED DOCKER to remove the listed Docker components: " confirmation
-    if [[ "$confirmation" == "REMOVE DETECTED DOCKER" ]]; then
+    if confirm_phrase "REMOVE DETECTED DOCKER" "Type REMOVE DETECTED DOCKER to remove the listed Docker components: "; then
       remove_detected_docker="true"
     else
       echo "Detected Docker components were preserved."
@@ -487,8 +485,7 @@ remove_installer_managed_dependencies() {
     fi
   else
     echo "Only installer-recorded items will be removed; untracked software is preserved."
-    read -r -p "Type REMOVE DEPENDENCIES to continue: " confirmation
-    if [[ "$confirmation" != "REMOVE DEPENDENCIES" ]]; then
+    if ! confirm_phrase "REMOVE DEPENDENCIES" "Type REMOVE DEPENDENCIES to continue: "; then
       echo "Docker and dependency cleanup skipped."
       return 0
     fi
@@ -497,8 +494,7 @@ remove_installer_managed_dependencies() {
       echo
       echo "The Docker Engine packages were detected but are not present in the ownership record."
       echo "This can happen when an older installer created Docker before package tracking was added."
-      read -r -p "Type REMOVE DETECTED DOCKER to remove those Docker packages too: " confirmation
-      if [[ "$confirmation" == "REMOVE DETECTED DOCKER" ]]; then
+      if confirm_phrase "REMOVE DETECTED DOCKER" "Type REMOVE DETECTED DOCKER to remove those Docker packages too: "; then
         remove_detected_docker="true"
       else
         echo "Untracked Docker Engine packages will be preserved."
@@ -952,8 +948,7 @@ run_uninstaller() {
         echo "Uninstall cancelled; nothing was removed."
         return
       fi
-      read -r -p "Type $confirmation_text to confirm: " confirmation
-      if [[ "$confirmation" != "$confirmation_text" ]]; then
+      if ! confirm_phrase "$confirmation_text" "Type $confirmation_text to confirm: "; then
         echo "Permanent uninstall cancelled; nothing was removed."
         return
       fi
@@ -977,8 +972,7 @@ run_uninstaller() {
       1|keep) ;;
       2|delete)
         printf '%b\n' "${COLOR_YELLOW}WARNING: Every file in the listed /opt folders will be permanently deleted.${COLOR_RESET}"
-        read -r -p "Type DELETE INSTALLED SOURCE to confirm: " confirmation
-        if [[ "$confirmation" != "DELETE INSTALLED SOURCE" ]]; then
+        if ! confirm_phrase "DELETE INSTALLED SOURCE" "Type DELETE INSTALLED SOURCE to confirm: "; then
           echo "Permanent source cleanup cancelled; nothing was removed."
           return
         fi

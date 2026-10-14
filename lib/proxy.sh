@@ -18,14 +18,44 @@ valid_server_name() {
     [[ "$1" =~ ^[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*$ ]]
 }
 
-# Address shown in URLs: "https://name" for 443, "https://name:port" otherwise.
+# Address shown in URLs, without the port when it is the scheme's default.
 proxy_url() {
-  local port="$1"
-  if [[ "$port" == "443" ]]; then
-    printf 'https://%s' "$PROXY_SERVER_NAME"
-  else
-    printf 'https://%s:%s' "$PROXY_SERVER_NAME" "$port"
+  local port="$1" scheme="https" default_port=443
+  if [[ "$PROXY_CERT_MODE" == "none" ]]; then
+    scheme="http"
+    default_port=80
   fi
+  if [[ "$port" == "$default_port" ]]; then
+    printf '%s://%s' "$scheme" "$PROXY_SERVER_NAME"
+  else
+    printf '%s://%s:%s' "$scheme" "$PROXY_SERVER_NAME" "$port"
+  fi
+}
+
+# Public URL of each edition behind the proxy. In HTTP-only mode the first
+# selected edition uses the HTTP port and Community (with both) its own port.
+proxy_enterprise_url() {
+  if [[ "$PROXY_CERT_MODE" == "none" ]]; then
+    proxy_url "$PROXY_HTTP_PORT"
+  else
+    proxy_url "$ENTERPRISE_HTTPS_PORT"
+  fi
+}
+
+proxy_community_url() {
+  if [[ "$PROXY_CERT_MODE" == "none" && "$START_ENTERPRISE" != "true" ]]; then
+    proxy_url "$PROXY_HTTP_PORT"
+  else
+    proxy_url "$COMMUNITY_HTTPS_PORT"
+  fi
+}
+
+proxy_mode_label() {
+  case "$PROXY_CERT_MODE" in
+    none) printf 'Nginx, HTTP only (no certificate)' ;;
+    custom) printf 'Nginx, HTTPS with your certificate for %s' "$PROXY_SERVER_NAME" ;;
+    *) printf 'Nginx, HTTPS with a self-signed certificate for %s' "$PROXY_SERVER_NAME" ;;
+  esac
 }
 
 # Subject alternative names for the self-signed certificate: the chosen name
@@ -88,9 +118,10 @@ install_custom_certificate() {
 # One HTTPS server block proxying to an Odoo service. With workers, Odoo serves
 # websockets on its evented port 8072; in threaded mode on 8069 itself.
 nginx_odoo_server_block() {
-  local listen_port="$1" service="$2" workers="$3" chat_port=8069
+  local listen_port="$1" service="$2" workers="$3" tls="${4:-true}" chat_port=8069
   (( workers > 0 )) && chat_port=8072
-  cat <<EOF
+  if [[ "$tls" == "true" ]]; then
+    cat <<EOF
 server {
     listen $listen_port ssl;
     http2 on;
@@ -101,6 +132,20 @@ server {
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_session_cache shared:SSL:10m;
     ssl_session_timeout 1d;
+EOF
+  else
+    cat <<EOF
+server {
+    listen $listen_port$([[ "$listen_port" == "80" ]] && echo " default_server");
+    server_name _;
+
+    location = /nginx-health {
+        access_log off;
+        return 200 "ok\n";
+    }
+EOF
+  fi
+  cat <<EOF
 
     location /websocket {
         set \$odoo_chat http://$service:$chat_port;
@@ -167,6 +212,11 @@ gzip_min_length 1024;
 
 server_tokens off;
 
+EOF
+    if [[ "$PROXY_CERT_MODE" == "none" ]]; then
+      write_nginx_http_only_servers
+    else
+      cat <<EOF
 # Plain HTTP only redirects to HTTPS (and answers the container health check).
 server {
     listen 80 default_server;
@@ -183,15 +233,36 @@ server {
 }
 
 EOF
-    if [[ "$START_ENTERPRISE" == "true" ]]; then
-      echo "# Odoo Enterprise: $(proxy_url "$ENTERPRISE_HTTPS_PORT")"
-      nginx_odoo_server_block "$PROXY_CONTAINER_ENTERPRISE_PORT" enterprise "$ENTERPRISE_WORKERS"
-    fi
-    if [[ "$START_COMMUNITY" == "true" ]]; then
-      echo "# Odoo Community: $(proxy_url "$COMMUNITY_HTTPS_PORT")"
-      nginx_odoo_server_block "$PROXY_CONTAINER_COMMUNITY_PORT" community "$COMMUNITY_WORKERS"
+      if [[ "$START_ENTERPRISE" == "true" ]]; then
+        echo "# Odoo Enterprise: $(proxy_enterprise_url)"
+        nginx_odoo_server_block "$PROXY_CONTAINER_ENTERPRISE_PORT" enterprise "$ENTERPRISE_WORKERS"
+      fi
+      if [[ "$START_COMMUNITY" == "true" ]]; then
+        echo "# Odoo Community: $(proxy_community_url)"
+        nginx_odoo_server_block "$PROXY_CONTAINER_COMMUNITY_PORT" community "$COMMUNITY_WORKERS"
+      fi
     fi
   } > "$conf_dir/odoo.conf"
+}
+
+# HTTP only: container port 80 serves the first selected edition and 9443
+# serves Community. Every published listener answers, so no port is left dead.
+write_nginx_http_only_servers() {
+  local main_service=community main_workers="$COMMUNITY_WORKERS"
+  if [[ "$START_ENTERPRISE" == "true" ]]; then
+    main_service=enterprise
+    main_workers="$ENTERPRISE_WORKERS"
+  fi
+  echo "# Odoo ${main_service^}: $(proxy_url "$PROXY_HTTP_PORT")"
+  nginx_odoo_server_block 80 "$main_service" "$main_workers" false
+  # Published on 127.0.0.1 only in HTTP mode (PROXY_TLS_BIND_ADDRESS).
+  nginx_odoo_server_block "$PROXY_CONTAINER_ENTERPRISE_PORT" "$main_service" "$main_workers" false
+  if [[ "$START_COMMUNITY" == "true" ]]; then
+    echo "# Odoo Community: $(proxy_community_url)"
+    nginx_odoo_server_block "$PROXY_CONTAINER_COMMUNITY_PORT" community "$COMMUNITY_WORKERS" false
+  else
+    nginx_odoo_server_block "$PROXY_CONTAINER_COMMUNITY_PORT" "$main_service" "$main_workers" false
+  fi
 }
 
 # Checks the generated configuration and certificate with the pinned image.

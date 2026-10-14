@@ -65,7 +65,7 @@ numbered menu instead.
 ```text
 ============================================================
                ODOO DEPLOYMENT CONTROL CENTER
-                    Installer v1.4.0
+                    Installer v1.4.1
      Community • Enterprise • PostgreSQL • pgAdmin
                   Script by TI ASSOCIATES
               Developed by USAMA ARSHAD
@@ -113,8 +113,8 @@ package-manager, and cache databases from overwhelming the backup menu.
 Stopped native database services and stopped database containers can be started
 temporarily with the user's permission and are returned to their original state.
 If an instance cannot be queried with local, sudo, or container-configured
-credentials, the wizard requests a username and hidden password; entering no
-username skips that native instance, and `S` skips a Docker instance. Passwords
+credentials, the wizard requests a username and hidden password; typing `S`
+instead of a username skips that instance. Passwords
 remain in memory and are never written into the backup.
 
 All accessible results appear in one combined list with engine, source,
@@ -160,7 +160,8 @@ accessible database, deletion does not continue automatically; the user must
 retry, explicitly approve continuing without a backup, or cancel. Permanent
 deletion then requires a scope-specific confirmation such as
 `DELETE COMMUNITY`, `DELETE ENTERPRISE`, `DELETE BOTH`, or `DELETE ALL`, followed
-by approval of the verified plan. Approved volumes are force-removed and then
+by approval of the verified plan. Every typed confirmation phrase allows three
+attempts for a mistyped phrase; pressing Enter on an empty line cancels at once. Approved volumes are force-removed and then
 queried again. Generated `.env` and configuration files are deleted only after
 all selected containers, networks, and volumes pass the final absence checks.
 If Docker created an empty directory where a bind-mounted generated file should
@@ -237,9 +238,14 @@ engine is not already ready.
 
 ## Questions the installer asks
 
-Press Enter to accept the value shown in square brackets.
-If a user mistypes a choice, port, Enterprise folder, email, or yes/no answer,
-the installer explains the expected value and asks the same question again.
+Every question needs a typed answer: pressing Enter on an empty line is never
+accepted, so an accidental Enter cannot pick a value. Where the installer has a
+recommended value it shows it as a suggestion, for example
+`Community web port (suggested: 8069):` or `[y/n] (suggested: y)`; type it to
+use it. If a user mistypes a choice, port, Enterprise folder, email, or yes/no
+answer, the installer explains the expected value and asks the same question
+again. If the input ends (for example a closed pipe), the installer stops
+without changes.
 
 On Windows, `Install Docker Desktop now using winget? [Y/n]` appears first only
 when Docker is missing. Answering `n` cancels cleanly; answering `y` installs
@@ -288,10 +294,10 @@ how to rerun it.
 | 8 | `Add pgAdmin to this installation? [y/N]` | Enables the optional pgAdmin web application. A rerun with pgAdmin enabled instead asks whether to keep it enabled. |
 | 9 | `pgAdmin web port [5050]` | Asked only when pgAdmin is enabled. It must differ from the selected Odoo ports. |
 | 10 | `pgAdmin login email [admin@example.com]` | Asked only on the first pgAdmin setup. Existing pgAdmin data reuses the saved email. |
-| 10a | `Put Nginx with HTTPS in front of Odoo?` | Optional HTTPS reverse proxy (see [HTTPS with Nginx](#https-with-nginx)). The default is yes for production with a network bind address and no otherwise; a rerun keeps the saved choice. |
+| 10a | `Put Nginx in front of Odoo?` | Optional Nginx reverse proxy (see [HTTPS with Nginx](#https-with-nginx)). Suggested yes for production with a network bind address, no otherwise; a rerun suggests the saved choice. |
 | 10b | `Server name or IP` | Asked when Nginx is enabled: the address users type in the browser, such as `192.168.10.20` or `erp.example.com`. |
-| 10c | `HTTP port`, `Enterprise HTTPS port`, `Community HTTPS port` | Defaults `80`, `443`, and `8443`. They must differ from each other and from the Odoo and pgAdmin ports. Port 80 only redirects to HTTPS. |
-| 10d | `Choose a certificate option [1]` | `1` creates a self-signed certificate; `2` installs your own full-chain certificate and private key after checking that they match. |
+| 10c | `How should Nginx serve Odoo?` | `1` HTTPS with a self-signed certificate; `2` HTTPS with your own full-chain certificate and private key (checked to match); `3` HTTP only, no certificate. |
+| 10d | Proxy ports | HTTPS: `HTTP port (redirects to HTTPS)` 80, `Enterprise HTTPS port` 443, `Community HTTPS port` 8443. HTTP only: the first selected edition's HTTP port 80 and, with both editions, `Community HTTP port` 8080. Ports must differ from each other and from the Odoo and pgAdmin ports. |
 | 11 | `Start this installation now? [Y/n]` | Shows after a complete plan summary and provides a final chance to cancel before configuration or Enterprise addons are changed. |
 
 Windows asks for the Odoo version and then uses its adaptive edition menu inside
@@ -458,9 +464,16 @@ first visit (Advanced → Proceed); the page is still a secure context. For publ
 access, rerun the installer with option `2` and give your own certificate (for
 example from your certificate authority or an existing Let's Encrypt setup).
 
-With UFW active and a network bind address, the installer opens the HTTP and
-HTTPS ports instead of the Odoo ports. The Windows installer does not set up
-Nginx.
+**HTTP only.** Option `3` runs Nginx without a certificate: Odoo is served on
+`http://SERVER-NAME` (Community on port 8080 when both editions run). The Odoo
+ports stay private and `/websocket` still reaches the evented port, so
+production workers keep live updates. Without HTTPS the browser does not treat a
+network address as a secure context, so the Odoo 20 clipboard error above can
+still appear; use HTTPS (or `http://localhost`) for regular use. The unused HTTPS
+listener is published on `127.0.0.1` only in this mode.
+
+With UFW active and a network bind address, the installer opens the proxy ports
+instead of the Odoo ports. The Windows installer does not set up Nginx.
 
 ## Runtime architecture
 

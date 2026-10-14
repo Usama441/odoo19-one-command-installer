@@ -25,8 +25,8 @@ step_configure_pgadmin() {
       exit 1
     fi
     while true; do
-      read -r -p "pgAdmin web port [$PGADMIN_PORT]: " PGADMIN_PORT_INPUT
-      PGADMIN_PORT="${PGADMIN_PORT_INPUT:-$PGADMIN_PORT}"
+      read_value PGADMIN_PORT_INPUT "pgAdmin web port [$PGADMIN_PORT]: "
+      PGADMIN_PORT="$PGADMIN_PORT_INPUT"
       if ! valid_port "$PGADMIN_PORT"; then
         echo "Please enter a port number from 1 to 65535."
         continue
@@ -44,8 +44,8 @@ step_configure_pgadmin() {
     else
       echo "This email is used only to sign in to the local pgAdmin web page."
       while true; do
-        read -r -p "pgAdmin login email [$PGADMIN_EMAIL]: " PGADMIN_EMAIL_INPUT
-        PGADMIN_EMAIL="${PGADMIN_EMAIL_INPUT:-$PGADMIN_EMAIL}"
+        read_value PGADMIN_EMAIL_INPUT "pgAdmin login email [$PGADMIN_EMAIL]: "
+        PGADMIN_EMAIL="$PGADMIN_EMAIL_INPUT"
         if [[ "$PGADMIN_EMAIL" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]]; then break; fi
         echo "Please enter a valid email address, for example admin@example.com."
       done

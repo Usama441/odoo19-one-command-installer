@@ -111,7 +111,8 @@ services:
     restart: unless-stopped
     ports:
       - "${BIND_ADDRESS:-0.0.0.0}:${PROXY_HTTP_PORT:-80}:80"
-      - "${BIND_ADDRESS:-0.0.0.0}:${ENTERPRISE_HTTPS_PORT:-443}:8443"
+      # 127.0.0.1 in HTTP-only mode, where this HTTPS listener is unused.
+      - "${PROXY_TLS_BIND_ADDRESS:-${BIND_ADDRESS:-0.0.0.0}}:${ENTERPRISE_HTTPS_PORT:-443}:8443"
       - "${BIND_ADDRESS:-0.0.0.0}:${COMMUNITY_HTTPS_PORT:-8443}:9443"
     volumes:
       - ./config/nginx/conf.d:/etc/nginx/conf.d:ro

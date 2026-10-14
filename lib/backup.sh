@@ -254,8 +254,8 @@ discover_native_mysql() {
     auth_mode="current"
     auth_user="current login defaults"
   elif [[ -t 0 ]]; then
-    read -r -p "    MySQL/MariaDB username (blank skips this server): " auth_user
-    if [[ -z "$auth_user" ]]; then
+    read_value auth_user "    MySQL/MariaDB username (S skips this server): "
+    if [[ "${auth_user,,}" == "s" ]]; then
       echo "    Skipped because credentials were not provided."
       return 0
     fi
@@ -311,9 +311,9 @@ discover_docker_postgresql() {
       return 0
     fi
     echo "    PostgreSQL credentials from container settings did not work for $container_name."
-    read -r -p "    PostgreSQL username [$user] (blank keeps default, S skips): " entered_user
+    read_value entered_user "    PostgreSQL username (suggested: $user; S skips): "
     [[ "${entered_user,,}" == "s" ]] && return 0
-    user="${entered_user:-$user}"
+    user="$entered_user"
     backup_read_secret secret "    Password for $user: "
     if ! database_output="$(backup_docker_postgres_query "$container_id" "$user" "$secret" "$postgres_sql" 2>/dev/null)"; then
       echo "    Authentication failed; skipping $container_name."
@@ -364,9 +364,9 @@ discover_docker_mysql() {
       secret="$configured_secret"
     elif [[ -t 0 ]]; then
       echo "    MySQL/MariaDB credentials from container settings did not work for $container_name."
-      read -r -p "    Database username [root] (blank keeps default, S skips): " entered_user
+      read_value entered_user "    Database username (suggested: root; S skips): "
       [[ "${entered_user,,}" == "s" ]] && return 0
-      user="${entered_user:-root}"
+      user="$entered_user"
       backup_read_secret secret "    Password for $user: "
       if ! database_output="$(backup_docker_mysql_query "$container_id" "$client" "$user" "$secret" "$mysql_sql" 2>/dev/null)"; then
         echo "    Authentication failed; skipping $container_name."
@@ -664,8 +664,7 @@ select_multiple_backup_databases() {
   echo "Select multiple entries with commas/spaces (example: 1,3,4), a range (1-3), or A for all."
 
   while true; do
-    read -r -p "Database selection [A]: " selection
-    selection="${selection:-A}"
+    read_value selection "Database selection [A]: "
     case "${selection,,}" in
       a|all)
         for (( index = 0; index < ${#BACKUP_CATALOG_DATABASES[@]}; index++ )); do

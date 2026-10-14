@@ -29,8 +29,7 @@ step_choose_deployment_mode() {
   if [[ "$START_COMMUNITY" == "true" ]]; then
     echo "The Community web port is used in the browser URL."
     while true; do
-      read -r -p "Community web port [8069]: " COMMUNITY_PORT
-      COMMUNITY_PORT="${COMMUNITY_PORT:-8069}"
+      read_value COMMUNITY_PORT "Community web port [8069]: "
       if valid_port "$COMMUNITY_PORT"; then break; fi
       echo "Please enter a port number from 1 to 65535."
     done

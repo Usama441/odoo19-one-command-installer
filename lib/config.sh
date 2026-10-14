@@ -37,8 +37,7 @@ choose_bind_address() {
   [[ "$default_address" == "127.0.0.1" ]] && default_address="0.0.0.0"
   echo "IPv4 addresses on this machine: $(hostname -I 2>/dev/null | xargs || echo unknown)"
   while true; do
-    read -r -p "Bind IP address [$default_address]: " entered
-    entered="${entered:-$default_address}"
+    read_value entered "Bind IP address [$default_address]: "
     entered="${entered//[[:space:]]/}"
     if ! valid_ipv4 "$entered"; then
       echo "Please enter an IPv4 address such as 192.168.1.10 or 0.0.0.0."
@@ -282,10 +281,9 @@ configure_custom_addons_directory() {
 
   while true; do
     if [[ -n "$default_name" ]]; then
-      read -r -p "Custom addons folder name [$default_name]: " entered_name
-      entered_name="${entered_name:-$default_name}"
+      read_value entered_name "Custom addons folder name [$default_name]: "
     else
-      read -r -p "Custom addons folder name (example: TI_Associates): " entered_name
+      read_value entered_name "Custom addons folder name (example: TI_Associates): "
     fi
 
     entered_name="${entered_name#"${entered_name%%[![:space:]]*}"}"
@@ -321,8 +319,7 @@ valid_integer_in_range() {
 read_integer() {
   local target="$1" prompt="$2" default_value="$3" minimum="$4" maximum="$5" entered_value
   while true; do
-    read -r -p "$prompt" entered_value
-    entered_value="${entered_value:-$default_value}"
+    read_value entered_value "$prompt"
     if valid_integer_in_range "$entered_value" "$minimum" "$maximum"; then
       printf -v "$target" '%s' "$((10#$entered_value))"
       return
@@ -605,8 +602,7 @@ read_enterprise_source() {
   while true; do
     echo "Default Enterprise path based on the current installer location:"
     echo "  $suggested_path"
-    read -r -p "Enterprise addons folder [$suggested_path]: " entered_path
-    entered_path="${entered_path:-$suggested_path}"
+    read_value entered_path "Enterprise addons folder [$suggested_path]: "
     entered_path="${entered_path#\"}"
     entered_path="${entered_path%\"}"
     if ! has_enterprise_addons "$entered_path"; then

@@ -7,8 +7,7 @@ read_proxy_port() {
   local target="$1" prompt="$2" default_port="$3" value taken
   shift 3
   while true; do
-    read -r -p "$prompt [$default_port]: " value
-    value="${value:-$default_port}"
+    read_value value "$prompt [$default_port]: "
     if ! valid_port "$value"; then
       echo "Please enter a port number from 1 to 65535."
       continue
@@ -30,7 +29,7 @@ read_proxy_port() {
 }
 
 step_configure_proxy() {
-  local default_enabled default_name choice cert_path key_path
+  local default_enabled default_name choice default_choice cert_path key_path
 
   PROXY_ENABLED="false"
   PROXY_CERT_MODE="self-signed"
@@ -48,12 +47,16 @@ step_configure_proxy() {
     valid_port "$(get_env_value COMMUNITY_HTTPS_PORT)" && COMMUNITY_HTTPS_PORT="$(get_env_value COMMUNITY_HTTPS_PORT)"
     [[ -n "$(get_env_value NGINX_IMAGE)" ]] && NGINX_IMAGE="$(get_env_value NGINX_IMAGE)"
   fi
-  [[ "$PROXY_CERT_MODE" == "custom" ]] || PROXY_CERT_MODE="self-signed"
+  case "$PROXY_CERT_MODE" in
+    custom|none) ;;
+    *) PROXY_CERT_MODE="self-signed" ;;
+  esac
 
-  section "4/6" "Choose optional HTTPS (Nginx reverse proxy)"
-  echo "Nginx serves Odoo over HTTPS and keeps the Odoo ports private on this server."
-  echo "It is needed for the Odoo 20 web client on a network address (secure browser"
-  echo "context) and for live updates (websocket) when production workers are enabled."
+  section "4/6" "Choose optional Nginx reverse proxy"
+  echo "Nginx sits in front of Odoo and keeps the Odoo ports private on this server."
+  echo "It routes live updates (websocket) to Odoo when production workers are enabled,"
+  echo "and with HTTPS gives the Odoo 20 web client the secure browser context it needs"
+  echo "on a network address. Plain HTTP through Nginx is also possible."
 
   if [[ "$PROXY_ENABLED" == "true" ]]; then
     default_enabled="y"
@@ -62,16 +65,16 @@ step_configure_proxy() {
   else
     default_enabled="n"
   fi
-  if ask_yes_no "Put Nginx with HTTPS in front of Odoo? [$([[ "$default_enabled" == "y" ]] && echo "Y/n" || echo "y/N")]: " "$default_enabled"; then
+  if ask_yes_no "Put Nginx in front of Odoo? [$([[ "$default_enabled" == "y" ]] && echo "Y/n" || echo "y/N")]: "; then
     PROXY_ENABLED="true"
   else
     PROXY_ENABLED="false"
-    echo "HTTPS proxy not selected; Odoo is served directly over HTTP."
+    echo "Nginx not selected; Odoo is served directly over HTTP on its own ports."
     return
   fi
 
   if [[ "$BIND_ADDRESS" == "127.0.0.1" ]]; then
-    printf '%b\n' "${COLOR_YELLOW}The bind address is localhost only, so HTTPS will only be reachable from this machine.${COLOR_RESET}"
+    printf '%b\n' "${COLOR_YELLOW}The bind address is localhost only, so Nginx will only be reachable from this machine.${COLOR_RESET}"
   fi
 
   default_name="$PROXY_SERVER_NAME"
@@ -85,54 +88,49 @@ step_configure_proxy() {
   echo
   echo "Enter the address users will type in the browser: this server's IP or a domain name."
   while true; do
-    read -r -p "Server name or IP [$default_name]: " PROXY_SERVER_NAME
-    PROXY_SERVER_NAME="${PROXY_SERVER_NAME:-$default_name}"
+    read_value PROXY_SERVER_NAME "Server name or IP [$default_name]: "
     PROXY_SERVER_NAME="${PROXY_SERVER_NAME//[[:space:]]/}"
     if valid_server_name "$PROXY_SERVER_NAME"; then break; fi
     echo "Please enter an IPv4 address such as 192.168.1.10 or a name such as erp.example.com."
   done
 
   echo
-  read_proxy_port PROXY_HTTP_PORT "HTTP port (redirects to HTTPS)" "$PROXY_HTTP_PORT"
-  if [[ "$START_ENTERPRISE" == "true" ]]; then
-    read_proxy_port ENTERPRISE_HTTPS_PORT "Enterprise HTTPS port" "$ENTERPRISE_HTTPS_PORT" "$PROXY_HTTP_PORT"
-  fi
-  if [[ "$START_COMMUNITY" == "true" ]]; then
-    if [[ "$START_ENTERPRISE" != "true" && "$COMMUNITY_HTTPS_PORT" == "8443" ]]; then
-      COMMUNITY_HTTPS_PORT="443"
-    fi
-    read_proxy_port COMMUNITY_HTTPS_PORT "Community HTTPS port" "$COMMUNITY_HTTPS_PORT" "$PROXY_HTTP_PORT" \
-      "$([[ "$START_ENTERPRISE" == "true" ]] && echo "$ENTERPRISE_HTTPS_PORT")"
-  fi
-  # compose.yaml publishes both HTTPS ports; keep the unused one distinct.
-  if [[ "$ENTERPRISE_HTTPS_PORT" == "$COMMUNITY_HTTPS_PORT" ]]; then
-    if [[ "$START_ENTERPRISE" == "true" ]]; then COMMUNITY_HTTPS_PORT="8443"; else ENTERPRISE_HTTPS_PORT="8444"; fi
-  fi
+  echo "How should Nginx serve Odoo?"
+  echo "  1) HTTPS with a self-signed certificate (LAN/testing; browsers ask to proceed once)"
+  echo "  2) HTTPS with my own certificate files (full chain + private key, e.g. from your CA)"
+  echo "  3) HTTP only, no certificate (Odoo 20 needs HTTPS or localhost for some browser features)"
+  case "$PROXY_CERT_MODE" in
+    custom) default_choice=2 ;;
+    none) default_choice=3 ;;
+    *) default_choice=1 ;;
+  esac
+  read_choice choice "Choose an option [$default_choice]: " "" "1 2 3"
+  case "$choice" in
+    1) PROXY_CERT_MODE="self-signed" ;;
+    2) PROXY_CERT_MODE="custom" ;;
+    3) PROXY_CERT_MODE="none" ;;
+  esac
 
   echo
-  echo "Which HTTPS certificate should Nginx use?"
-  echo "  1) Self-signed certificate (LAN/testing; browsers ask to proceed once)"
-  echo "  2) My own certificate files (full chain + private key, e.g. from your CA)"
-  read_choice choice "Choose a certificate option [$([[ "$PROXY_CERT_MODE" == "custom" ]] && echo 2 || echo 1)]: " \
-    "$([[ "$PROXY_CERT_MODE" == "custom" ]] && echo 2 || echo 1)" "1 2"
-  if [[ "$choice" == "1" ]]; then
-    PROXY_CERT_MODE="self-signed"
-    PROXY_CUSTOM_CERT=""
-    PROXY_CUSTOM_KEY=""
-    return
+  if [[ "$PROXY_CERT_MODE" == "none" ]]; then
+    configure_proxy_http_ports
+  else
+    configure_proxy_https_ports
   fi
 
-  PROXY_CERT_MODE="custom"
+  PROXY_CUSTOM_CERT=""
+  PROXY_CUSTOM_KEY=""
+  if [[ "$PROXY_CERT_MODE" != "custom" ]]; then
+    return
+  fi
   if [[ -f "$PROXY_CERT_DIR/fullchain.pem" && -f "$PROXY_CERT_DIR/privkey.pem" &&
         ! -f "$PROXY_CERT_DIR/self-signed-names.txt" ]] &&
-     ask_yes_no "Keep the certificate already installed for Nginx? [Y/n]: " "y"; then
-    PROXY_CUSTOM_CERT=""
-    PROXY_CUSTOM_KEY=""
+     ask_yes_no "Keep the certificate already installed for Nginx? [Y/n]: "; then
     return
   fi
   while true; do
-    read -r -p "Path to the certificate (full chain, PEM): " cert_path
-    read -r -p "Path to the private key (PEM): " key_path
+    read_value cert_path "Path to the certificate (full chain, PEM): "
+    read_value key_path "Path to the private key (PEM): "
     cert_path="${cert_path/#\~/$HOME}"
     key_path="${key_path/#\~/$HOME}"
     if [[ ! -r "$cert_path" || ! -r "$key_path" ]]; then
@@ -147,4 +145,43 @@ step_configure_proxy() {
     fi
     echo "The certificate is not valid PEM or the private key does not match it."
   done
+}
+
+# HTTPS: port 80 redirects to HTTPS; each selected edition gets an HTTPS port.
+configure_proxy_https_ports() {
+  [[ "$PROXY_HTTP_PORT" == "$ENTERPRISE_HTTPS_PORT" || "$PROXY_HTTP_PORT" == "$COMMUNITY_HTTPS_PORT" ]] && PROXY_HTTP_PORT="80"
+  read_proxy_port PROXY_HTTP_PORT "HTTP port (redirects to HTTPS)" "$PROXY_HTTP_PORT"
+  if [[ "$START_ENTERPRISE" == "true" ]]; then
+    [[ "$ENTERPRISE_HTTPS_PORT" == "$PROXY_HTTP_PORT" ]] && ENTERPRISE_HTTPS_PORT="443"
+    read_proxy_port ENTERPRISE_HTTPS_PORT "Enterprise HTTPS port" "$ENTERPRISE_HTTPS_PORT" "$PROXY_HTTP_PORT"
+  fi
+  if [[ "$START_COMMUNITY" == "true" ]]; then
+    if [[ "$START_ENTERPRISE" != "true" && "$COMMUNITY_HTTPS_PORT" == "8443" ]]; then
+      COMMUNITY_HTTPS_PORT="443"
+    fi
+    [[ "$COMMUNITY_HTTPS_PORT" == "$PROXY_HTTP_PORT" ]] && COMMUNITY_HTTPS_PORT="8443"
+    read_proxy_port COMMUNITY_HTTPS_PORT "Community HTTPS port" "$COMMUNITY_HTTPS_PORT" "$PROXY_HTTP_PORT" \
+      "$([[ "$START_ENTERPRISE" == "true" ]] && echo "$ENTERPRISE_HTTPS_PORT")"
+  fi
+  # compose.yaml publishes both HTTPS ports; keep the unused one distinct.
+  if [[ "$ENTERPRISE_HTTPS_PORT" == "$COMMUNITY_HTTPS_PORT" ]]; then
+    if [[ "$START_ENTERPRISE" == "true" ]]; then COMMUNITY_HTTPS_PORT="8443"; else ENTERPRISE_HTTPS_PORT="8444"; fi
+  fi
+}
+
+# HTTP only: the first selected edition is served on the HTTP port; with both
+# editions, Community gets its own HTTP port. The HTTPS listener stays unused
+# and is published on 127.0.0.1 only.
+configure_proxy_http_ports() {
+  local main_label="Odoo"
+  [[ "$START_ENTERPRISE" == "true" ]] && main_label="Enterprise" || main_label="Community"
+  [[ "$PROXY_HTTP_PORT" == "443" ]] && PROXY_HTTP_PORT="80"
+  read_proxy_port PROXY_HTTP_PORT "$main_label HTTP port" "$PROXY_HTTP_PORT"
+  if [[ "$START_ENTERPRISE" == "true" && "$START_COMMUNITY" == "true" ]]; then
+    [[ "$COMMUNITY_HTTPS_PORT" == "8443" || "$COMMUNITY_HTTPS_PORT" == "$PROXY_HTTP_PORT" ]] && COMMUNITY_HTTPS_PORT="8080"
+    read_proxy_port COMMUNITY_HTTPS_PORT "Community HTTP port" "$COMMUNITY_HTTPS_PORT" "$PROXY_HTTP_PORT"
+  fi
+  [[ "$COMMUNITY_HTTPS_PORT" == "$PROXY_HTTP_PORT" ]] && COMMUNITY_HTTPS_PORT="8080"
+  [[ "$ENTERPRISE_HTTPS_PORT" == "$PROXY_HTTP_PORT" || "$ENTERPRISE_HTTPS_PORT" == "$COMMUNITY_HTTPS_PORT" ]] && ENTERPRISE_HTTPS_PORT="8444"
+  return 0
 }

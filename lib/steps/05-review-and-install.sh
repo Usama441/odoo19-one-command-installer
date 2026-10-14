@@ -42,16 +42,16 @@ step_review_and_install() {
     printf '  %-24s %s\n' "pgAdmin" "not selected"
   fi
   if [[ "$PROXY_ENABLED" == "true" ]]; then
-    printf '  %-24s %s\n' "HTTPS proxy" "Nginx, $PROXY_CERT_MODE certificate for $PROXY_SERVER_NAME"
+    printf '  %-24s %s\n' "Reverse proxy" "$(proxy_mode_label)"
     if [[ "$START_ENTERPRISE" == "true" ]]; then
-      printf '  %-24s %s\n' "Enterprise URL" "$(proxy_url "$ENTERPRISE_HTTPS_PORT")"
+      printf '  %-24s %s\n' "Enterprise URL" "$(proxy_enterprise_url)"
     fi
     if [[ "$START_COMMUNITY" == "true" ]]; then
-      printf '  %-24s %s\n' "Community URL" "$(proxy_url "$COMMUNITY_HTTPS_PORT")"
+      printf '  %-24s %s\n' "Community URL" "$(proxy_community_url)"
     fi
     printf '  %-24s %s\n' "Odoo ports" "private on 127.0.0.1 (only Nginx is exposed)"
   else
-    printf '  %-24s %s\n' "HTTPS proxy" "not selected"
+    printf '  %-24s %s\n' "Reverse proxy" "not selected"
   fi
   printf '  %-24s %s\n' "Cron threads" "$ODOO_MAX_CRON_THREADS per selected edition"
   if [[ "$DEPLOYMENT_MODE" == "production" ]]; then
@@ -85,6 +85,8 @@ step_review_and_install() {
   # Behind the proxy only Nginx is published; Odoo stays reachable on localhost.
   ODOO_BIND_ADDRESS="$BIND_ADDRESS"
   [[ "$PROXY_ENABLED" == "true" ]] && ODOO_BIND_ADDRESS="127.0.0.1"
+  PROXY_TLS_BIND_ADDRESS="$BIND_ADDRESS"
+  [[ "$PROXY_CERT_MODE" == "none" ]] && PROXY_TLS_BIND_ADDRESS="127.0.0.1"
 
   umask 077
   cat > .env <<EOF
@@ -119,6 +121,7 @@ PROXY_ENABLED=$PROXY_ENABLED
 PROXY_CERT_MODE=$PROXY_CERT_MODE
 PROXY_SERVER_NAME=$PROXY_SERVER_NAME
 PROXY_HTTP_PORT=$PROXY_HTTP_PORT
+PROXY_TLS_BIND_ADDRESS=$PROXY_TLS_BIND_ADDRESS
 ENTERPRISE_HTTPS_PORT=$ENTERPRISE_HTTPS_PORT
 COMMUNITY_HTTPS_PORT=$COMMUNITY_HTTPS_PORT
 NGINX_IMAGE=$NGINX_IMAGE
@@ -203,12 +206,13 @@ EOF
         echo "No certificate is installed for Nginx. Rerun the installer and provide the certificate files."
         exit 1
       fi
-    else
+    elif [[ "$PROXY_CERT_MODE" == "self-signed" ]]; then
       ensure_self_signed_certificate || exit 1
     fi
+    mkdir -p "$PROXY_CERT_DIR"
     write_nginx_config
     chmod 700 "$PROXY_CERT_DIR"
-    chmod 600 "$PROXY_CERT_DIR"/*.pem
+    chmod 600 "$PROXY_CERT_DIR"/*.pem 2>/dev/null || true
   fi
 
   COMPOSE_PROFILE=()
@@ -284,7 +288,7 @@ EOF
   "${DOCKER[@]}" compose "${COMPOSE_PROFILE[@]}" up -d --wait --wait-timeout 300 "${START_SERVICES[@]}"
   if [[ "$PROXY_ENABLED" == "true" ]]; then
     # Recreate so a rerun always picks up the regenerated configuration and certificate.
-    echo "Starting the Nginx HTTPS proxy..."
+    echo "Starting the Nginx reverse proxy..."
     "${DOCKER[@]}" compose "${COMPOSE_PROFILE[@]}" up -d --wait --wait-timeout 120 --force-recreate nginx
   fi
 
@@ -292,8 +296,13 @@ EOF
      command -v ufw >/dev/null 2>&1 && sudo ufw status | grep -q '^Status: active'; then
     if [[ "$PROXY_ENABLED" == "true" ]]; then
       sudo ufw allow "${PROXY_HTTP_PORT}/tcp"
-      if [[ "$START_ENTERPRISE" == "true" ]]; then sudo ufw allow "${ENTERPRISE_HTTPS_PORT}/tcp"; fi
-      if [[ "$START_COMMUNITY" == "true" ]]; then sudo ufw allow "${COMMUNITY_HTTPS_PORT}/tcp"; fi
+      if [[ "$START_ENTERPRISE" == "true" && "$PROXY_CERT_MODE" != "none" ]]; then
+        sudo ufw allow "${ENTERPRISE_HTTPS_PORT}/tcp"
+      fi
+      if [[ "$START_COMMUNITY" == "true" ]] &&
+         [[ "$PROXY_CERT_MODE" != "none" || "$START_ENTERPRISE" == "true" ]]; then
+        sudo ufw allow "${COMMUNITY_HTTPS_PORT}/tcp"
+      fi
     else
       if [[ "$START_COMMUNITY" == "true" ]]; then
         sudo ufw allow "${COMMUNITY_PORT}/tcp"
@@ -315,15 +324,15 @@ EOF
   COMMUNITY_URL="http://$ACCESS_HOST:$COMMUNITY_PORT"
   ENTERPRISE_URL="http://$ACCESS_HOST:$ENTERPRISE_PORT"
   if [[ "$PROXY_ENABLED" == "true" ]]; then
-    COMMUNITY_URL="$(proxy_url "$COMMUNITY_HTTPS_PORT")"
-    ENTERPRISE_URL="$(proxy_url "$ENTERPRISE_HTTPS_PORT")"
+    COMMUNITY_URL="$(proxy_community_url)"
+    ENTERPRISE_URL="$(proxy_enterprise_url)"
   fi
   if [[ -e installation-info.txt ]]; then
     chmod 600 installation-info.txt
   fi
   PROXY_SUMMARY="not enabled"
   if [[ "$PROXY_ENABLED" == "true" ]]; then
-    PROXY_SUMMARY="Nginx ($PROXY_CERT_MODE certificate for $PROXY_SERVER_NAME); Odoo ports on 127.0.0.1"
+    PROXY_SUMMARY="$(proxy_mode_label); Odoo ports on 127.0.0.1"
   fi
   (
   umask 077
@@ -333,7 +342,7 @@ Odoo version: $ODOO_VERSION
 Mode: $DEPLOYMENT_MODE
 Performance mode: $PERFORMANCE_MODE
 Network binding: $BIND_ADDRESS
-HTTPS proxy: $PROXY_SUMMARY
+Reverse proxy: $PROXY_SUMMARY
 Detected hardware: $SYSTEM_SPEC_SUMMARY
 Cron threads per selected edition: $ODOO_MAX_CRON_THREADS
 Automatic startup: enabled (Docker at boot; containers restart unless manually stopped)

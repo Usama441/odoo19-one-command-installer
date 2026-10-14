@@ -34,11 +34,43 @@ menu_item() {
   printf '  %b[%s]%b %s\n' "$COLOR_GREEN$COLOR_BOLD" "$1" "$COLOR_RESET" "$2"
 }
 
-ask_yes_no() {
-  local prompt="$1" default_answer="$2" answer
+# Prompts never accept an empty answer, so an accidental Enter cannot pick a
+# value. A bracketed default in a prompt ("Port [8069]: ") is shown as a
+# suggestion instead ("Port (suggested: 8069): ") and must be typed.
+format_prompt() {
+  local prompt="$1" pattern='^(.*) \[([^]]*)\](: *)$'
+  if [[ ! "$prompt" =~ $pattern ]]; then
+    printf '%s' "$prompt"
+    return
+  fi
+  case "${BASH_REMATCH[2]}" in
+    Y/n) printf '%s [y/n] (suggested: y)%s' "${BASH_REMATCH[1]}" "${BASH_REMATCH[3]}" ;;
+    y/N) printf '%s [y/n] (suggested: n)%s' "${BASH_REMATCH[1]}" "${BASH_REMATCH[3]}" ;;
+    *) printf '%s (suggested: %s)%s' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "${BASH_REMATCH[3]}" ;;
+  esac
+}
+
+# Reads a non-empty answer into the variable named by $1.
+read_value() {
+  local __rv_target="$1" __rv_prompt="$2" __rv_answer
   while true; do
-    read -r -p "$prompt" answer
-    answer="${answer:-$default_answer}"
+    if ! read -r -p "$(format_prompt "$__rv_prompt")" __rv_answer && [[ -z "$__rv_answer" ]]; then
+      echo
+      echo "Input ended before an answer was given; stopping without changes."
+      exit 1
+    fi
+    if [[ -n "${__rv_answer//[[:space:]]/}" ]]; then
+      printf -v "$__rv_target" '%s' "$__rv_answer"
+      return
+    fi
+    echo "Nothing was entered. Please type your answer."
+  done
+}
+
+ask_yes_no() {
+  local prompt="$1" answer
+  while true; do
+    read_value answer "$prompt"
     case "${answer,,}" in
       y|yes) return 0 ;;
       n|no) return 1 ;;
@@ -47,11 +79,31 @@ ask_yes_no() {
   done
 }
 
-read_choice() {
-  local target="$1" prompt="$2" default_answer="$3" allowed="$4" answer
-  while true; do
+# Asks the user to type a confirmation phrase exactly. A mistyped phrase gets up
+# to three attempts; pressing Enter on an empty answer cancels immediately.
+confirm_phrase() {
+  local phrase="$1" prompt="$2" answer attempt max_attempts=3
+  for (( attempt = 1; attempt <= max_attempts; attempt++ )); do
     read -r -p "$prompt" answer
-    answer="${answer:-$default_answer}"
+    if [[ "$answer" == "$phrase" ]]; then
+      return 0
+    fi
+    if [[ -z "$answer" ]]; then
+      return 1
+    fi
+    if (( attempt < max_attempts )); then
+      echo "That does not match \"$phrase\" (capital letters and spaces must match)."
+      echo "$((max_attempts - attempt)) attempt(s) left; press Enter to cancel."
+    fi
+  done
+  echo "The phrase did not match after $max_attempts attempts."
+  return 1
+}
+
+read_choice() {
+  local target="$1" prompt="$2" allowed="$4" answer
+  while true; do
+    read_value answer "$prompt"
     answer="${answer,,}"
     if [[ " $allowed " == *" $answer "* ]]; then
       printf -v "$target" '%s' "$answer"
