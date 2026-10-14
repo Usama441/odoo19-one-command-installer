@@ -248,9 +248,9 @@ write_ca_download_page() {
     <p>Open a terminal in your Downloads folder and run:</p>
     <ol>
       <li>System: <code>sudo cp odoo-local-ca.crt /usr/local/share/ca-certificates/ &amp;&amp; sudo update-ca-certificates</code></li>
-      <li>Chrome / Chromium: <code>sudo apt install -y libnss3-tools &amp;&amp; certutil -d sql:\$HOME/.pki/nssdb -A -t "C,," -n "Odoo Local CA" -i odoo-local-ca.crt</code></li>
+      <li>Chrome / Chromium: <code>sudo apt install -y libnss3-tools &amp;&amp; mkdir -p \$HOME/.pki/nssdb &amp;&amp; { [ -f \$HOME/.pki/nssdb/cert9.db ] || certutil -d sql:\$HOME/.pki/nssdb -N --empty-password; } &amp;&amp; certutil -d sql:\$HOME/.pki/nssdb -A -t "C,," -n "Odoo Local CA" -i odoo-local-ca.crt</code></li>
       <li>Firefox: Settings → Privacy &amp; Security → Certificates → View Certificates → Authorities → Import, and tick "Trust this CA to identify websites".</li>
-      <li>Restart the browser.</li>
+      <li>Close every browser window (<code>pkill -f chrome</code> for Chrome) and open Odoo again.</li>
     </ol>
   </div>
 
