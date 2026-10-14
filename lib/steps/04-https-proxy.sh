@@ -28,11 +28,13 @@ read_proxy_port() {
   done
 }
 
-step_configure_proxy() {
-  local default_enabled default_name choice default_choice cert_path key_path
+# Asked in step 2, right after the bind address and before the Odoo ports:
+# with Nginx the Odoo ports become internal, so they are not asked at all.
+ask_proxy_enabled() {
+  local default_enabled
 
   PROXY_ENABLED="false"
-  PROXY_CERT_MODE="self-signed"
+  PROXY_CERT_MODE="local-ca"
   PROXY_SERVER_NAME=""
   PROXY_HTTP_PORT="80"
   ENTERPRISE_HTTPS_PORT="443"
@@ -47,12 +49,14 @@ step_configure_proxy() {
     valid_port "$(get_env_value COMMUNITY_HTTPS_PORT)" && COMMUNITY_HTTPS_PORT="$(get_env_value COMMUNITY_HTTPS_PORT)"
     [[ -n "$(get_env_value NGINX_IMAGE)" ]] && NGINX_IMAGE="$(get_env_value NGINX_IMAGE)"
   fi
+  # Earlier versions created a plain self-signed certificate; they now use the CA.
   case "$PROXY_CERT_MODE" in
     custom|none) ;;
-    *) PROXY_CERT_MODE="self-signed" ;;
+    *) PROXY_CERT_MODE="local-ca" ;;
   esac
 
-  section "4/6" "Choose optional Nginx reverse proxy"
+  echo
+  printf '%b\n' "${COLOR_BOLD}Nginx reverse proxy${COLOR_RESET}"
   echo "Nginx sits in front of Odoo and keeps the Odoo ports private on this server."
   echo "It routes live updates (websocket) to Odoo when production workers are enabled,"
   echo "and with HTTPS gives the Odoo 20 web client the secure browser context it needs"
@@ -72,6 +76,27 @@ step_configure_proxy() {
     echo "Nginx not selected; Odoo is served directly over HTTP on its own ports."
     return
   fi
+  echo "Nginx selected: the address, certificate and Nginx ports are asked in step 4."
+}
+
+# Internal Odoo port used behind Nginx: the saved one, else the default.
+proxy_internal_odoo_port() {
+  local key="$1" default_port="$2" saved=""
+  [[ -f .env ]] && saved="$(get_env_value "$key")"
+  if valid_port "$saved"; then
+    echo "$((10#$saved))"
+  else
+    echo "$default_port"
+  fi
+}
+
+step_configure_proxy() {
+  local default_name choice default_choice cert_path key_path
+
+  if [[ "$PROXY_ENABLED" != "true" ]]; then
+    return
+  fi
+  section "4/6" "Configure the Nginx reverse proxy"
 
   if [[ "$BIND_ADDRESS" == "127.0.0.1" ]]; then
     printf '%b\n' "${COLOR_YELLOW}The bind address is localhost only, so Nginx will only be reachable from this machine.${COLOR_RESET}"
@@ -96,7 +121,7 @@ step_configure_proxy() {
 
   echo
   echo "How should Nginx serve Odoo?"
-  echo "  1) HTTPS with a self-signed certificate (LAN/testing; browsers ask to proceed once)"
+  echo "  1) HTTPS with a local company certificate authority (LAN; install it once per device)"
   echo "  2) HTTPS with my own certificate files (full chain + private key, e.g. from your CA)"
   echo "  3) HTTP only, no certificate (Odoo 20 needs HTTPS or localhost for some browser features)"
   case "$PROXY_CERT_MODE" in
@@ -106,7 +131,7 @@ step_configure_proxy() {
   esac
   read_choice choice "Choose an option [$default_choice]: " "" "1 2 3"
   case "$choice" in
-    1) PROXY_CERT_MODE="self-signed" ;;
+    1) PROXY_CERT_MODE="local-ca" ;;
     2) PROXY_CERT_MODE="custom" ;;
     3) PROXY_CERT_MODE="none" ;;
   esac
@@ -124,7 +149,7 @@ step_configure_proxy() {
     return
   fi
   if [[ -f "$PROXY_CERT_DIR/fullchain.pem" && -f "$PROXY_CERT_DIR/privkey.pem" &&
-        ! -f "$PROXY_CERT_DIR/self-signed-names.txt" ]] &&
+        ! -f "$PROXY_CERT_DIR/generated-names.txt" && ! -f "$PROXY_CERT_DIR/self-signed-names.txt" ]] &&
      ask_yes_no "Keep the certificate already installed for Nginx? [Y/n]: "; then
     return
   fi

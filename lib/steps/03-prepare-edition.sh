@@ -34,7 +34,13 @@ step_prepare_edition() {
     echo "Community-only installation selected; no licensed Enterprise files are required."
   fi
 
-  if [[ "$START_ENTERPRISE" == "true" ]]; then
+  if [[ "$START_ENTERPRISE" == "true" && "$PROXY_ENABLED" == "true" ]]; then
+    ENTERPRISE_PORT="$(proxy_internal_odoo_port ENTERPRISE_PORT 8070)"
+    if [[ "$START_COMMUNITY" == "true" && "$ENTERPRISE_PORT" == "$COMMUNITY_PORT" ]]; then
+      ENTERPRISE_PORT=$(( COMMUNITY_PORT == 8070 ? 8071 : 8070 ))
+    fi
+    echo "Enterprise internal port: $ENTERPRISE_PORT (private on 127.0.0.1, used only by Nginx)."
+  elif [[ "$START_ENTERPRISE" == "true" ]]; then
     while true; do
       read_value ENTERPRISE_PORT "Enterprise web port [8070]: "
       if ! valid_port "$ENTERPRISE_PORT"; then

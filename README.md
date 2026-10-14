@@ -53,8 +53,8 @@ When run interactively, the Ubuntu script first clears the previous terminal
 output and then opens a keyboard-controlled dashboard before performing package
 maintenance or starting services. Use the Up/Down arrow keys and Enter, press a
 number directly, or press Esc/Ctrl+C to exit. The full dashboard adapts between
-112–132 columns and uses a 33–42 row viewport. It stays centered when the
-terminal is larger. On interactive terminals smaller than 112×33, a full-screen
+112–132 columns and uses a 34–42 row viewport. It stays centered when the
+terminal is larger. On interactive terminals smaller than 112×34, a full-screen
 resize guard shows the current and required sizes and waits; resizing the window
 automatically opens the dashboard. Press Q, Esc, or Ctrl+C to exit from that
 screen. Redirected, automated, `NO_COLOR`, and basic-terminal runs use the clean
@@ -65,7 +65,7 @@ numbered menu instead.
 ```text
 ============================================================
                ODOO DEPLOYMENT CONTROL CENTER
-                    Installer v1.4.1
+                    Installer v1.5.0
      Community • Enterprise • PostgreSQL • pgAdmin
                   Script by TI ASSOCIATES
               Developed by USAMA ARSHAD
@@ -86,7 +86,8 @@ Quick system snapshot
   [4] Check Ubuntu updates and missing dependencies
   [5] Back up databases across this system
   [6] Uninstall Odoo
-  [7] Exit
+  [7] HTTPS certificates & device setup (company CA)
+  [8] Exit
 Choose an option [3]:
 ```
 
@@ -130,6 +131,16 @@ The scanner currently supports PostgreSQL, MySQL, MariaDB, and SQLite. A truly
 universal database backup format does not exist: MongoDB, Redis, SQL Server,
 Oracle, and other engines require their own discovery, authentication, and dump
 tools and are not yet included in this backup option.
+
+Option 7 manages HTTPS for an existing installation without rerunning the
+installer. It is shown but disabled ("install Odoo first") until Odoo is
+installed. It displays the company CA and server certificate expiry dates and
+the device setup page, and offers to switch the Nginx HTTPS proxy to the company
+certificate authority (creating it on first use), renew the server certificate
+now (devices keep working), or back up the CA to `backups/`
+(`odoo-company-ca-<date>.tar.gz`, mode 600, contains the CA private key). It
+needs an installation that already uses Nginx with HTTPS; for HTTP-only or
+no-proxy installations it explains how to enable it with the installer.
 
 Option 6 has an edition-aware uninstall wizard. It can remove Community only,
 Enterprise only, both Odoo editions while keeping pgAdmin, or the complete
@@ -285,19 +296,19 @@ how to rerun it.
 | 0 | `Choose an Odoo version [2]` | Asked right after an install option is chosen in the main menu (Windows asks it at the start of step 2). `1` selects Odoo 19.0 and `2` selects Odoo 20.0 (the default on a new machine). On a rerun the installed version is the default. Switching versions is refused while databases from the other version exist; back them up and remove them first, because a major-version upgrade needs Odoo's database migration. |
 | 1 | `Choose a profile [1]` | `1` selects the lightweight testing server. `2` selects production and opens the hardware-aware performance advisor. |
 | 1a | `Choose a bind address option` | `1` publishes the web ports on `127.0.0.1` only (reachable from this machine). `2` asks for an IP address: a server IP to listen on one network only, or `0.0.0.0` for all interfaces. The default is `1` for testing and `2` with `0.0.0.0` for production; on reruns the saved `BIND_ADDRESS` from `.env` is the default. An address that is not assigned to the machine is rejected. |
-| 2 | `Community web port [8069]` | Asked only when Community or Both was selected in the Ubuntu menu. |
+| 1b | `Put Nginx in front of Odoo?` | Asked right after the bind address. Optional Nginx reverse proxy (see [HTTPS with Nginx](#https-with-nginx)). Suggested yes for production with a network bind address, no otherwise; a rerun suggests the saved choice. With Nginx, the Odoo ports (questions 2 and 4) are not asked: they become internal ports on `127.0.0.1` (the saved ports on a rerun, otherwise 8069/8070). |
+| 2 | `Community web port [8069]` | Asked only when Community or Both was selected in the Ubuntu menu and Nginx is not used. |
 | 3 | `Enterprise addons folder` | Asked only when Enterprise is selected and complete addons were not detected automatically. |
-| 4 | `Enterprise web port [8070]` | Asked only when Enterprise will start. In Both mode it must differ from the Community port. |
+| 4 | `Enterprise web port [8070]` | Asked only when Enterprise will start and Nginx is not used. In Both mode it must differ from the Community port. |
 | 5 | `Expected simultaneous ... users` | Production only. Enter active users expected at the same time, not the total number of accounts. Each selected edition has its own estimate. |
 | 6 | `Choose a performance option [1]` | `1` applies the automatic recommendation, `2` accepts custom worker/cron/memory values, and `3` uses one safe worker per selected edition. |
 | 7 | Custom performance questions | Shown only for option `2`. The installer validates HTTP workers, cron threads, and soft/hard memory limits and warns before accepting an overcommitted worker total. |
 | 8 | `Add pgAdmin to this installation? [y/N]` | Enables the optional pgAdmin web application. A rerun with pgAdmin enabled instead asks whether to keep it enabled. |
 | 9 | `pgAdmin web port [5050]` | Asked only when pgAdmin is enabled. It must differ from the selected Odoo ports. |
 | 10 | `pgAdmin login email [admin@example.com]` | Asked only on the first pgAdmin setup. Existing pgAdmin data reuses the saved email. |
-| 10a | `Put Nginx in front of Odoo?` | Optional Nginx reverse proxy (see [HTTPS with Nginx](#https-with-nginx)). Suggested yes for production with a network bind address, no otherwise; a rerun suggests the saved choice. |
-| 10b | `Server name or IP` | Asked when Nginx is enabled: the address users type in the browser, such as `192.168.10.20` or `erp.example.com`. |
-| 10c | `How should Nginx serve Odoo?` | `1` HTTPS with a self-signed certificate; `2` HTTPS with your own full-chain certificate and private key (checked to match); `3` HTTP only, no certificate. |
-| 10d | Proxy ports | HTTPS: `HTTP port (redirects to HTTPS)` 80, `Enterprise HTTPS port` 443, `Community HTTPS port` 8443. HTTP only: the first selected edition's HTTP port 80 and, with both editions, `Community HTTP port` 8080. Ports must differ from each other and from the Odoo and pgAdmin ports. |
+| 10a | `Server name or IP` | Step 4, asked when Nginx is enabled: the address users type in the browser, such as `192.168.10.20` or `erp.example.com`. |
+| 10b | `How should Nginx serve Odoo?` | `1` HTTPS with a local company certificate authority (LAN; each device installs it once from the setup page); `2` HTTPS with your own full-chain certificate and private key (checked to match); `3` HTTP only, no certificate. |
+| 10c | Proxy ports | HTTPS: `HTTP port (redirects to HTTPS)` 80, `Enterprise HTTPS port` 443, `Community HTTPS port` 8443. HTTP only: the first selected edition's HTTP port 80 and, with both editions, `Community HTTP port` 8080. Ports must differ from each other and from the Odoo and pgAdmin ports. |
 | 11 | `Start this installation now? [Y/n]` | Shows after a complete plan summary and provides a final chance to cancel before configuration or Enterprise addons are changed. |
 
 Windows asks for the Odoo version and then uses its adaptive edition menu inside
@@ -450,19 +461,40 @@ What the installer generates (Git-ignored):
 config/nginx/
 ├── conf.d/odoo.conf                  # HTTP→HTTPS redirect, one HTTPS server per edition
 ├── conf.d/odoo-proxy-headers.inc     # X-Forwarded-* headers
-└── certs/fullchain.pem, privkey.pem  # certificate (mode 600)
+├── certs/fullchain.pem, privkey.pem  # certificate (mode 600)
+├── ca/ca.crt, ca.key                 # local certificate authority (option 1; never served)
+└── public/                           # device setup page and CA download (option 1)
 ```
 
 The configuration is validated with `nginx -t` before the stack starts, and Nginx
 is recreated on every rerun so a new certificate or port takes effect. Upload
 size is 512 MiB and proxy timeouts are 720 seconds for long reports and imports.
 
-**Certificates.** The self-signed certificate covers the server name plus
-`localhost` and the host's LAN IPv4 addresses, is valid for 825 days, and is
-reused on reruns while the names are unchanged. Browsers show a warning on the
-first visit (Advanced → Proceed); the page is still a secure context. For public
-access, rerun the installer with option `2` and give your own certificate (for
-example from your certificate authority or an existing Let's Encrypt setup).
+**Local company certificate authority (option 1, for LAN use).** Browsers trust
+an HTTPS address only when its certificate comes from an authority they know,
+and no website can install such an authority on a device by itself. The
+installer therefore creates a small certificate authority for your company once
+(valid 10 years, stored in `config/nginx/ca/`, never replaced on reruns) and
+issues the Nginx certificate from it for the server name, `localhost`, and the
+host's LAN IPv4 addresses (valid 825 days; reissued automatically on a rerun
+when the names change or it is about to expire).
+
+Each device installs the authority once from the setup page on the HTTP port,
+for example `http://192.168.10.20/`. The page detects the visitor's system
+(Windows, macOS, Ubuntu/Linux, Android, iPhone/iPad) and shows only that
+system's download and steps, with a "Show all" link for other devices:
+
+- **Windows:** download the one-click `install-odoo-ca.bat`, right-click it and
+  choose *Run as administrator*. Many PCs at once: deploy `odoo-local-ca.crt`
+  with Group Policy (Trusted Root Certification Authorities).
+- **Ubuntu/Linux, macOS, Android, iPhone/iPad:** step-by-step instructions on
+  the page. Firefox and Chrome on Linux keep their own certificate list.
+
+After that the Odoo HTTPS address shows a normal padlock on that device. Devices
+without it still work but show "Not secure". Back up `config/nginx/ca/`: if the
+authority is lost and recreated, every device must install the new one. The rest
+of the HTTP port still redirects to HTTPS. For a public deployment with a
+domain, use option `2` with a certificate from a public authority.
 
 **HTTP only.** Option `3` runs Nginx without a certificate: Odoo is served on
 `http://SERVER-NAME` (Community on port 8080 when both editions run). The Odoo

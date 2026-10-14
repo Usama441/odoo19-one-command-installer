@@ -15,10 +15,11 @@ step_show_completion() {
   if [[ "$PGADMIN_ENABLED" == "true" ]]; then
     echo "  - Sign in to pgAdmin with the email and password shown above."
   fi
-  if [[ "$PROXY_ENABLED" == "true" && "$PROXY_CERT_MODE" == "self-signed" ]]; then
-    echo "  - The HTTPS certificate is self-signed: on the first visit each browser shows a"
-    echo "    warning; choose Advanced > Proceed to continue. Use your own certificate for"
-    echo "    public access by rerunning the installer."
+  if [[ "$PROXY_ENABLED" == "true" && "$PROXY_CERT_MODE" == "local-ca" ]]; then
+    echo "  - On each computer or phone, open $(proxy_ca_page_url) once and install the"
+    echo "    company certificate (Windows: one-click installer, run as administrator)."
+    echo "    After that the Odoo HTTPS address opens with a normal padlock."
+    echo "    Keep $SCRIPT_DIR/$PROXY_CA_DIR backed up: replacing it means reinstalling on every device."
   fi
   echo "Credentials are stored in $SCRIPT_DIR/installation-info.txt (owner-readable only)."
   echo "Place custom modules in $ODOO_HOST_CUSTOM_ADDONS_DIR, then update the Apps list in Odoo."

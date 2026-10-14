@@ -72,9 +72,9 @@ step_bootstrap_and_menu() {
 
   DASHBOARD_MIN_WIDTH=112
   DASHBOARD_MAX_WIDTH=132
-  DASHBOARD_MIN_HEIGHT=33
+  DASHBOARD_MIN_HEIGHT=34
   DASHBOARD_MAX_HEIGHT=42
-  DASHBOARD_CONTENT_HEIGHT=32
+  DASHBOARD_CONTENT_HEIGHT=33
   DASHBOARD_WIDTH="$DASHBOARD_MIN_WIDTH"
   DASHBOARD_CONTENT_WIDTH=$((DASHBOARD_WIDTH - 6))
   DASHBOARD_LEFT=0
@@ -139,8 +139,15 @@ step_bootstrap_and_menu() {
     menu_item "4" "Check Ubuntu updates and missing dependencies"
     menu_item "5" "Back up databases across this system"
     menu_item "6" "Uninstall Odoo"
-    menu_item "7" "Exit"
-    read_choice MAIN_CHOICE "Choose an option [$DEFAULT_MAIN_CHOICE]: " "$DEFAULT_MAIN_CHOICE" "1 2 3 4 5 6 7"
+    local main_allowed="1 2 3 4 5 6 8"
+    if odoo_installation_present; then
+      menu_item "7" "HTTPS certificates and device setup (company CA)"
+      main_allowed="1 2 3 4 5 6 7 8"
+    else
+      menu_item "7" "HTTPS certificates and device setup (company CA) - after Odoo is installed"
+    fi
+    menu_item "8" "Exit"
+    read_choice MAIN_CHOICE "Choose an option [$DEFAULT_MAIN_CHOICE]: " "" "$main_allowed"
   fi
 
   INSTALL_ACTION="install"
@@ -153,7 +160,8 @@ step_bootstrap_and_menu() {
     4) INSTALL_ACTION="dependencies" ;;
     5) run_backup_manager; exit 0 ;;
     6) run_uninstaller; exit 0 ;;
-    7) echo "Goodbye."; exit 0 ;;
+    7) run_certificate_manager; exit $? ;;
+    8) echo "Goodbye."; exit 0 ;;
   esac
 
   if [[ "$INSTALL_ACTION" == "install" ]]; then

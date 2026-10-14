@@ -8,7 +8,11 @@ step_review_and_install() {
   printf '  %-24s %s\n' "Performance mode" "$PERFORMANCE_MODE"
   printf '  %-24s %s\n' "Network exposure" "$(bind_address_label)"
   if [[ "$START_COMMUNITY" == "true" ]]; then
-    printf '  %-24s %s\n' "Community" "enabled on port $COMMUNITY_PORT"
+    if [[ "$PROXY_ENABLED" == "true" ]]; then
+      printf '  %-24s %s\n' "Community" "enabled; internal port $COMMUNITY_PORT behind Nginx"
+    else
+      printf '  %-24s %s\n' "Community" "enabled on port $COMMUNITY_PORT"
+    fi
     printf '  %-24s %s\n' "Community custom addons" "$ODOO_HOST_CUSTOM_ADDONS_DIR"
     if [[ "$DEPLOYMENT_MODE" == "production" ]]; then
       printf '  %-24s %s\n' "Community workers" "$COMMUNITY_WORKERS (~$((COMMUNITY_WORKERS * 6)) simultaneous users)"
@@ -19,7 +23,11 @@ step_review_and_install() {
     printf '  %-24s %s\n' "Community" "not selected"
   fi
   if [[ "$START_ENTERPRISE" == "true" ]]; then
-    printf '  %-24s %s\n' "Enterprise" "enabled on port $ENTERPRISE_PORT"
+    if [[ "$PROXY_ENABLED" == "true" ]]; then
+      printf '  %-24s %s\n' "Enterprise" "enabled; internal port $ENTERPRISE_PORT behind Nginx"
+    else
+      printf '  %-24s %s\n' "Enterprise" "enabled on port $ENTERPRISE_PORT"
+    fi
     printf '  %-24s %s\n' "Enterprise storage" "$ODOO_HOST_ENTERPRISE_DIR"
     printf '  %-24s %s\n' "Enterprise custom addons" "$ODOO_HOST_CUSTOM_ADDONS_DIR"
     if [[ "$DEPLOYMENT_MODE" == "production" ]]; then
@@ -49,7 +57,7 @@ step_review_and_install() {
     if [[ "$START_COMMUNITY" == "true" ]]; then
       printf '  %-24s %s\n' "Community URL" "$(proxy_community_url)"
     fi
-    printf '  %-24s %s\n' "Odoo ports" "private on 127.0.0.1 (only Nginx is exposed)"
+    printf '  %-24s %s\n' "Odoo internal ports" "127.0.0.1 only; users open the URLs above"
   else
     printf '  %-24s %s\n' "Reverse proxy" "not selected"
   fi
@@ -206,10 +214,14 @@ EOF
         echo "No certificate is installed for Nginx. Rerun the installer and provide the certificate files."
         exit 1
       fi
-    elif [[ "$PROXY_CERT_MODE" == "self-signed" ]]; then
-      ensure_self_signed_certificate || exit 1
+    elif [[ "$PROXY_CERT_MODE" == "local-ca" ]]; then
+      ensure_ca_signed_certificate || exit 1
     fi
-    mkdir -p "$PROXY_CERT_DIR"
+    mkdir -p "$PROXY_CERT_DIR" "$PROXY_CONFIG_DIR/public"
+    rm -f -- "$PROXY_CONFIG_DIR/public/"*
+    if [[ "$PROXY_CERT_MODE" == "local-ca" ]]; then
+      write_ca_download_page
+    fi
     write_nginx_config
     chmod 700 "$PROXY_CERT_DIR"
     chmod 600 "$PROXY_CERT_DIR"/*.pem 2>/dev/null || true
@@ -401,6 +413,9 @@ Shared custom addons path: $ODOO_HOST_CUSTOM_ADDONS_DIR
 EOF
   if [[ "$PGADMIN_ENABLED" == "true" ]]; then echo "pgAdmin image: $PGADMIN_IMAGE"; fi
   if [[ "$PROXY_ENABLED" == "true" ]]; then echo "Nginx image: $NGINX_IMAGE"; fi
+  if [[ "$PROXY_ENABLED" == "true" && "$PROXY_CERT_MODE" == "local-ca" ]]; then
+    echo "Certificate setup page for each device: $(proxy_ca_page_url)"
+  fi
   } > installation-info.txt
   )
   chmod 600 .env installation-info.txt

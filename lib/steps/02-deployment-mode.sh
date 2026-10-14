@@ -22,11 +22,15 @@ step_choose_deployment_mode() {
     0.0.0.0) ACCESS_HOST="" ;;
     *) ACCESS_HOST="$BIND_ADDRESS" ;;
   esac
+  ask_proxy_enabled
 
   echo
   COMMUNITY_PORT="8069"
   ENTERPRISE_PORT="8070"
-  if [[ "$START_COMMUNITY" == "true" ]]; then
+  if [[ "$START_COMMUNITY" == "true" && "$PROXY_ENABLED" == "true" ]]; then
+    COMMUNITY_PORT="$(proxy_internal_odoo_port COMMUNITY_PORT 8069)"
+    echo "Community internal port: $COMMUNITY_PORT (private on 127.0.0.1, used only by Nginx)."
+  elif [[ "$START_COMMUNITY" == "true" ]]; then
     echo "The Community web port is used in the browser URL."
     while true; do
       read_value COMMUNITY_PORT "Community web port [8069]: "

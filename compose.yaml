@@ -117,6 +117,7 @@ services:
     volumes:
       - ./config/nginx/conf.d:/etc/nginx/conf.d:ro
       - ./config/nginx/certs:/etc/nginx/certs:ro
+      - ./config/nginx/public:/usr/share/nginx/odoo-ca:ro
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/nginx-health"]
       interval: 10s
