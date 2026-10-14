@@ -18,3 +18,4 @@ config/pgadmin/pgpass
 addons/enterprise/*
 !addons/enterprise/.gitkeep
 enterprise-*.zip
+config/nginx/

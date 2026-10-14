@@ -41,6 +41,18 @@ step_review_and_install() {
   else
     printf '  %-24s %s\n' "pgAdmin" "not selected"
   fi
+  if [[ "$PROXY_ENABLED" == "true" ]]; then
+    printf '  %-24s %s\n' "HTTPS proxy" "Nginx, $PROXY_CERT_MODE certificate for $PROXY_SERVER_NAME"
+    if [[ "$START_ENTERPRISE" == "true" ]]; then
+      printf '  %-24s %s\n' "Enterprise URL" "$(proxy_url "$ENTERPRISE_HTTPS_PORT")"
+    fi
+    if [[ "$START_COMMUNITY" == "true" ]]; then
+      printf '  %-24s %s\n' "Community URL" "$(proxy_url "$COMMUNITY_HTTPS_PORT")"
+    fi
+    printf '  %-24s %s\n' "Odoo ports" "private on 127.0.0.1 (only Nginx is exposed)"
+  else
+    printf '  %-24s %s\n' "HTTPS proxy" "not selected"
+  fi
   printf '  %-24s %s\n' "Cron threads" "$ODOO_MAX_CRON_THREADS per selected edition"
   if [[ "$DEPLOYMENT_MODE" == "production" ]]; then
     printf '  %-24s %s\n' "Worker memory limits" "$((ODOO_LIMIT_MEMORY_SOFT / 1024 / 1024)) MiB soft / $((ODOO_LIMIT_MEMORY_HARD / 1024 / 1024)) MiB hard"
@@ -66,6 +78,13 @@ step_review_and_install() {
   fi
 
   echo "Generating private configuration and credentials..."
+  if [[ ! "$NGINX_IMAGE" =~ ^[A-Za-z0-9][A-Za-z0-9._/@:-]+$ ]]; then
+    echo "The Nginx image reference in .env is invalid."
+    exit 1
+  fi
+  # Behind the proxy only Nginx is published; Odoo stays reachable on localhost.
+  ODOO_BIND_ADDRESS="$BIND_ADDRESS"
+  [[ "$PROXY_ENABLED" == "true" ]] && ODOO_BIND_ADDRESS="127.0.0.1"
 
   umask 077
   cat > .env <<EOF
@@ -74,6 +93,7 @@ ODOO_IMAGE=$ODOO_IMAGE
 POSTGRES_IMAGE=$POSTGRES_IMAGE
 PGADMIN_IMAGE=$PGADMIN_IMAGE
 BIND_ADDRESS=$BIND_ADDRESS
+ODOO_BIND_ADDRESS=$ODOO_BIND_ADDRESS
 COMMUNITY_PORT=$COMMUNITY_PORT
 ENTERPRISE_PORT=$ENTERPRISE_PORT
 COMMUNITY_DB_PASSWORD=$COMMUNITY_DB_PASSWORD
@@ -95,6 +115,13 @@ ODOO_LIMIT_MEMORY_HARD=$ODOO_LIMIT_MEMORY_HARD
 COMMUNITY_CUSTOM_ADDONS_PATH=$ODOO_HOST_CUSTOM_ADDONS_DIR
 ENTERPRISE_ADDONS_PATH=$ODOO_HOST_ENTERPRISE_DIR
 ENTERPRISE_CUSTOM_ADDONS_PATH=$ODOO_HOST_CUSTOM_ADDONS_DIR
+PROXY_ENABLED=$PROXY_ENABLED
+PROXY_CERT_MODE=$PROXY_CERT_MODE
+PROXY_SERVER_NAME=$PROXY_SERVER_NAME
+PROXY_HTTP_PORT=$PROXY_HTTP_PORT
+ENTERPRISE_HTTPS_PORT=$ENTERPRISE_HTTPS_PORT
+COMMUNITY_HTTPS_PORT=$COMMUNITY_HTTPS_PORT
+NGINX_IMAGE=$NGINX_IMAGE
 EOF
 
   write_config config/community/odoo.conf db-community "$COMMUNITY_DB_PASSWORD" "$COMMUNITY_ADMIN_PASSWORD" \
@@ -168,11 +195,31 @@ db-enterprise:5432:*:odoo:$ENTERPRISE_DB_PASSWORD
 EOF
   chmod 600 .env config/community/odoo.conf config/enterprise/odoo.conf config/pgadmin/servers.json config/pgadmin/pgpass
 
+  if [[ "$PROXY_ENABLED" == "true" ]]; then
+    if [[ "$PROXY_CERT_MODE" == "custom" ]]; then
+      if [[ -n "$PROXY_CUSTOM_CERT" ]]; then
+        install_custom_certificate "$PROXY_CUSTOM_CERT" "$PROXY_CUSTOM_KEY" || exit 1
+      elif [[ ! -f "$PROXY_CERT_DIR/fullchain.pem" || ! -f "$PROXY_CERT_DIR/privkey.pem" ]]; then
+        echo "No certificate is installed for Nginx. Rerun the installer and provide the certificate files."
+        exit 1
+      fi
+    else
+      ensure_self_signed_certificate || exit 1
+    fi
+    write_nginx_config
+    chmod 700 "$PROXY_CERT_DIR"
+    chmod 600 "$PROXY_CERT_DIR"/*.pem
+  fi
+
   COMPOSE_PROFILE=()
-  if [[ "$PGADMIN_ENABLED" == "true" ]]; then COMPOSE_PROFILE=(--profile pgadmin); fi
+  if [[ "$PGADMIN_ENABLED" == "true" ]]; then COMPOSE_PROFILE+=(--profile pgadmin); fi
+  if [[ "$PROXY_ENABLED" == "true" ]]; then COMPOSE_PROFILE+=(--profile proxy); fi
   echo "Downloading the required Docker images..."
   "${DOCKER[@]}" compose "${COMPOSE_PROFILE[@]}" pull
   verify_install_addon_mounts || exit 1
+  if [[ "$PROXY_ENABLED" == "true" ]]; then
+    verify_nginx_config || exit 1
+  fi
 
   # Keep the configuration private from other host users while making it readable
   # by the non-root odoo user in the official container image.
@@ -225,19 +272,35 @@ EOF
     echo "Stopping pgAdmin because it was not selected..."
     "${DOCKER[@]}" compose --profile pgadmin stop pgadmin
   fi
+  if [[ "$PROXY_ENABLED" != "true" ]] &&
+     [[ -n "$("${DOCKER[@]}" compose --profile proxy ps -q nginx)" ]]; then
+    echo "Stopping the Nginx HTTPS proxy because it was not selected..."
+    "${DOCKER[@]}" compose --profile proxy stop nginx
+  fi
   START_SERVICES=()
   if [[ "$START_COMMUNITY" == "true" ]]; then START_SERVICES+=(db-community community); fi
   if [[ "$START_ENTERPRISE" == "true" ]]; then START_SERVICES+=(db-enterprise enterprise); fi
   if [[ "$PGADMIN_ENABLED" == "true" ]]; then START_SERVICES+=(pgadmin); fi
   "${DOCKER[@]}" compose "${COMPOSE_PROFILE[@]}" up -d --wait --wait-timeout 300 "${START_SERVICES[@]}"
+  if [[ "$PROXY_ENABLED" == "true" ]]; then
+    # Recreate so a rerun always picks up the regenerated configuration and certificate.
+    echo "Starting the Nginx HTTPS proxy..."
+    "${DOCKER[@]}" compose "${COMPOSE_PROFILE[@]}" up -d --wait --wait-timeout 120 --force-recreate nginx
+  fi
 
   if [[ "$BIND_ADDRESS" != "127.0.0.1" ]] &&
      command -v ufw >/dev/null 2>&1 && sudo ufw status | grep -q '^Status: active'; then
-    if [[ "$START_COMMUNITY" == "true" ]]; then
-      sudo ufw allow "${COMMUNITY_PORT}/tcp"
-    fi
-    if [[ "$START_ENTERPRISE" == "true" ]]; then
-      sudo ufw allow "${ENTERPRISE_PORT}/tcp"
+    if [[ "$PROXY_ENABLED" == "true" ]]; then
+      sudo ufw allow "${PROXY_HTTP_PORT}/tcp"
+      if [[ "$START_ENTERPRISE" == "true" ]]; then sudo ufw allow "${ENTERPRISE_HTTPS_PORT}/tcp"; fi
+      if [[ "$START_COMMUNITY" == "true" ]]; then sudo ufw allow "${COMMUNITY_HTTPS_PORT}/tcp"; fi
+    else
+      if [[ "$START_COMMUNITY" == "true" ]]; then
+        sudo ufw allow "${COMMUNITY_PORT}/tcp"
+      fi
+      if [[ "$START_ENTERPRISE" == "true" ]]; then
+        sudo ufw allow "${ENTERPRISE_PORT}/tcp"
+      fi
     fi
     if [[ "$PGADMIN_ENABLED" == "true" ]]; then
       sudo ufw allow "${PGADMIN_PORT}/tcp"
@@ -249,8 +312,18 @@ EOF
   if [[ -z "$ACCESS_HOST" ]]; then
     ACCESS_HOST="$HOST_IP"
   fi
+  COMMUNITY_URL="http://$ACCESS_HOST:$COMMUNITY_PORT"
+  ENTERPRISE_URL="http://$ACCESS_HOST:$ENTERPRISE_PORT"
+  if [[ "$PROXY_ENABLED" == "true" ]]; then
+    COMMUNITY_URL="$(proxy_url "$COMMUNITY_HTTPS_PORT")"
+    ENTERPRISE_URL="$(proxy_url "$ENTERPRISE_HTTPS_PORT")"
+  fi
   if [[ -e installation-info.txt ]]; then
     chmod 600 installation-info.txt
+  fi
+  PROXY_SUMMARY="not enabled"
+  if [[ "$PROXY_ENABLED" == "true" ]]; then
+    PROXY_SUMMARY="Nginx ($PROXY_CERT_MODE certificate for $PROXY_SERVER_NAME); Odoo ports on 127.0.0.1"
   fi
   (
   umask 077
@@ -260,6 +333,7 @@ Odoo version: $ODOO_VERSION
 Mode: $DEPLOYMENT_MODE
 Performance mode: $PERFORMANCE_MODE
 Network binding: $BIND_ADDRESS
+HTTPS proxy: $PROXY_SUMMARY
 Detected hardware: $SYSTEM_SPEC_SUMMARY
 Cron threads per selected edition: $ODOO_MAX_CRON_THREADS
 Automatic startup: enabled (Docker at boot; containers restart unless manually stopped)
@@ -271,7 +345,7 @@ EOF
   fi
   if [[ "$START_COMMUNITY" == "true" ]]; then
   cat <<EOF
-Community: http://$ACCESS_HOST:$COMMUNITY_PORT
+Community: $COMMUNITY_URL
 Community Odoo master password: $COMMUNITY_ADMIN_PASSWORD
 EOF
   if [[ "$DEPLOYMENT_MODE" == "production" ]]; then
@@ -287,7 +361,7 @@ EOF
   fi
   if [[ "$START_ENTERPRISE" == "true" ]]; then
   cat <<EOF
-Enterprise: http://$ACCESS_HOST:$ENTERPRISE_PORT
+Enterprise: $ENTERPRISE_URL
 Enterprise Odoo master password: $ENTERPRISE_ADMIN_PASSWORD
 EOF
   if [[ "$DEPLOYMENT_MODE" == "production" ]]; then
@@ -317,6 +391,7 @@ Enterprise addons path: $ODOO_HOST_ENTERPRISE_DIR
 Shared custom addons path: $ODOO_HOST_CUSTOM_ADDONS_DIR
 EOF
   if [[ "$PGADMIN_ENABLED" == "true" ]]; then echo "pgAdmin image: $PGADMIN_IMAGE"; fi
+  if [[ "$PROXY_ENABLED" == "true" ]]; then echo "Nginx image: $NGINX_IMAGE"; fi
   } > installation-info.txt
   )
   chmod 600 .env installation-info.txt

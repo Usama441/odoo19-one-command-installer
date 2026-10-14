@@ -15,6 +15,7 @@ Docker services. The installer asks which Odoo version to install.
 | Odoo Community (19 or 20) + PostgreSQL | Community or Both is selected | `http://localhost:8069` (localhost bind) or `http://SERVER-IP:8069` |
 | Odoo Enterprise (19 or 20) + PostgreSQL | Enterprise or Both is selected and licensed addons exist | `http://localhost:8070` (localhost bind) or `http://SERVER-IP:8070` |
 | pgAdmin 4 web application | When the user answers `y` | `http://localhost:5050` (localhost bind) or `http://SERVER-IP:5050` |
+| Nginx HTTPS reverse proxy | When the user answers `y` (Ubuntu; default in production) | Enterprise `https://SERVER-NAME`, Community `https://SERVER-NAME:8443`; Odoo ports then stay on `127.0.0.1` |
 
 Community and Enterprise use separate databases, passwords, filestores, ports,
 configuration files, and custom-addon folders. pgAdmin can manage both databases
@@ -64,7 +65,7 @@ numbered menu instead.
 ```text
 ============================================================
                ODOO DEPLOYMENT CONTROL CENTER
-                    Installer v1.3.1
+                    Installer v1.4.0
      Community • Enterprise • PostgreSQL • pgAdmin
                   Script by TI ASSOCIATES
               Developed by USAMA ARSHAD
@@ -287,6 +288,10 @@ how to rerun it.
 | 8 | `Add pgAdmin to this installation? [y/N]` | Enables the optional pgAdmin web application. A rerun with pgAdmin enabled instead asks whether to keep it enabled. |
 | 9 | `pgAdmin web port [5050]` | Asked only when pgAdmin is enabled. It must differ from the selected Odoo ports. |
 | 10 | `pgAdmin login email [admin@example.com]` | Asked only on the first pgAdmin setup. Existing pgAdmin data reuses the saved email. |
+| 10a | `Put Nginx with HTTPS in front of Odoo?` | Optional HTTPS reverse proxy (see [HTTPS with Nginx](#https-with-nginx)). The default is yes for production with a network bind address and no otherwise; a rerun keeps the saved choice. |
+| 10b | `Server name or IP` | Asked when Nginx is enabled: the address users type in the browser, such as `192.168.10.20` or `erp.example.com`. |
+| 10c | `HTTP port`, `Enterprise HTTPS port`, `Community HTTPS port` | Defaults `80`, `443`, and `8443`. They must differ from each other and from the Odoo and pgAdmin ports. Port 80 only redirects to HTTPS. |
+| 10d | `Choose a certificate option [1]` | `1` creates a self-signed certificate; `2` installs your own full-chain certificate and private key after checking that they match. |
 | 11 | `Start this installation now? [Y/n]` | Shows after a complete plan summary and provides a final chance to cancel before configuration or Enterprise addons are changed. |
 
 Windows asks for the Odoo version and then uses its adaptive edition menu inside
@@ -412,6 +417,51 @@ running containers, and disabling pgAdmin stops its existing container.
 13. **Show next steps.** The terminal prints URLs, credentials, and browser setup
    guidance. The access information is also saved to `installation-info.txt`.
 
+## HTTPS with Nginx
+
+The Ubuntu installer can put an Nginx reverse proxy (`nginx:1.30.0-alpine`,
+Compose profile `proxy`) in front of Odoo. It is recommended for any access over
+the network:
+
+- **HTTPS / secure browser context.** Browsers only expose some APIs on `https://`
+  or `localhost` pages. The Odoo 20 web client reads `navigator.clipboard` while
+  loading, so over plain `http://SERVER-IP` it fails with
+  `Cannot read properties of undefined (reading 'writeText')`. HTTPS fixes this.
+- **Live updates with production workers.** With `workers > 0`, Odoo serves its
+  websocket (notifications, chatter, discuss, background job updates) on the
+  evented port `8072`, not on `8069`. Nginx routes `/websocket` there, which
+  removes the `Couldn't bind the websocket. Is the connection opened on the
+  evented port (8072)?` errors. In testing mode (`workers = 0`) it routes to
+  `8069`.
+- **Private Odoo ports.** With the proxy enabled, the Odoo ports are published
+  only on `127.0.0.1` (`ODOO_BIND_ADDRESS` in `.env`); users reach Odoo through
+  Nginx. Odoo runs with `proxy_mode = True` so it sees the real client address
+  and the `https` scheme.
+
+What the installer generates (Git-ignored):
+
+```text
+config/nginx/
+├── conf.d/odoo.conf                  # HTTP→HTTPS redirect, one HTTPS server per edition
+├── conf.d/odoo-proxy-headers.inc     # X-Forwarded-* headers
+└── certs/fullchain.pem, privkey.pem  # certificate (mode 600)
+```
+
+The configuration is validated with `nginx -t` before the stack starts, and Nginx
+is recreated on every rerun so a new certificate or port takes effect. Upload
+size is 512 MiB and proxy timeouts are 720 seconds for long reports and imports.
+
+**Certificates.** The self-signed certificate covers the server name plus
+`localhost` and the host's LAN IPv4 addresses, is valid for 825 days, and is
+reused on reruns while the names are unchanged. Browsers show a warning on the
+first visit (Advanced → Proceed); the page is still a secure context. For public
+access, rerun the installer with option `2` and give your own certificate (for
+example from your certificate authority or an existing Let's Encrypt setup).
+
+With UFW active and a network bind address, the installer opens the HTTP and
+HTTPS ports instead of the Odoo ports. The Windows installer does not set up
+Nginx.
+
 ## Runtime architecture
 
 ![Odoo Docker service architecture](docs/images/service-architecture.svg)
@@ -421,6 +471,7 @@ running containers, and disabling pgAdmin stops its existing container.
 | `community` | `db-community` | `community-data`, `community-db` | Community or Both is selected |
 | `enterprise` | `db-enterprise` | `enterprise-data`, `enterprise-db` | Enterprise or Both is selected and addons exist |
 | `pgadmin` | Connects to the selected internal databases | `pgadmin-data` | User enables pgAdmin |
+| `nginx` | Proxies HTTPS to `community`/`enterprise` | `config/nginx` (bind mounts) | User enables the HTTPS proxy |
 
 The two PostgreSQL services listen only on Docker's internal network. Only the
 Odoo and pgAdmin web ports are published on the host. On Ubuntu, Enterprise code
@@ -478,9 +529,10 @@ odoo19-one-command-installer/
 ├── config/
 │   ├── community/odoo.conf           # Community database and runtime settings
 │   ├── enterprise/odoo.conf          # Enterprise database and runtime settings
-│   └── pgadmin/
-│       ├── servers.json              # Automatically registered DB servers
-│       └── pgpass                    # Automatic DB authentication for pgAdmin
+│   ├── pgadmin/
+│   │   ├── servers.json              # Automatically registered DB servers
+│   │   └── pgpass                    # Automatic DB authentication for pgAdmin
+│   └── nginx/                        # Only with the HTTPS proxy: config and certificate
 └── addons/                            # Windows defaults and Ubuntu migration sources
     ├── community/
     ├── enterprise/
@@ -592,8 +644,8 @@ different software:
 
 - Odoo 19: `odoo:19.0-20260908`
 - Odoo 20: `odoo:20.0-20260926`
-- PostgreSQL for Odoo 19: `pgvector/pgvector:0.8.7-pg15`
-- PostgreSQL for Odoo 20: `pgvector/pgvector:0.8.7-pg17` (Odoo 20 requires
+- PostgreSQL for Odoo 19: `pgvector/pgvector:0.8.7-pg15-trixie`
+- PostgreSQL for Odoo 20: `pgvector/pgvector:0.8.7-pg17-trixie` (Odoo 20 requires
   PostgreSQL 16 or newer; an installation still on an older PostgreSQL with
   existing databases is stopped with instructions instead of starting a broken
   stack)
@@ -604,6 +656,7 @@ On a rerun, an existing `postgres:<major>` image is switched to the pgvector
 image of the same major version automatically, which reads the existing data
 without migration.
 - pgAdmin: `dpage/pgadmin4:9.17`
+- Nginx (optional HTTPS proxy): `nginx:1.30.0-alpine`
 
 Before upgrading, back up both PostgreSQL databases and both Odoo filestores,
 verify that the Enterprise addons match the target Odoo build, and then
@@ -624,12 +677,25 @@ backups. They contain credentials needed to administer or recover the services.
 The `production` choice opens the hardware-aware advisor, but its result remains
 a starting point rather than a load-test guarantee. Monitor real CPU, RAM,
 database latency, and custom-module behavior before raising worker counts. The
-installer does not configure a domain, TLS/HTTPS, reverse proxy, mail delivery,
-monitoring, or automated backups. Before exposing the system to the internet,
+installer does not configure a domain, mail delivery,
+monitoring, or automated backups. The optional Nginx proxy adds HTTPS, but a
+public deployment still needs a trusted certificate and a domain. Before
+exposing the system to the internet,
 add those controls, restrict Odoo and pgAdmin access with firewall rules, and
 test database and filestore restoration.
 
 ## Troubleshooting
+
+- **`Error while loading "@web_tour/tour_helpers/tour_helpers_clipboard": TypeError:
+  Cannot read properties of undefined (reading 'writeText')`:** Odoo 20 was opened
+  over plain HTTP on a network address. Enable the Nginx HTTPS proxy (rerun the
+  installer) or open Odoo through `http://localhost`.
+- **`Couldn't bind the websocket. Is the connection opened on the evented port
+  (8072)?` in the Odoo log:** production workers are enabled without the proxy.
+  Enable the Nginx HTTPS proxy, or use the testing profile (`workers = 0`).
+- **Nginx does not start:** run `docker compose --profile proxy logs nginx`. A
+  port such as 80 or 443 may already be used by another web server on the host;
+  rerun the installer and choose free ports.
 
 - **Docker engine is not ready:** On Ubuntu, start the native Docker Engine;
   on Windows, start Docker Desktop. Then rerun the installer.

@@ -34,7 +34,8 @@ services:
       db-community:
         condition: service_healthy
     ports:
-      - "${BIND_ADDRESS:-0.0.0.0}:${COMMUNITY_PORT}:8069"
+      # 127.0.0.1 when the Nginx proxy is enabled (ODOO_BIND_ADDRESS in .env).
+      - "${ODOO_BIND_ADDRESS:-${BIND_ADDRESS:-0.0.0.0}}:${COMMUNITY_PORT}:8069"
     environment:
       HOST: db-community
       PORT: 5432
@@ -67,7 +68,8 @@ services:
       db-enterprise:
         condition: service_healthy
     ports:
-      - "${BIND_ADDRESS:-0.0.0.0}:${ENTERPRISE_PORT}:8069"
+      # 127.0.0.1 when the Nginx proxy is enabled (ODOO_BIND_ADDRESS in .env).
+      - "${ODOO_BIND_ADDRESS:-${BIND_ADDRESS:-0.0.0.0}}:${ENTERPRISE_PORT}:8069"
     environment:
       HOST: db-enterprise
       PORT: 5432
@@ -102,6 +104,25 @@ services:
       retries: 30
       start_period: 30s
     stop_grace_period: 30s
+
+  nginx:
+    image: ${NGINX_IMAGE:-nginx:1.30.0-alpine}
+    profiles: ["proxy"]
+    restart: unless-stopped
+    ports:
+      - "${BIND_ADDRESS:-0.0.0.0}:${PROXY_HTTP_PORT:-80}:80"
+      - "${BIND_ADDRESS:-0.0.0.0}:${ENTERPRISE_HTTPS_PORT:-443}:8443"
+      - "${BIND_ADDRESS:-0.0.0.0}:${COMMUNITY_HTTPS_PORT:-8443}:9443"
+    volumes:
+      - ./config/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./config/nginx/certs:/etc/nginx/certs:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/nginx-health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    stop_grace_period: 10s
 
 volumes:
   community-db:

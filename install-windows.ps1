@@ -65,8 +65,8 @@ $odooImagesByVersion = @{
 # PostgreSQL plus the pgvector extension that Odoo's AI apps need for RAG.
 # Odoo 20 requires PostgreSQL 16 or newer (it uses any_value()).
 $postgresImagesByVersion = @{
-    "19.0" = "pgvector/pgvector:0.8.7-pg15"
-    "20.0" = "pgvector/pgvector:0.8.7-pg17"
+    "19.0" = "pgvector/pgvector:0.8.7-pg15-trixie"
+    "20.0" = "pgvector/pgvector:0.8.7-pg17-trixie"
 }
 function Get-PostgresImageMajor([string]$Image) {
     if ($Image -match '-pg(\d+)') { return [int]$Matches[1] }

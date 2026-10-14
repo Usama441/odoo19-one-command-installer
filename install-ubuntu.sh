@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-INSTALLER_VERSION="1.3.1"
+INSTALLER_VERSION="1.4.0"
 # Odoo releases offered by the installer, oldest first. Each needs a pinned
 # image in odoo_image_for_version (lib/config.sh).
 SUPPORTED_ODOO_VERSIONS=(19.0 20.0)
@@ -48,7 +48,7 @@ else
 fi
 
 LIB_DIR="$SCRIPT_DIR/lib"
-for _installer_lib in ui dashboard system config backup uninstall; do
+for _installer_lib in ui dashboard system config proxy backup uninstall; do
   # shellcheck source=/dev/null
   source "$LIB_DIR/${_installer_lib}.sh"
 done
@@ -59,7 +59,7 @@ unset _installer_lib LIB_DIR
 set_odoo_version "$(detect_installed_odoo_version)"
 
 STEPS_DIR="$SCRIPT_DIR/lib/steps"
-for _installer_step in 00-bootstrap 01-prerequisites 02-deployment-mode 03-prepare-edition 04-pgadmin 05-review-and-install 06-complete; do
+for _installer_step in 00-bootstrap 01-prerequisites 02-deployment-mode 03-prepare-edition 04-pgadmin 04-https-proxy 05-review-and-install 06-complete; do
   # shellcheck source=/dev/null
   source "$STEPS_DIR/${_installer_step}.sh"
 done
@@ -71,6 +71,7 @@ main() {
   step_choose_deployment_mode
   step_prepare_edition
   step_configure_pgadmin
+  step_configure_proxy
   step_review_and_install
   step_show_completion
 }

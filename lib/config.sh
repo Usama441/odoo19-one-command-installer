@@ -79,8 +79,8 @@ odoo_image_for_version() {
 # any_value()); Odoo 19 stays on 15.
 postgres_image_for_version() {
   case "$1" in
-    19.0) echo "pgvector/pgvector:0.8.7-pg15" ;;
-    20.0) echo "pgvector/pgvector:0.8.7-pg17" ;;
+    19.0) echo "pgvector/pgvector:0.8.7-pg15-trixie" ;;
+    20.0) echo "pgvector/pgvector:0.8.7-pg17-trixie" ;;
     *) return 1 ;;
   esac
 }
@@ -646,6 +646,9 @@ get_config_value() {
 write_config() {
   local target="$1" db_host="$2" db_password="$3" admin_password="$4" addons_path="$5"
   local workers="$6" cron_threads="$7" memory_soft="$8" memory_hard="$9"
+  # Behind the Nginx proxy Odoo trusts its X-Forwarded-* headers (client IP, https).
+  local proxy_mode="False"
+  [[ "${PROXY_ENABLED:-false}" == "true" ]] && proxy_mode="True"
   cat > "$target" <<EOF
 [options]
 admin_passwd = $admin_password
@@ -657,7 +660,7 @@ addons_path = $addons_path
 data_dir = /var/lib/odoo
 http_interface = 0.0.0.0
 list_db = True
-proxy_mode = False
+proxy_mode = $proxy_mode
 workers = $workers
 max_cron_threads = $cron_threads
 limit_memory_hard = $memory_hard

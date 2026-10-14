@@ -102,7 +102,7 @@ discover_odoo_images() {
   local -a default_images=()
 
   UNINSTALL_TARGET_IMAGES=()
-  for key in ODOO_IMAGE POSTGRES_IMAGE PGADMIN_IMAGE; do
+  for key in ODOO_IMAGE POSTGRES_IMAGE PGADMIN_IMAGE NGINX_IMAGE; do
     case "$key" in
       ODOO_IMAGE)
         default_images=()
@@ -117,6 +117,7 @@ discover_odoo_images() {
         done
         ;;
       PGADMIN_IMAGE) default_images=("dpage/pgadmin4:9.17") ;;
+      NGINX_IMAGE) default_images=("$NGINX_DEFAULT_IMAGE") ;;
     esac
     env_image=""
     if [[ -f "$env_file" ]]; then
@@ -901,7 +902,7 @@ run_uninstaller() {
       UNINSTALL_SOURCE_TARGETS=("$ODOO_HOST_ENTERPRISE_DIR" "$ODOO_HOST_CUSTOM_ROOT")
       ;;
     4|all)
-      services=(community db-community enterprise db-enterprise pgadmin)
+      services=(community db-community enterprise db-enterprise pgadmin nginx)
       volumes=(odoo19-dual_community-db odoo19-dual_community-data odoo19-dual_enterprise-db odoo19-dual_enterprise-data odoo19-dual_pgadmin-data)
       generated_files=(
         "$SCRIPT_DIR/.env"
@@ -910,6 +911,11 @@ run_uninstaller() {
         "$SCRIPT_DIR/config/enterprise/odoo.conf"
         "$SCRIPT_DIR/config/pgadmin/servers.json"
         "$SCRIPT_DIR/config/pgadmin/pgpass"
+        "$SCRIPT_DIR/config/nginx/conf.d/odoo.conf"
+        "$SCRIPT_DIR/config/nginx/conf.d/odoo-proxy-headers.inc"
+        "$SCRIPT_DIR/config/nginx/certs/fullchain.pem"
+        "$SCRIPT_DIR/config/nginx/certs/privkey.pem"
+        "$SCRIPT_DIR/config/nginx/certs/self-signed-names.txt"
         "$SCRIPT_DIR/cron/database-query.conf"
         "$SCRIPT_DIR/cron/database-query.sql"
         "$SCRIPT_DIR/logs/database-query.log"
