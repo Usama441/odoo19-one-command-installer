@@ -1,5 +1,9 @@
 # Scheduled database query
 
+The easiest way to set this up is main menu option 8 of `install-ubuntu.sh`:
+it picks the database, opens the SQL file, runs it now, and adds or removes
+the monthly crontab entry. The manual steps below do the same by hand.
+
 `database-query.sql` is your local file where you paste the PostgreSQL query or
 script that should run repeatedly. `run-database-query.sh` streams it directly
 into the configured PostgreSQL container using the local configuration.

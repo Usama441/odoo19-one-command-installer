@@ -87,7 +87,8 @@ Quick system snapshot
   [5] Back up databases across this system
   [6] Uninstall Odoo
   [7] HTTPS certificates & device setup (company CA)
-  [8] Exit
+  [8] Scheduled database query (monthly cron job)
+  [9] Exit
 Choose an option [3]:
 ```
 
@@ -141,6 +142,25 @@ now (devices keep working), turn automatic renewal on or off, or back up the CA 
 (`odoo-company-ca-<date>.tar.gz`, mode 600, contains the CA private key). It
 needs an installation that already uses Nginx with HTTPS; for HTTP-only or
 no-proxy installations it explains how to enable it with the installer.
+
+Option 8 manages the scheduled database query (`cron/run-database-query.sh`)
+without editing files by hand. Like option 7, it is disabled until Odoo is
+installed. It shows the target database, the SQL file, the schedule, and the
+last run, and lets you:
+
+1. choose the edition and the Odoo database from a list (written to
+   `cron/database-query.conf`);
+2. write or edit the SQL in `cron/database-query.sql` (opens `nano`, or
+   `$VISUAL`/`$EDITOR` when set);
+3. run the query now — the output is shown and added to
+   `logs/database-query.log`;
+4. turn the monthly schedule on (you choose the day, 1–28, and the time) or off.
+   It is an entry in your user crontab, so the server must be on at that time;
+5. show the last lines of the log.
+
+Each run starts with a `=== <date> <database> (<edition>) ===` line in the log.
+The uninstaller removes the crontab entry, the configuration, the SQL file, and
+the log.
 
 Option 6 has an edition-aware uninstall wizard. It can remove Community only,
 Enterprise only, both Odoo editions while keeping pgAdmin, or the complete

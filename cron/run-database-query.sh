@@ -58,6 +58,9 @@ if ! flock -n 9; then
   exit 0
 fi
 
+# The installer's option 8 reads the latest header as the "Last run".
+echo "=== $(date '+%F %T') $DB_CRON_DATABASE ($DB_CRON_TARGET) ==="
+
 # -i streams the local SQL file into psql. It is supported by both this
 # machine's older native Docker engine and Docker Desktop, unlike `exec -T`.
 "${DOCKER_COMMAND[@]}" exec -i "$DB_CONTAINER" \

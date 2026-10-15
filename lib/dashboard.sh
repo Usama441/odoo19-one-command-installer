@@ -164,7 +164,7 @@ draw_interactive_menu_rows() {
 
   label_width=$((DASHBOARD_CONTENT_WIDTH - 36))
 
-  for index in 1 2 3 4 5 6 7 8; do
+  for index in 1 2 3 4 5 6 7 8 9; do
     case "$index" in
       1) icon="⇩"; label="Install Odoo Community only" ;;
       2) icon="⇩"; label="Install Odoo Enterprise only" ;;
@@ -173,7 +173,8 @@ draw_interactive_menu_rows() {
       5) icon="⇧"; label="Back up databases across this system" ;;
       6) icon="♲"; label="Uninstall Odoo" ;;
       7) icon="⚿"; label="HTTPS certificates & device setup (company CA)" ;;
-      8) icon="↩"; label="Exit" ;;
+      8) icon="⏱"; label="Scheduled database query (monthly cron job)" ;;
+      9) icon="↩"; label="Exit" ;;
     esac
     tag=""
     if (( index == recommended )); then tag="★ RECOMMENDED"; fi
@@ -195,7 +196,7 @@ draw_interactive_menu_rows() {
 # Menu options that need an existing installation stay visible but disabled.
 main_menu_option_enabled() {
   case "$1" in
-    7) odoo_installation_present ;;
+    7|8) odoo_installation_present ;;
     *) return 0 ;;
   esac
 }
@@ -205,7 +206,7 @@ next_main_menu_option() {
   local current="$1" step="$2" candidate="$1"
   while true; do
     candidate=$((candidate + step))
-    (( candidate < 1 || candidate > 8 )) && { echo "$current"; return; }
+    (( candidate < 1 || candidate > 9 )) && { echo "$current"; return; }
     main_menu_option_enabled "$candidate" && { echo "$candidate"; return; }
   done
 }
@@ -430,17 +431,17 @@ read_interactive_main_choice() {
     IFS= read -rsn1 key || true
     case "$key" in
       '') MAIN_CHOICE="$selected"; break ;;
-      [1-8]) main_menu_option_enabled "$key" && { MAIN_CHOICE="$key"; break; } ;;
+      [1-9]) main_menu_option_enabled "$key" && { MAIN_CHOICE="$key"; break; } ;;
       k|K) selected="$(next_main_menu_option "$selected" -1)" ;;
       j|J) selected="$(next_main_menu_option "$selected" 1)" ;;
-      q|Q) MAIN_CHOICE="8"; break ;;
+      q|Q) MAIN_CHOICE="9"; break ;;
       $'\033')
         sequence=""
         read_dashboard_escape_sequence sequence
         case "$sequence" in
           '[A'|'OA') selected="$(next_main_menu_option "$selected" -1)" ;;
           '[B'|'OB') selected="$(next_main_menu_option "$selected" 1)" ;;
-          '') MAIN_CHOICE="8"; break ;;
+          '') MAIN_CHOICE="9"; break ;;
         esac
         ;;
     esac

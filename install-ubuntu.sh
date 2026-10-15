@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-INSTALLER_VERSION="1.5.1"
+INSTALLER_VERSION="1.6.0"
 # Odoo releases offered by the installer, oldest first. Each needs a pinned
 # image in odoo_image_for_version (lib/config.sh).
 SUPPORTED_ODOO_VERSIONS=(19.0 20.0)
@@ -48,7 +48,7 @@ else
 fi
 
 LIB_DIR="$SCRIPT_DIR/lib"
-for _installer_lib in ui dashboard system config proxy certificates backup uninstall; do
+for _installer_lib in ui dashboard system config proxy certificates database-query backup uninstall; do
   # shellcheck source=/dev/null
   source "$LIB_DIR/${_installer_lib}.sh"
 done
