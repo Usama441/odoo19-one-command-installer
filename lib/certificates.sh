@@ -38,6 +38,62 @@ certificate_days_left() {
   echo $(( ($(date -d "$end" +%s) - $(date +%s)) / 86400 ))
 }
 
+CERT_RENEWAL_UNIT="odoo-installer-cert-renewal"
+CERT_RENEWAL_LOG="logs/certificate-renewal.log"
+
+certificate_renewal_timer_enabled() {
+  systemctl is-enabled --quiet "$CERT_RENEWAL_UNIT.timer" 2>/dev/null
+}
+
+# Weekly systemd timer running cron/renew-certificate.sh as root (it needs
+# Docker to reload Nginx); Persistent catches up after the server was off.
+enable_certificate_renewal_timer() {
+  local runner="$SCRIPT_DIR/cron/renew-certificate.sh"
+  echo "Enabling automatic HTTPS certificate renewal (weekly check)..."
+  if ! sudo tee "/etc/systemd/system/$CERT_RENEWAL_UNIT.service" >/dev/null <<EOF
+[Unit]
+Description=Renew the Odoo HTTPS certificate from the company CA when needed
+After=docker.service
+Wants=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash $runner
+EOF
+  then
+    echo "Could not write the systemd service for certificate renewal."
+    return 1
+  fi
+  sudo tee "/etc/systemd/system/$CERT_RENEWAL_UNIT.timer" >/dev/null <<EOF
+[Unit]
+Description=Weekly Odoo HTTPS certificate renewal check
+
+[Timer]
+OnCalendar=weekly
+RandomizedDelaySec=1h
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+  sudo systemctl daemon-reload &&
+    sudo systemctl enable --now "$CERT_RENEWAL_UNIT.timer" >/dev/null 2>&1 || {
+      echo "Could not enable the certificate renewal timer."
+      return 1
+    }
+  echo "Automatic renewal enabled: the certificate is renewed 30 days before it expires."
+}
+
+disable_certificate_renewal_timer() {
+  if [[ ! -f "/etc/systemd/system/$CERT_RENEWAL_UNIT.timer" && ! -f "/etc/systemd/system/$CERT_RENEWAL_UNIT.service" ]]; then
+    return 0
+  fi
+  sudo systemctl disable --now "$CERT_RENEWAL_UNIT.timer" >/dev/null 2>&1 || true
+  sudo rm -f -- "/etc/systemd/system/$CERT_RENEWAL_UNIT.timer" "/etc/systemd/system/$CERT_RENEWAL_UNIT.service"
+  sudo systemctl daemon-reload
+  echo "Automatic certificate renewal disabled."
+}
+
 # Loads the proxy settings written by the installer.
 load_proxy_settings_from_env() {
   PROXY_ENABLED="$(get_env_value PROXY_ENABLED)"
@@ -56,7 +112,9 @@ load_proxy_settings_from_env() {
   [[ "$COMMUNITY_WORKERS" =~ ^[0-9]+$ ]] || COMMUNITY_WORKERS=0
   [[ "$ENTERPRISE_WORKERS" =~ ^[0-9]+$ ]] || ENTERPRISE_WORKERS=0
   # Older installations stored a plain self-signed certificate.
-  [[ "$PROXY_CERT_MODE" == "self-signed" ]] && PROXY_CERT_MODE="self-signed-legacy"
+  if [[ "$PROXY_CERT_MODE" == "self-signed" ]]; then
+    PROXY_CERT_MODE="self-signed-legacy"
+  fi
 }
 
 # Sets DOCKER to a working command for the pinned native engine.
@@ -99,6 +157,14 @@ show_certificate_status() {
   fi
   if [[ "$PROXY_CERT_MODE" == "local-ca" ]]; then
     printf '  %-26s %s\n' "Device setup page" "$(proxy_ca_page_url)"
+    if certificate_renewal_timer_enabled; then
+      printf '  %-26s %s\n' "Automatic renewal" "enabled (weekly; next check $(systemctl show "$CERT_RENEWAL_UNIT.timer" -p NextElapseUSecRealtime --value 2>/dev/null | awk '{print $2, $3}'))"
+    else
+      printf '  %-26s %s\n' "Automatic renewal" "not enabled"
+    fi
+    if [[ -s "$SCRIPT_DIR/$CERT_RENEWAL_LOG" ]]; then
+      printf '  %-26s %s\n' "Last renewal check" "$(tail -n 1 "$SCRIPT_DIR/$CERT_RENEWAL_LOG")"
+    fi
   fi
 }
 
@@ -172,11 +238,27 @@ run_certificate_manager() {
   fi
   echo "  2) Renew the server certificate now (devices keep working, nothing to reinstall)"
   echo "  3) Back up the company CA"
-  echo "  4) Exit"
-  read_choice choice "Choose an option [1]: " "" "1 2 3 4"
+  if certificate_renewal_timer_enabled; then
+    echo "  4) Turn off automatic certificate renewal"
+  else
+    echo "  4) Turn on automatic certificate renewal (weekly check)"
+  fi
+  echo "  5) Exit"
+  read_choice choice "Choose an option [1]: " "" "1 2 3 4 5"
   case "$choice" in
-    4) return 0 ;;
+    5) return 0 ;;
     3) backup_company_ca; return ;;
+    4)
+      if certificate_renewal_timer_enabled; then
+        disable_certificate_renewal_timer
+      elif [[ "$PROXY_CERT_MODE" == "local-ca" ]]; then
+        enable_certificate_renewal_timer
+      else
+        echo "Automatic renewal applies to the company CA; switch to it first with option 1."
+        return 1
+      fi
+      return
+      ;;
   esac
   if [[ "$choice" == "2" && "$PROXY_CERT_MODE" != "local-ca" ]]; then
     echo "The server certificate comes from your own files; replace them by rerunning the installer"
@@ -194,5 +276,6 @@ run_certificate_manager() {
   [[ "$choice" == "2" ]] && rm -f -- "$PROXY_CERT_DIR/generated-names.txt"
   ensure_ca_signed_certificate || return 1
   set_env_value PROXY_CERT_MODE local-ca
-  apply_proxy_changes
+  apply_proxy_changes || return 1
+  certificate_renewal_timer_enabled || enable_certificate_renewal_timer
 }

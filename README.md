@@ -65,7 +65,7 @@ numbered menu instead.
 ```text
 ============================================================
                ODOO DEPLOYMENT CONTROL CENTER
-                    Installer v1.5.0
+                    Installer v1.5.1
      Community • Enterprise • PostgreSQL • pgAdmin
                   Script by TI ASSOCIATES
               Developed by USAMA ARSHAD
@@ -137,7 +137,7 @@ installer. It is shown but disabled ("install Odoo first") until Odoo is
 installed. It displays the company CA and server certificate expiry dates and
 the device setup page, and offers to switch the Nginx HTTPS proxy to the company
 certificate authority (creating it on first use), renew the server certificate
-now (devices keep working), or back up the CA to `backups/`
+now (devices keep working), turn automatic renewal on or off, or back up the CA to `backups/`
 (`odoo-company-ca-<date>.tar.gz`, mode 600, contains the CA private key). It
 needs an installation that already uses Nginx with HTTPS; for HTTP-only or
 no-proxy installations it explains how to enable it with the installer.
@@ -493,7 +493,17 @@ system's download and steps, with a "Show all" link for other devices:
 After that the Odoo HTTPS address shows a normal padlock on that device. Devices
 without it still work but show "Not secure". Back up `config/nginx/ca/`: if the
 authority is lost and recreated, every device must install the new one. The rest
-of the HTTP port still redirects to HTTPS. For a public deployment with a
+of the HTTP port still redirects to HTTPS.
+
+**Automatic renewal.** With the company CA, the installer enables a weekly
+systemd timer (`odoo-installer-cert-renewal.timer`, catches up after downtime)
+that runs `cron/renew-certificate.sh`. It renews the server certificate when
+fewer than 30 days remain or the server's names/addresses changed, reloads
+Nginx, and logs each check to `logs/certificate-renewal.log`. Devices need
+nothing because the CA stays the same. It never replaces the CA: when the CA
+itself has less than a year left it logs a warning (shown in main menu option
+7), because a new CA has to be installed on every device. Complete uninstall
+removes the timer. For a public deployment with a
 domain, use option `2` with a certificate from a public authority.
 
 **HTTP only.** Option `3` runs Nginx without a certificate: Odoo is served on

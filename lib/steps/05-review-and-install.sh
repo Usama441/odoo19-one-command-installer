@@ -303,6 +303,11 @@ EOF
     echo "Starting the Nginx reverse proxy..."
     "${DOCKER[@]}" compose "${COMPOSE_PROFILE[@]}" up -d --wait --wait-timeout 120 --force-recreate nginx
   fi
+  if [[ "$PROXY_ENABLED" == "true" && "$PROXY_CERT_MODE" == "local-ca" ]]; then
+    certificate_renewal_timer_enabled || enable_certificate_renewal_timer || true
+  else
+    disable_certificate_renewal_timer
+  fi
 
   if [[ "$BIND_ADDRESS" != "127.0.0.1" ]] &&
      command -v ufw >/dev/null 2>&1 && sudo ufw status | grep -q '^Status: active'; then

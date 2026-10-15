@@ -334,6 +334,14 @@ audit_uninstall_targets() {
     fi
 
     echo
+    echo "Automatic certificate renewal (systemd timer):"
+    if [[ -f "/etc/systemd/system/$CERT_RENEWAL_UNIT.timer" ]]; then
+      printf '  [FOUND] %s.timer\n' "$CERT_RENEWAL_UNIT"
+    else
+      echo "  [NONE]"
+    fi
+
+    echo
     echo "Scheduled database query (user crontab):"
     if odoo_cron_entries_present; then
       printf '  [FOUND] entry running %s\n' "$(odoo_cron_runner_path)"
@@ -922,6 +930,7 @@ run_uninstaller() {
         "$SCRIPT_DIR/cron/database-query.conf"
         "$SCRIPT_DIR/cron/database-query.sql"
         "$SCRIPT_DIR/logs/database-query.log"
+        "$SCRIPT_DIR/logs/certificate-renewal.log"
       )
       UNINSTALL_SCOPE_NAME="complete installer stack"
       confirmation_text="DELETE ALL"
@@ -1008,6 +1017,7 @@ run_uninstaller() {
       return 1
     fi
     remove_odoo_cron_entries
+    disable_certificate_renewal_timer
     remove_odoo_images
   fi
   if [[ "$data_choice" == "delete" ]]; then
