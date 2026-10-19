@@ -91,7 +91,7 @@ proxy_internal_odoo_port() {
 }
 
 step_configure_proxy() {
-  local default_name choice default_choice cert_path key_path
+  local default_name choice default_choice
 
   if [[ "$PROXY_ENABLED" != "true" ]]; then
     return
@@ -119,22 +119,31 @@ step_configure_proxy() {
     echo "Please enter an IPv4 address such as 192.168.1.10 or a name such as erp.example.com."
   done
 
-  echo
-  echo "How should Nginx serve Odoo?"
-  echo "  1) HTTPS with a local company certificate authority (LAN; install it once per device)"
-  echo "  2) HTTPS with my own certificate files (full chain + private key, e.g. from your CA)"
-  echo "  3) HTTP only, no certificate (Odoo 20 needs HTTPS or localhost for some browser features)"
-  case "$PROXY_CERT_MODE" in
-    custom) default_choice=2 ;;
-    none) default_choice=3 ;;
-    *) default_choice=1 ;;
-  esac
-  read_choice choice "Choose an option [$default_choice]: " "" "1 2 3"
-  case "$choice" in
-    1) PROXY_CERT_MODE="local-ca" ;;
-    2) PROXY_CERT_MODE="custom" ;;
-    3) PROXY_CERT_MODE="none" ;;
-  esac
+  PROXY_CUSTOM_CERT=""
+  PROXY_CUSTOM_KEY=""
+  # Typing "back" at a certificate file prompt returns to this menu, so
+  # choosing option 2 without the files at hand is not a dead end.
+  while true; do
+    echo
+    echo "How should Nginx serve Odoo?"
+    echo "  1) HTTPS with a local company certificate authority (LAN; install it once per device)"
+    echo "  2) HTTPS with my own certificate files (full chain + private key, e.g. from your CA)"
+    echo "  3) HTTP only, no certificate (Odoo 20 needs HTTPS or localhost for some browser features)"
+    case "$PROXY_CERT_MODE" in
+      custom) default_choice=2 ;;
+      none) default_choice=3 ;;
+      *) default_choice=1 ;;
+    esac
+    read_choice choice "Choose an option [$default_choice]: " "" "1 2 3"
+    case "$choice" in
+      1) PROXY_CERT_MODE="local-ca" ;;
+      2) PROXY_CERT_MODE="custom" ;;
+      3) PROXY_CERT_MODE="none" ;;
+    esac
+    if [[ "$PROXY_CERT_MODE" != "custom" ]] || ask_custom_certificate; then
+      break
+    fi
+  done
 
   echo
   if [[ "$PROXY_CERT_MODE" == "none" ]]; then
@@ -142,33 +151,47 @@ step_configure_proxy() {
   else
     configure_proxy_https_ports
   fi
+}
+
+# Asks for the custom certificate and key, or keeps the installed pair.
+# Returns 1 when the user types "back" to choose another certificate option.
+ask_custom_certificate() {
+  local cert_path key_path
 
   PROXY_CUSTOM_CERT=""
   PROXY_CUSTOM_KEY=""
-  if [[ "$PROXY_CERT_MODE" != "custom" ]]; then
-    return
-  fi
   if [[ -f "$PROXY_CERT_DIR/fullchain.pem" && -f "$PROXY_CERT_DIR/privkey.pem" &&
         ! -f "$PROXY_CERT_DIR/generated-names.txt" && ! -f "$PROXY_CERT_DIR/self-signed-names.txt" ]] &&
      ask_yes_no "Keep the certificate already installed for Nginx? [Y/n]: "; then
-    return
+    return 0
   fi
+  echo "Type back at either prompt to choose another certificate option."
   while true; do
     read_value cert_path "Path to the certificate (full chain, PEM): "
-    read_value key_path "Path to the private key (PEM): "
+    [[ "${cert_path,,}" == "back" ]] && return 1
     cert_path="${cert_path/#\~/$HOME}"
+    if [[ ! -r "$cert_path" ]]; then
+      echo "The certificate file does not exist or is not readable."
+      continue
+    fi
+    if ! openssl x509 -noout -in "$cert_path" >/dev/null 2>&1; then
+      echo "That file is not a valid PEM certificate."
+      continue
+    fi
+    read_value key_path "Path to the private key (PEM): "
+    [[ "${key_path,,}" == "back" ]] && return 1
     key_path="${key_path/#\~/$HOME}"
-    if [[ ! -r "$cert_path" || ! -r "$key_path" ]]; then
-      echo "Both files must exist and be readable."
+    if [[ ! -r "$key_path" ]]; then
+      echo "The private key file does not exist or is not readable."
+      continue
+    fi
+    if [[ "$(openssl x509 -noout -pubkey -in "$cert_path" 2>/dev/null)" != "$(openssl pkey -pubout -in "$key_path" 2>/dev/null)" ]]; then
+      echo "The private key does not match the certificate."
       continue
     fi
     PROXY_CUSTOM_CERT="$cert_path"
     PROXY_CUSTOM_KEY="$key_path"
-    if openssl x509 -noout -in "$cert_path" >/dev/null 2>&1 &&
-       [[ "$(openssl x509 -noout -pubkey -in "$cert_path" 2>/dev/null)" == "$(openssl pkey -pubout -in "$key_path" 2>/dev/null)" ]]; then
-      break
-    fi
-    echo "The certificate is not valid PEM or the private key does not match it."
+    return 0
   done
 }
 

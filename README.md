@@ -329,7 +329,7 @@ how to rerun it.
 | 10a | `Server name or IP` | Step 4, asked when Nginx is enabled: the address users type in the browser, such as `192.168.10.20` or `erp.example.com`. |
 | 10b | `How should Nginx serve Odoo?` | `1` HTTPS with a local company certificate authority (LAN; each device installs it once from the setup page); `2` HTTPS with your own full-chain certificate and private key (checked to match); `3` HTTP only, no certificate. |
 | 10c | Proxy ports | HTTPS: `HTTP port (redirects to HTTPS)` 80, `Enterprise HTTPS port` 443, `Community HTTPS port` 8443. HTTP only: the first selected edition's HTTP port 80 and, with both editions, `Community HTTP port` 8080. Ports must differ from each other and from the Odoo and pgAdmin ports. |
-| 11 | `Start this installation now? [Y/n]` | Shows after a complete plan summary and provides a final chance to cancel before configuration or Enterprise addons are changed. |
+| 11 | `Choose an option [1]` (review menu) | Shows after a complete plan summary: 1 starts the installation, 2 changes a group of settings (profile/network/Nginx, custom addons folder, pgAdmin, Nginx certificate and ports), 3 cancels before configuration or Enterprise addons are changed. If the image download, certificate, Nginx check or container start fails, the installer returns to this menu with the reason, so you can fix it and try again or change a setting. |
 
 Windows asks for the Odoo version and then uses its adaptive edition menu inside
 the guided wizard. The new
@@ -380,7 +380,7 @@ Community web port [8069]:
 Add pgAdmin to this installation? [y/N]: y
 pgAdmin web port [5050]:
 pgAdmin login email [admin@example.com]: admin@example.com
-Start this installation now? [Y/n]:
+Choose an option [1]: 1
 ```
 
 When `enterprise-<version>/` (for example `enterprise-20.0/`) is beside the

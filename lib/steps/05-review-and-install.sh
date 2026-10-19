@@ -1,8 +1,111 @@
 #!/usr/bin/env bash
 # Sourced by install-ubuntu.sh -- not meant to run standalone.
 
+# The review stays open until the installation succeeds or the user cancels:
+# settings can be changed here, and a failed install stage (image download,
+# certificate, Nginx check, container start) returns here instead of exiting.
 step_review_and_install() {
-  section "5/6" "Review the installation plan"
+  local choice show_plan="true"
+  INSTALL_FAILURE=""
+  while true; do
+    # After a failure the plan is not reprinted, so the error stays on screen.
+    if [[ "$show_plan" == "true" ]]; then
+      section "5/6" "Review the installation plan"
+      print_install_plan
+    fi
+    echo
+    if [[ -n "$INSTALL_FAILURE" ]]; then
+      printf '%b\n' "${COLOR_RED}${COLOR_BOLD}The installation stopped: $INSTALL_FAILURE${COLOR_RESET}"
+      echo "Fix the problem shown above, then try again or change a setting. Your answers are kept."
+      echo "  1) Try the installation again"
+      echo "  2) Change a setting"
+      echo "  3) Exit"
+    else
+      echo "  1) Start the installation now"
+      echo "  2) Change a setting"
+      echo "  3) Cancel"
+    fi
+    read_choice choice "Choose an option [1]: " "" "1 2 3"
+    case "$choice" in
+      1)
+        INSTALL_FAILURE=""
+        run_installation
+        [[ -z "$INSTALL_FAILURE" ]] && return
+        show_plan="false"
+        ;;
+      2)
+        change_install_setting
+        show_plan="true"
+        ;;
+      3)
+        if [[ -n "$INSTALL_FAILURE" ]]; then
+          echo "Installation stopped. The settings written so far are kept in .env; run the installer again to finish."
+        else
+          echo "Installation cancelled. No Odoo configuration or Enterprise addons were changed."
+        fi
+        exit 0
+        ;;
+    esac
+  done
+}
+
+# Re-asks one group of settings, then the review shows the updated plan.
+change_install_setting() {
+  local choice
+  echo
+  echo "Which settings do you want to change?"
+  echo "  1) Profile, network address and Nginx on/off (asks steps 2 to 4 again)"
+  echo "  2) Custom addons folder"
+  echo "  3) pgAdmin"
+  echo "  4) Nginx address, certificate and ports"
+  echo "  5) Back to the plan"
+  read_choice choice "Choose an option [5]: " "" "1 2 3 4 5"
+  case "$choice" in
+    1)
+      # Later steps depend on these answers (ports, workers, pgAdmin), so they
+      # are asked again in order.
+      step_choose_deployment_mode
+      step_prepare_edition
+      step_configure_pgadmin
+      step_configure_proxy
+      ;;
+    2) configure_custom_addons_directory "$ODOO_HOST_CUSTOM_ADDONS_DIR" ;;
+    3)
+      step_configure_pgadmin
+      if [[ "$PROXY_ENABLED" == "true" && "$PGADMIN_ENABLED" == "true" ]] &&
+         [[ "$PGADMIN_PORT" == "$PROXY_HTTP_PORT" || "$PGADMIN_PORT" == "$ENTERPRISE_HTTPS_PORT" ||
+            "$PGADMIN_PORT" == "$COMMUNITY_HTTPS_PORT" ]]; then
+        echo "pgAdmin port $PGADMIN_PORT is also an Nginx port, so the Nginx settings are asked again."
+        step_configure_proxy
+      fi
+      ;;
+    4)
+      if [[ "$PROXY_ENABLED" == "true" ]]; then
+        step_configure_proxy
+      else
+        echo "Nginx is not selected. Use option 1 to turn it on."
+      fi
+      ;;
+  esac
+}
+
+# Prints a fix when Docker's credential helper (often left behind by Docker
+# Desktop as "credsStore": "desktop") is missing, which breaks every pull.
+docker_credential_helper_hint() {
+  local config="$HOME/.docker/config.json" helper
+  [[ -r "$config" ]] || return 0
+  helper="$(sed -n 's/.*"credsStore"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$config" | head -n 1)"
+  if [[ -n "$helper" ]] && ! command -v "docker-credential-$helper" >/dev/null 2>&1; then
+    echo
+    printf '%b\n' "${COLOR_YELLOW}$config asks Docker to use the credential helper docker-credential-$helper, which is not installed.${COLOR_RESET}"
+    echo "This is usually left behind by Docker Desktop. In another terminal, remove that line:"
+    echo "  cp $config $config.bak"
+    echo "  sed -i '/\"credsStore\"/d' $config"
+    echo "Then choose 1 to try again."
+  fi
+}
+
+print_install_plan() {
   printf '  %-24s %s\n' "Odoo version" "$ODOO_VERSION ($ODOO_IMAGE)"
   printf '  %-24s %s\n' "Profile" "$DEPLOYMENT_MODE"
   printf '  %-24s %s\n' "Performance mode" "$PERFORMANCE_MODE"
@@ -66,12 +169,11 @@ step_review_and_install() {
     printf '  %-24s %s\n' "Worker memory limits" "$((ODOO_LIMIT_MEMORY_SOFT / 1024 / 1024)) MiB soft / $((ODOO_LIMIT_MEMORY_HARD / 1024 / 1024)) MiB hard"
   fi
   printf '  %-24s %s\n' "Automatic restart" "enabled"
-  echo
-  if ! ask_yes_no "Start this installation now? [Y/n]: " "y"; then
-    echo "Installation cancelled. No Odoo configuration or Enterprise addons were changed."
-    exit 0
-  fi
+}
 
+# Runs the installation. A failed stage sets INSTALL_FAILURE and returns 0, so
+# set -e stays active for everything else in this function.
+run_installation() {
   prepare_persistent_addons_layout
   migrate_legacy_custom_addons
 
@@ -79,6 +181,8 @@ step_review_and_install() {
         "$(realpath "$ENTERPRISE_SOURCE")" != "$(realpath "$ODOO_HOST_ENTERPRISE_DIR")" ]]; then
     echo "Copying Enterprise addons into $ODOO_HOST_ENTERPRISE_DIR. This may take a moment..."
     cp -a "$ENTERPRISE_SOURCE"/. "$ODOO_HOST_ENTERPRISE_DIR/"
+    # A retry from the review reuses the copy instead of copying again.
+    ENTERPRISE_SOURCE=""
   fi
   sudo chmod -R u+rwX,go+rX "$ODOO_HOST_CUSTOM_ADDONS_DIR"
   if [[ "$START_ENTERPRISE" == "true" ]]; then
@@ -209,13 +313,19 @@ EOF
   if [[ "$PROXY_ENABLED" == "true" ]]; then
     if [[ "$PROXY_CERT_MODE" == "custom" ]]; then
       if [[ -n "$PROXY_CUSTOM_CERT" ]]; then
-        install_custom_certificate "$PROXY_CUSTOM_CERT" "$PROXY_CUSTOM_KEY" || exit 1
+        if ! install_custom_certificate "$PROXY_CUSTOM_CERT" "$PROXY_CUSTOM_KEY"; then
+          INSTALL_FAILURE="the certificate files could not be installed for Nginx."
+          return 0
+        fi
       elif [[ ! -f "$PROXY_CERT_DIR/fullchain.pem" || ! -f "$PROXY_CERT_DIR/privkey.pem" ]]; then
-        echo "No certificate is installed for Nginx. Rerun the installer and provide the certificate files."
-        exit 1
+        INSTALL_FAILURE="no certificate is installed for Nginx. Choose 2, then 4, to provide the certificate files."
+        return 0
       fi
     elif [[ "$PROXY_CERT_MODE" == "local-ca" ]]; then
-      ensure_ca_signed_certificate || exit 1
+      if ! ensure_ca_signed_certificate; then
+        INSTALL_FAILURE="the company CA certificate could not be created."
+        return 0
+      fi
     fi
     mkdir -p "$PROXY_CERT_DIR" "$PROXY_CONFIG_DIR/public"
     rm -f -- "$PROXY_CONFIG_DIR/public/"*
@@ -231,10 +341,18 @@ EOF
   if [[ "$PGADMIN_ENABLED" == "true" ]]; then COMPOSE_PROFILE+=(--profile pgadmin); fi
   if [[ "$PROXY_ENABLED" == "true" ]]; then COMPOSE_PROFILE+=(--profile proxy); fi
   echo "Downloading the required Docker images..."
-  "${DOCKER[@]}" compose "${COMPOSE_PROFILE[@]}" pull
-  verify_install_addon_mounts || exit 1
-  if [[ "$PROXY_ENABLED" == "true" ]]; then
-    verify_nginx_config || exit 1
+  if ! "${DOCKER[@]}" compose "${COMPOSE_PROFILE[@]}" pull; then
+    docker_credential_helper_hint
+    INSTALL_FAILURE="the Docker images could not be downloaded."
+    return 0
+  fi
+  if ! verify_install_addon_mounts; then
+    INSTALL_FAILURE="the Odoo containers cannot read the addons folders."
+    return 0
+  fi
+  if [[ "$PROXY_ENABLED" == "true" ]] && ! verify_nginx_config; then
+    INSTALL_FAILURE="the generated Nginx configuration did not pass its check."
+    return 0
   fi
 
   # Keep the configuration private from other host users while making it readable
@@ -297,11 +415,17 @@ EOF
   if [[ "$START_COMMUNITY" == "true" ]]; then START_SERVICES+=(db-community community); fi
   if [[ "$START_ENTERPRISE" == "true" ]]; then START_SERVICES+=(db-enterprise enterprise); fi
   if [[ "$PGADMIN_ENABLED" == "true" ]]; then START_SERVICES+=(pgadmin); fi
-  "${DOCKER[@]}" compose "${COMPOSE_PROFILE[@]}" up -d --wait --wait-timeout 300 "${START_SERVICES[@]}"
+  if ! "${DOCKER[@]}" compose "${COMPOSE_PROFILE[@]}" up -d --wait --wait-timeout 300 "${START_SERVICES[@]}"; then
+    INSTALL_FAILURE="the Odoo containers did not start. Check them with: docker compose ps"
+    return 0
+  fi
   if [[ "$PROXY_ENABLED" == "true" ]]; then
     # Recreate so a rerun always picks up the regenerated configuration and certificate.
     echo "Starting the Nginx reverse proxy..."
-    "${DOCKER[@]}" compose "${COMPOSE_PROFILE[@]}" up -d --wait --wait-timeout 120 --force-recreate nginx
+    if ! "${DOCKER[@]}" compose "${COMPOSE_PROFILE[@]}" up -d --wait --wait-timeout 120 --force-recreate nginx; then
+      INSTALL_FAILURE="the Nginx reverse proxy did not start. Check it with: docker compose logs nginx"
+      return 0
+    fi
   fi
   if [[ "$PROXY_ENABLED" == "true" && "$PROXY_CERT_MODE" == "local-ca" ]]; then
     certificate_renewal_timer_enabled || enable_certificate_renewal_timer || true
